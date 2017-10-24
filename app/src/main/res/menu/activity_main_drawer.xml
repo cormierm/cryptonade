@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_trade"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Trade" />
+        <item
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Orders" />
+        <item
+            android:id="@+id/nav_ticker"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Ticker" />
+        <item
+            android:id="@+id/nav_pairs"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Exchange Pairs" />
+    </group>
+
+    <item android:title="Settings">
+        <menu>
+            <item
+                android:id="@+id/nav_api_settings"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/api_settings" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvLiTickerPair"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ETH-BTC"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <TextView
+        android:id="@+id/lblLiTickerLast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/last_trade"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.29"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiTickerLast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="-1dp"
+        android:text="0.05000000"
+        android:textSize="14sp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerLast"
+        app:layout_constraintRight_toLeftOf="@+id/tvLiTickerHighestBid"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerLast" />
+
+    <TextView
+        android:id="@+id/lblLiTickerVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/volume"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="@+id/tvLiTickerLast"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiTickerLast" />
+
+    <TextView
+        android:id="@+id/tvLiTickerVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="0.05000000"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerVolume"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerVolume" />
+
+    <TextView
+        android:id="@+id/tvLiTickerVolumeCurrency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="BTC"
+        android:textAllCaps="false"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@+id/tvLiTickerVolume"
+        app:layout_constraintTop_toTopOf="@+id/tvLiTickerVolume" />
+
+    <TextView
+        android:id="@+id/lblLiTickerLowestAsk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/lowest_ask"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.61"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiTickerLowestAsk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="1.00000000"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerLowestAsk"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerLowestAsk" />
+
+    <TextView
+        android:id="@+id/lblLiTickerLowest24hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/lowest24hr"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="@+id/tvLiTickerLowestAsk"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiTickerLowestAsk" />
+
+    <TextView
+        android:id="@+id/tvLiTickerLowest24hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="1.00000000"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerLowest24hr"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerLowest24hr" />
+
+    <TextView
+        android:id="@+id/lblLiTickerHighestBid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/highest_bid"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiTickerHighestBid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="1.00000000"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerHighestBid"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerHighestBid" />
+
+    <TextView
+        android:id="@+id/lblLiTickerHighest24Hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/highest24hr"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="@+id/tvLiTickerHighestBid"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiTickerHighestBid" />
+
+    <TextView
+        android:id="@+id/tvLiTickerHighest24hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="1.00000000"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiTickerHighest24Hr"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiTickerHighest24Hr" />
+
+</android.support.constraint.ConstraintLayout>
