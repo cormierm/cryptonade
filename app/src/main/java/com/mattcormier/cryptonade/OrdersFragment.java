@@ -18,7 +18,7 @@ public class OrdersFragment extends Fragment {
     private static final String TAG = "OrdersFragment";
     ListView lvOpenOrders;
     CryptoDB db;
-    PoloniexClient exchange;
+    Exchange exchange;
     View ordersView;
     Context context;
 

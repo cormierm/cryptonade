@@ -15,11 +15,18 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.R;
+import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
+import com.mattcormier.cryptonade.adapters.TickerAdapter;
+import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.models.OpenOrder;
+import com.mattcormier.cryptonade.models.Pair;
+import com.mattcormier.cryptonade.models.Ticker;
 
+import org.apache.commons.codec.binary.Hex;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.commons.codec.binary.Hex;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -32,34 +39,24 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.mattcormier.cryptonade.models.Ticker;
-import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
-import com.mattcormier.cryptonade.models.Pair;
-import com.mattcormier.cryptonade.R;
-import com.mattcormier.cryptonade.adapters.TickerAdapter;
-
-import com.mattcormier.cryptonade.models.OpenOrder;
-
-public class PoloniexClient extends Exchange {
-    private static final String TAG = "PoloniexClient";
+public class QuadrigacxClient extends Exchange {
+    private static final String TAG = "QuadrigacxClient";
     private long exchangeId;
-    private static long typeId = 1;
+    private static long typeId = 2;
     private String name;
     private String apiKey;
     private String apiSecret;
     private String apiOther;
-    private static String publicUrl = "https://poloniex.com/public?";
-    private static String privateUrl = "https://poloniex.com/tradingApi";
+    private static String apiUrl = "https://api.quadrigacx.com/v2";
 
-    public PoloniexClient() {
+    public QuadrigacxClient() {
         name = "";
         apiKey = "";
         apiSecret = "";
         apiOther = "";
     }
 
-    public PoloniexClient(int exchangeId, String name, String apiKey, String apiSecret, String apiOther) {
+    public QuadrigacxClient(int exchangeId, String name, String apiKey, String apiSecret, String apiOther) {
         this.exchangeId = exchangeId;
         this.name = name;
         this.apiKey = apiKey;
@@ -67,9 +64,9 @@ public class PoloniexClient extends Exchange {
         this.apiOther = apiOther;
     }
 
-    private void publicRequest(HashMap<String, String> params, final Context c, final String cmd) {
+    private void publicRequest(HashMap<String, String> params, final Context c, String endpointUri, final String cmd) {
         Log.d(TAG, "publicRequest: " + cmd);
-        String url = publicUrl + createBody(params);
+        String url = apiUrl + endpointUri + createBody(params);
         RequestQueue queue = Volley.newRequestQueue(c);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -103,19 +100,21 @@ public class PoloniexClient extends Exchange {
         queue.add(stringRequest);
     }
 
-    private void privateRequest(final HashMap<String, String> params, final Context c, final String cmd) {
-        Log.d(TAG, "privateRequest: " + cmd);
+    private void privateRequest(final Context c, String endpointUri, final String cmd) {
+        String url = apiUrl + endpointUri;
+        Log.d(TAG, "privateRequest: url: " + url + " cmd: " + cmd);
+
         final String nonce = new BigDecimal(generateNonce()).toString();
-        params.put("nonce", nonce);
-        final String body = createBody(params);
-        final String signature = createSignature(body);
+        final String signature = createSignature(nonce);
+        final String body = createJsonBody(nonce, signature);
 
         RequestQueue queue = Volley.newRequestQueue(c);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, privateUrl,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.d(TAG, "private.onResponse: " + response);
                         if (cmd.equals("refreshBalances")) {
                             processRefreshBalances(response, c);
                         }
@@ -151,12 +150,10 @@ public class PoloniexClient extends Exchange {
             }
 
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Key", apiKey);
-                headers.put("Sign", signature);
-                return headers;
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
             }
+
         };
         queue.add(stringRequest);
     }
@@ -321,11 +318,11 @@ public class PoloniexClient extends Exchange {
                 JSONObject jsonTicker = json.getJSONObject(pair);
                 String tickerPair = createTradePair(pair);
                 String last = jsonTicker.getString("last");
-                String volume = jsonTicker.getString("baseVolume");
-                String lowestAsk = jsonTicker.getString("lowestAsk");
-                String lowest24hr = jsonTicker.getString("low24hr");
-                String highestBid = jsonTicker.getString("highestBid");
-                String highest24hr = jsonTicker.getString("high24hr");
+                String volume = jsonTicker.getString("volume");
+                String lowestAsk = jsonTicker.getString("ask");
+                String lowest24hr = jsonTicker.getString("low");
+                String highestBid = jsonTicker.getString("bid");
+                String highest24hr = jsonTicker.getString("high");
                 Ticker ticker = new Ticker(tickerPair, last, volume,
                         lowestAsk, lowest24hr, highestBid, highest24hr);
                 tickerList.add(ticker);
@@ -367,21 +364,21 @@ public class PoloniexClient extends Exchange {
     }
 
     public void RestorePairsInDB(Context c) {
+        String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
-        publicRequest(params, c, "restorePairsInDB");
+        params.put("book", "all");
+        publicRequest(params, c, endpointUri, "restorePairsInDB");
     }
 
     public void RefreshBalances(Context c) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnBalances");
-        privateRequest(params, c, "refreshBalances");
+        //privateRequest(params, c, "refreshBalances");
     }
 
     public void UpdateBalanceBar(Context c) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnBalances");
-        privateRequest(params, c, "updateBalanceBar");
+        String endpointUri = "/balance";
+        privateRequest(c, endpointUri, "updateBalanceBar");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
@@ -389,26 +386,28 @@ public class PoloniexClient extends Exchange {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "cancelOrder");
         params.put("orderNumber", orderNumber);
-        privateRequest(params, c, "cancelOrder");
+       // privateRequest(params, c, "cancelOrder");
     }
 
     public void UpdateOpenOrders(Context c) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnOpenOrders");
         params.put("currencyPair", "all");
-        privateRequest(params, c, "updateOpenOrders");
+        //privateRequest(params, c, "updateOpenOrders");
     }
 
     public void UpdateTickerActivity(Context c) {
+        String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
-        publicRequest(params, c, "updateTickerActivity");
+        params.put("book", "all");
+        publicRequest(params, c, endpointUri, "updateTickerActivity");
     }
 
     public void UpdateTradeTickerInfo(Context c) {
+        String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
-        publicRequest(params, c, "updateTradeTickerInfo");
+        publicRequest(params, c, endpointUri, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
@@ -417,29 +416,37 @@ public class PoloniexClient extends Exchange {
         params.put("currencyPair", pair);
         params.put("rate", rate);
         params.put("amount", amount);
-        privateRequest(params, c, "placeOrder");
+        //privateRequest(params, c, "placeOrder");
     }
 
     private static String createTradePair(String pair) {
         String[] parts = pair.split("_");
-        return (parts[0] + "-" + parts[1]).toUpperCase();
+        String returnPair = (parts[0] + "-" + parts[1]).toUpperCase();
+        if (returnPair.equals("ETH-BTC")) {
+            returnPair = "BTC-ETH";
+        }
+        return returnPair;
     }
 
-    private String createSignature(String body) {
+    private String createSignature(String nonce) {
         try {
-            Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(new SecretKeySpec(this.apiSecret.getBytes(), "HmacSHA512"));
-            final byte[] macData = mac.doFinal(body.getBytes());
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(this.apiSecret.getBytes("utf-8"), "HmacSHA256"));
+            String msg = nonce + apiOther + apiKey;
+            Log.d(TAG, "createSignature: msg: " + msg);
+            final byte[] macData = mac.doFinal(msg.getBytes("utf-8"));
             return new String(Hex.encodeHex(macData));
+
         } catch (Exception e1) {
             e1.printStackTrace();
         }
         return null;
     }
 
-    private static long generateNonce() {
+    private static int generateNonce() {
         Date d = new Date();
-        return d.getTime();
+        return (int)d.getTime();
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -451,6 +458,18 @@ public class PoloniexClient extends Exchange {
             body += param.getKey() + "=" + param.getValue();
         }
         return body;
+    }
+
+    private String createJsonBody(String nonce, String signature) {
+        JSONObject jsonBody = new JSONObject();
+        try{
+            jsonBody.put("key", apiKey);
+            jsonBody.put("nonce", Integer.parseInt(nonce));
+            jsonBody.put("signature", signature);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonBody.toString();
     }
 
     public long getId() {
@@ -502,3 +521,5 @@ public class PoloniexClient extends Exchange {
     }
 
 }
+
+

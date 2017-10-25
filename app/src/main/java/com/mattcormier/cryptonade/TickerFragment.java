@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,11 +14,13 @@ import android.widget.ListView;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.exchanges.PoloniexClient;
 import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.exchanges.QuadrigacxClient;
 
 public class TickerFragment extends Fragment {
+    private static final String TAG = "TickerFragment";
     ListView lvTickers;
     CryptoDB db;
-    PoloniexClient exchange;
+    Exchange exchange;
     View tickerView;
     Context context;
 
@@ -29,8 +32,10 @@ public class TickerFragment extends Fragment {
         lvTickers = (ListView) tickerView.findViewById(R.id.lvTickerList);
 
         db = new CryptoDB(context);
-        Exchange ex = db.getExchange(1);
-        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        Exchange ex = db.getExchange(5);
+        //exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+
         exchange.UpdateTickerActivity(context);
         return tickerView;
     }

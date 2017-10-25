@@ -53,4 +53,5 @@
     <string name="ticker_information">Ticker Information</string>
     <string name="create">Create</string>
     <string name="update">Update</string>
+    <string name="restore_pairs_list_from_exchange">Restore Pairs List From Exchange</string>
 </resources>

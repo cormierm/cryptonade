@@ -36,6 +36,8 @@ public class Exchange {
         this.apiOther = apiOther;
     }
 
+    public void RestorePairsInDB(Context c) {}
+
     public void RefreshBalances(Context c) {}
 
     public void UpdateBalanceBar(Context c) {}
@@ -48,7 +50,7 @@ public class Exchange {
 
     public void UpdateTradeTickerInfo(Context c){}
 
-    public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType, TextView tv) {}
+    public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {}
 
     public long getId() {
         return exchangeId;

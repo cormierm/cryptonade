@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.exchanges.PoloniexClient;
 import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.exchanges.QuadrigacxClient;
 
 /**
  * Created by matt on 10/24/2017.
@@ -21,7 +22,7 @@ public class BalanceBarFragment extends Fragment {
     TextView tvBalances;
     View balanceView;
     CryptoDB db;
-    PoloniexClient exchange;
+    Exchange exchange;
     Context context;
 
     @Nullable
@@ -31,8 +32,10 @@ public class BalanceBarFragment extends Fragment {
         context = getActivity();
         tvBalances = balanceView.findViewById(R.id.tvBalanceBar);
         db = new CryptoDB(context);
-        Exchange ex = db.getExchange(1);
-        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+//        Exchange ex = db.getExchange(1);
+//        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        Exchange ex = db.getExchange(5);
+        exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
         UpdateBalanceBar();
 
         return balanceView;

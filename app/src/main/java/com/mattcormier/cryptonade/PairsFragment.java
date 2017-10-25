@@ -14,16 +14,18 @@ import android.widget.ListView;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.exchanges.PoloniexClient;
 import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.exchanges.QuadrigacxClient;
 import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.List;
 
 public class PairsFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = "PairsFragment";
     Button btnRefresh;
     Button btnUpdate;
     ListView lvPairsList;
     CryptoDB db;
-    PoloniexClient polo;
+    Exchange exchange;
     View pairsView;
 
     @Nullable
@@ -33,14 +35,15 @@ public class PairsFragment extends Fragment implements View.OnClickListener {
         btnRefresh = (Button) pairsView.findViewById(R.id.btnTradingPairsRefresh);
         btnRefresh.setOnClickListener(this);
 
-        btnUpdate = (Button) pairsView.findViewById(R.id.btnTradingPairsUpdate);
+        btnUpdate = (Button) pairsView.findViewById(R.id.btnTradingPairsRestore);
         btnUpdate.setOnClickListener(this);
 
         lvPairsList = (ListView) pairsView.findViewById(R.id.lvTradingPairsList);
 
         db = new CryptoDB(getActivity());
-        Exchange ex = db.getExchange(1);
-        polo = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        Exchange ex = db.getExchange(5);
+        //polo = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
 
         updatePairsListView();
         return pairsView;
@@ -52,12 +55,13 @@ public class PairsFragment extends Fragment implements View.OnClickListener {
             updatePairsListView();
         }
         else if (v.getId() == btnUpdate.getId()) {
-            polo.UpdateTradingPairs(getActivity(), null);
+            exchange.RestorePairsInDB(getActivity());
         }
     }
 
     private void updatePairsListView() {
-        List<Pair> pairsList = db.getPairs(1);
+        Log.d(TAG, "updatePairsListView: " + exchange.getId());
+        List<Pair> pairsList = db.getPairs((int)exchange.getId());
 
         try {
             ArrayAdapter<Pair> dataAdapter = new ArrayAdapter<>(getActivity(),
