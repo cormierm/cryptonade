@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvLiExchangeProfileName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="0dp"
+        android:text="My Poloniex"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/lblLiExchangeAPIKey"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiExchangeType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Poloniex"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiExchangeProfileName"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/tvLiExchangeProfileName"
+        android:layout_marginRight="0dp"
+        app:layout_constraintRight_toRightOf="@+id/tvLiExchangeProfileName"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+    <TextView
+        android:id="@+id/lblLiExchangeAPIKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/api_key"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_bias="0.34" />
+
+    <TextView
+        android:id="@+id/tvLiExchangeAPIKey"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:text="432423423-42342343-3424234"
+        android:textSize="10sp"
+        app:layout_constraintTop_toTopOf="@+id/lblLiExchangeAPIKey"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/lblLiExchangeAPISecret"
+        android:layout_marginLeft="4dp"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+    <TextView
+        android:id="@+id/lblLiExchangeAPISecret"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:text="@string/api_secret"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiExchangeAPIKey"
+        app:layout_constraintTop_toTopOf="@+id/tvLiExchangeAPISecret"
+        android:layout_marginTop="0dp" />
+
+    <TextView
+        android:id="@+id/tvLiExchangeAPISecret"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="8dp"
+        android:text="asd908f90sda8f90asd8f90aw8e90f8iawe90fi9a0weifawe90if90awkf90awekf90awekf09kawe90fawe"
+        android:textSize="10sp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toRightOf="@+id/lblLiExchangeAPISecret"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiExchangeAPIKey" />
+
+</android.support.constraint.ConstraintLayout>

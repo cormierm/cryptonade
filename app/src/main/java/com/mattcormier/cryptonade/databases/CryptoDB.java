@@ -18,9 +18,10 @@ import java.util.ArrayList;
  */
 
 public class CryptoDB {
+    private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 3;
+    public static final int     DB_VERSION = 5;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -28,17 +29,20 @@ public class CryptoDB {
     public static final String  EXCHANGE_ID = "_id";
     public static final int     EXCHANGE_ID_COL = 0;
 
+    public static final String  EXCHANGE_TYPE_ID = "type_id";
+    public static final int     EXCHANGE_TYPE_ID_COL = 1;
+
     public static final String  EXCHANGE_NAME = "exchange_name";
-    public static final int     EXCHANGE_NAME_COL = 1;
+    public static final int     EXCHANGE_NAME_COL = 2;
 
     public static final String  EXCHANGE_API_KEY = "api_key";
-    public static final int     EXCHANGE_API_KEY_COL = 2;
+    public static final int     EXCHANGE_API_KEY_COL = 3;
 
     public static final String  EXCHANGE_API_SECRET = "api_secret";
-    public static final int     EXCHANGE_API_SECRET_COL = 3;
+    public static final int     EXCHANGE_API_SECRET_COL = 4;
 
     public static final String  EXCHANGE_API_OTHER = "api_other";
-    public static final int     EXCHANGE_OTHER_COL = 4;
+    public static final int     EXCHANGE_API_OTHER_COL = 5;
 
     // Pair table
     public static final String  PAIR_TABLE = "pair";
@@ -71,6 +75,7 @@ public class CryptoDB {
     public static final String CREATE_EXCHANGE_TABLE =
             "CREATE TABLE " + EXCHANGE_TABLE + " (" +
             EXCHANGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            EXCHANGE_TYPE_ID + " INTEGER NOT NULL, " +
             EXCHANGE_NAME + " TEXT NOT NULL, " +
             EXCHANGE_API_KEY + " TEXT, " +
             EXCHANGE_API_SECRET + " TEXT, " +
@@ -84,7 +89,7 @@ public class CryptoDB {
             PAIR_TRADING_PAIR + " TEXT NOT NULL);";
 
     public static final String CREATE_TYPE_TABLE =
-            "CREATE TABLE " + PAIR_TABLE + " (" +
+            "CREATE TABLE " + TYPE_TABLE + " (" +
                     TYPE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     TYPE_NAME + " TEXT NOT NULL, " +
                     TYPE_API_OTHER + " TEXT);";
@@ -106,27 +111,31 @@ public class CryptoDB {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            Log.d(TAG, "onCreate: starting.");
             db.execSQL(CREATE_EXCHANGE_TABLE);
             db.execSQL(CREATE_PAIR_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
 
             // insert sample exchange
-            db.execSQL("INSERT INTO exchange VALUES (1, 'Poloniex', 'key', 'secret', '')");
+            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
             // insert sample pair
             db.execSQL("INSERT INTO pair VALUES (1, 1, 'btc-eth', 'btc-eth')");
 
-            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', null)");
-            db.execSQL("INSERT INTO type VALUES (2, 'Quadrigacx', 'Client Id')");
+            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
+            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
+            Log.d(TAG, "onCreate: done.");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.d(TAG, "onUpgrade: starting.");
             Log.d("Crypto DB", "Upgrading db from version "
                     + oldVersion + " to " + newVersion);
-            //db.execSQL(CryptoDB.DROP_EXCHANGE_TABLE);
+            // db.execSQL(CryptoDB.DROP_EXCHANGE_TABLE);
             db.execSQL(CryptoDB.DROP_PAIR_TABLE);
             db.execSQL(CryptoDB.DROP_TYPE_TABLE);
             onCreate(db);
+            Log.d(TAG, "onUpgrade: done.");
         }
     }
 
@@ -158,10 +167,11 @@ public class CryptoDB {
         while (cur.moveToNext()) {
             Exchange ex = new Exchange();
             ex.setId(cur.getInt(EXCHANGE_ID_COL));
+            ex.setTypeId(cur.getInt(EXCHANGE_TYPE_ID_COL));
             ex.setName(cur.getString(EXCHANGE_NAME_COL));
             ex.setAPIKey(cur.getString(EXCHANGE_API_KEY_COL));
             ex.setAPISecret(cur.getString(EXCHANGE_API_SECRET_COL));
-            ex.setAPIOther(cur.getString(EXCHANGE_OTHER_COL));
+            ex.setAPIOther(cur.getString(EXCHANGE_API_OTHER_COL));
 
             exchanges.add(ex);
         }
@@ -196,10 +206,11 @@ public class CryptoDB {
             try {
                 Exchange exchange = new Exchange(
                         cursor.getInt(EXCHANGE_ID_COL),
+                        cursor.getInt(EXCHANGE_TYPE_ID_COL),
                         cursor.getString(EXCHANGE_NAME_COL),
                         cursor.getString(EXCHANGE_API_KEY_COL),
                         cursor.getString(EXCHANGE_API_SECRET_COL),
-                        cursor.getString(EXCHANGE_OTHER_COL));
+                        cursor.getString(EXCHANGE_API_OTHER_COL));
                 return exchange;
             }
             catch(Exception e) {
@@ -210,6 +221,7 @@ public class CryptoDB {
 
     public long insertExchange(Exchange exchange) {
         ContentValues cv = new ContentValues();
+        cv.put(EXCHANGE_TYPE_ID, exchange.getTypeId());
         cv.put(EXCHANGE_NAME, exchange.getName());
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
@@ -225,6 +237,7 @@ public class CryptoDB {
     public int updateExchange(Exchange exchange) {
         ContentValues cv = new ContentValues();
         cv.put(EXCHANGE_NAME, exchange.getName());
+        cv.put(EXCHANGE_TYPE_ID, exchange.getTypeId());
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
         cv.put(EXCHANGE_API_OTHER, exchange.getAPIOther());
@@ -385,5 +398,39 @@ public class CryptoDB {
         closeDB();
 
         return types;
+    }
+
+    public ExchangeType getExchangeTypeById(int typeId) {
+        String where = TYPE_ID + "= ?";
+        String[] whereArgs = { Integer.toString(typeId) };
+
+        this.openReadableDB();
+        Cursor cursor = db.query(TYPE_TABLE,
+                null, where, whereArgs, null, null, null);
+        cursor.moveToFirst();
+        ExchangeType exType = getExchangeTypeFromCursor(cursor);
+        if (cursor != null)
+            cursor.close();
+        this.closeDB();
+
+        return exType;
+    }
+
+    private ExchangeType getExchangeTypeFromCursor(Cursor cursor) {
+        if (cursor == null || cursor.getCount() == 0){
+            return null;
+        }
+        else {
+            try {
+                ExchangeType exType = new ExchangeType(
+                        cursor.getInt(TYPE_ID_COL),
+                        cursor.getString(TYPE_NAME_COL),
+                        cursor.getString(TYPE_API_OTHER_COL));
+                return exType;
+            }
+            catch(Exception e) {
+                return null;
+            }
+        }
     }
 }

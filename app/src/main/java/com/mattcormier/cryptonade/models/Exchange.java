@@ -6,21 +6,24 @@ package com.mattcormier.cryptonade.models;
 
 public class Exchange {
     private long exchangeId;
+    private long typeId;
     private String name;
     private String apiKey;
     private String apiSecret;
     private String apiOther;
 
     public Exchange() {
+        typeId = 0;
         name = "";
         apiKey = "";
         apiSecret = "";
         apiOther = "";
     }
 
-    public Exchange(int exchangeId, String name, String apiKey, String apiSecret,
+    public Exchange(int exchangeId, int typeId, String name, String apiKey, String apiSecret,
                     String apiOther) {
         this.exchangeId = exchangeId;
+        this.typeId = typeId;
         this.name = name;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -33,6 +36,14 @@ public class Exchange {
 
     public void setId(long exchangeId) {
         this.exchangeId = exchangeId;
+    }
+
+    public long getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(long typeId) {
+        this.typeId = typeId;
     }
 
     public String getName() {

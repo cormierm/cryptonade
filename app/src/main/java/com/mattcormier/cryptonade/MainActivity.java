@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
                     .commit();
         } else if (id == R.id.nav_api_settings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APISettingsFragment())
+                    .replace(R.id.content_frame, new APIFragment())
                     .addToBackStack("api_settings")
                     .commit();
         }

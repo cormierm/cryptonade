@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements OnClickListener {
         }
         else if (v.getId() == R.id.btnHomeApiSettings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APISettingsFragment())
+                    .replace(R.id.content_frame, new APIFragment())
                     .addToBackStack("trade")
                     .commit();
         }

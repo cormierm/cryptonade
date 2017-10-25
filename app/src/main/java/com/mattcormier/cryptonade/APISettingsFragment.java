@@ -50,7 +50,11 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
         btnSave.setOnClickListener(this);
 
         db = new CryptoDB(getActivity());
+
         ex = db.getExchange(1);
+        edProfileName.setText(ex.getName());
+        edAPIKey.setText(ex.getAPIKey());
+        edAPISecret.setText(ex.getAPISecret());
 
         // setup exchange type spinner
         spnType = apiView.findViewById(R.id.spnAPISettingsExchangeType);
@@ -65,9 +69,6 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             Log.d(TAG, "onCreateView: " + ex.getMessage());
         }
 
-        edProfileName.setText(ex.getName());
-        edAPIKey.setText(ex.getAPIKey());
-        edAPISecret.setText(ex.getAPISecret());
         return apiView;
     }
 
@@ -75,6 +76,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
     public void onClick(View v) {
         if (v.getId() == btnSave.getId()) {
             ex.setId(1);
+            ex.setTypeId(((ExchangeType)spnType.getSelectedItem()).getTypeId());
             ex.setName(edProfileName.getText().toString());
             ex.setAPIKey(edAPIKey.getText().toString());
             ex.setAPISecret(edAPISecret.getText().toString());
@@ -88,7 +90,16 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+        ExchangeType type = (ExchangeType)spnType.getSelectedItem();
+        if (type.getApiOther().isEmpty()) {
+            tvAPIOther.setVisibility(View.INVISIBLE);
+            edAPIOther.setVisibility(View.INVISIBLE);
+        } else {
+            tvAPIOther.setVisibility(View.VISIBLE);
+            edAPIOther.setVisibility(View.VISIBLE);
+            tvAPIOther.setText(type.getApiOther());
+            edAPIOther.setText("");
+        }
     }
 
     @Override

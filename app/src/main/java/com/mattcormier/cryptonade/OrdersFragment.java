@@ -39,7 +39,7 @@ public class OrdersFragment extends Fragment {
         return ordersView;
     }
 
-@Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuRefresh:

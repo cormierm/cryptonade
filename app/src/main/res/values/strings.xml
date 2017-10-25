@@ -46,4 +46,6 @@
     <string name="api_settings">API Settings</string>
     <string name="cancel">Cancel</string>
     <string name="exchange_type">Exchange Type</string>
+    <string name="api_key">API Key</string>
+    <string name="api_secret">API Secret</string>
 </resources>
