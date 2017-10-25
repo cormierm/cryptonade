@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.lib.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.exchanges.PoloniexClient;
+import com.mattcormier.cryptonade.exchanges.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.List;
@@ -89,10 +89,10 @@ public class OpenOrdersAdapter extends ArrayAdapter {
 
         ViewHolder(View v) {
             this.tvliOpenOrdersId = (TextView) v.findViewById(R.id.tvliOpenOrdersId);
-            this.tvliOpenOrdersPair = (TextView) v.findViewById(R.id.tvLiTickerPair);
+            this.tvliOpenOrdersPair = (TextView) v.findViewById(R.id.tvLiOpenOrdersPair);
             this.tvliOpenOrdersType = (TextView) v.findViewById(R.id.tvliOpenOrdersType);
             this.tvliOpenOrdersAmount = (TextView) v.findViewById(R.id.tvliOpenOrdersAmount);
-            this.tvliOpenOrdersRate = (TextView) v.findViewById(R.id.tvLiTickerHighestBid);
+            this.tvliOpenOrdersRate = (TextView) v.findViewById(R.id.tvLiOpenOrdersRate);
             this.tvliOpenOrdersTimestamp = (TextView) v.findViewById(R.id.tvliOpenOrdersTimestamp);
             this.ivLiOpenOrdersCancel = (ImageView) v.findViewById(R.id.ivLiOpenOrdersCancel);
         }

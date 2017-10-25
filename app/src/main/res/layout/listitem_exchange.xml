@@ -90,4 +90,30 @@
         android:layout_marginTop="0dp"
         app:layout_constraintTop_toBottomOf="@+id/tvLiExchangeAPIKey" />
 
+    <TextView
+        android:id="@+id/lblLiExchangeAPIOther"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="0dp"
+        android:text="TextView"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="@+id/lblLiExchangeAPISecret"
+        app:layout_constraintRight_toLeftOf="@+id/tvLiExchangeAPISecret"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiExchangeAPISecret" />
+
+    <TextView
+        android:id="@+id/tvLiExchangeAPIOther"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:text="TextView"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toLeftOf="@+id/tvLiExchangeAPISecret"
+        app:layout_constraintTop_toTopOf="@+id/lblLiExchangeAPIOther" />
+
 </android.support.constraint.ConstraintLayout>

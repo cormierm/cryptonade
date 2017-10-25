@@ -10,11 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
 
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.lib.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.exchanges.PoloniexClient;
+import com.mattcormier.cryptonade.exchanges.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.List;

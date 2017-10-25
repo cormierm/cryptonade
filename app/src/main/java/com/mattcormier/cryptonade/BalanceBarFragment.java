@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.lib.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.exchanges.PoloniexClient;
+import com.mattcormier.cryptonade.exchanges.Exchange;
 
 /**
  * Created by matt on 10/24/2017.

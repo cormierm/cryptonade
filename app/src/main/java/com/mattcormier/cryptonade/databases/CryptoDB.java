@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.exchanges.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 import com.mattcormier.cryptonade.models.Pair;
 

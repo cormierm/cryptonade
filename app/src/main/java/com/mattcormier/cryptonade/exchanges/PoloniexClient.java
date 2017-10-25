@@ -1,4 +1,4 @@
-package com.mattcormier.cryptonade.lib;
+package com.mattcormier.cryptonade.exchanges;
 
 import android.app.Activity;
 import android.content.Context;
@@ -44,16 +44,17 @@ import com.mattcormier.cryptonade.adapters.TickerAdapter;
 
 import com.mattcormier.cryptonade.models.OpenOrder;
 
-public class PoloniexClient {
+public class PoloniexClient extends Exchange {
     private static final String TAG = "PoloniexClient";
     private long exchangeId;
+    private static String typeId = "Poloniex";
     private String name;
     private String apiKey;
     private String apiSecret;
     private String apiOther;
     private static String publicUrl = "https://poloniex.com/public?";
     private static String privateUrl = "https://poloniex.com/tradingApi";
-    private static String exchangeType = "Poloniex";
+
 
     public PoloniexClient() {
         name = "";
@@ -73,7 +74,6 @@ public class PoloniexClient {
     private static void publicRequest(HashMap<String, String> params, final Context c, final View v, final String cmd) {
         Log.d(TAG, "publicRequest: " + cmd);
         String url = publicUrl + createBody(params);
-        final String logTag = exchangeType + "." + cmd;
         RequestQueue queue = Volley.newRequestQueue(c);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -91,14 +91,14 @@ public class PoloniexClient {
                             }
 
                         } catch (Exception e) {
-                            Log.d(logTag, "Error in request: " + cmd);
+                            Log.d(TAG, "Error in request: " + cmd);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(logTag, "Error in request: " + error.toString());
+                        Log.d(TAG, "publicRequest.onErrorResponse: " + error.getMessage());
                         Toast.makeText(c, "Currency update failed.", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -113,7 +113,6 @@ public class PoloniexClient {
         params.put("nonce", nonce);
         final String body = createBody(params);
         final String signature = createSignature(body);
-        final String logTag = exchangeType + "." + cmd;
 
         RequestQueue queue = Volley.newRequestQueue(c);
 
@@ -141,7 +140,7 @@ public class PoloniexClient {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError ex) {
-                        Log.d(logTag, ex.toString());
+                        Log.d(TAG, "StringRequire.onErrorResponse: " + ex.getMessage());
                     }
                 }
         ) {
@@ -196,7 +195,7 @@ public class PoloniexClient {
             tvHeaderRight.setText(headerValue + " " + pair + " Available");
             tvBalances.setText(output);
         } catch (Exception ex) {
-            Log.d(exchangeType, "Error in processRequestBalances.");
+            Log.d(TAG, "Error in processRequestBalances.");
         }
     }
 
@@ -216,14 +215,8 @@ public class PoloniexClient {
             tvBalanceBar.setText(output);
         } catch (Exception ex) {
             tvBalanceBar.setText("Error updating balances.");
-            Log.d(exchangeType, "Error in processUpdateBalanceBar.");
+            Log.d(TAG, "Error in processUpdateBalanceBar.");
         }
-    }
-
-    public static void UpdateTradingPairs(Context c, View v) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
-        publicRequest(params, c, v, "updateTradingPairs");
     }
 
     private static void processTradingPairs(String response, Context c, View v) {
@@ -242,7 +235,7 @@ public class PoloniexClient {
 
             db.insertPairs(pairsList);
         } catch (Exception ex) {
-            Log.d(exchangeType, "Error in processTradingPairs: " + ex.toString());
+            Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
     }
 
@@ -374,8 +367,14 @@ public class PoloniexClient {
                 }
             }
         } catch (Exception ex) {
-            Log.d(exchangeType, "Error in processTradingPairs: " + ex.toString());
+            Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
+    }
+
+    public void UpdateTradingPairs(Context c, View v) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("command", "returnTicker");
+        publicRequest(params, c, v, "updateTradingPairs");
     }
 
     public void RefreshBalances(Context c) {
@@ -411,7 +410,7 @@ public class PoloniexClient {
         publicRequest(params, c, null, "updateTickerActivity");
     }
 
-    public static void UpdateTradeTickerInfo(Context c) {
+    public void UpdateTradeTickerInfo(Context c) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
         publicRequest(params, c, null, "updateTradeTickerInfo");

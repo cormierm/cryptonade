@@ -45,15 +45,17 @@
         android:id="@+id/edAPISettingsProfileName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:layout_marginTop="7dp"
-        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsProfileName"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="0dp"
-        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsProfileName" />
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="7dp"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsProfileName"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsProfileName" />
 
     <TextView
         android:id="@+id/lblAPISettingsAPIKey"
@@ -68,14 +70,16 @@
         android:id="@+id/edAPISettingsAPIKey"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPIKey"
-        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsAPIKey"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsAPIKey"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginEnd="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPIKey" />
 
     <TextView
         android:id="@+id/lblAPISettingsAPISecret"
@@ -90,14 +94,16 @@
         android:id="@+id/edAPISettingsAPISecret"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPassword"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPISecret"
-        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsAPISecret"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="textPassword"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsAPISecret"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginEnd="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPISecret" />
 
     <TextView
         android:id="@+id/lblAPISettingsAPIOther"
@@ -112,15 +118,30 @@
         android:id="@+id/edAPISettingsAPIOther"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
-        android:inputType="textPassword"
+        android:inputType="text"
+        android:textSize="14sp"
         android:visibility="invisible"
+        android:imeOptions="actionDone"
         app:layout_constraintLeft_toLeftOf="@+id/lblAPISettingsAPIOther"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPIOther"
-        android:layout_marginEnd="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/lblAPISettingsAPIOther" />
+
+    <Button
+        android:id="@+id/btnAPISettingsDelete"
+        android:theme="@style/RedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/delete"
+        app:layout_constraintBottom_toTopOf="@+id/btnAPISettingsSave"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/btnAPISettingsSave"
@@ -139,7 +160,6 @@
 
     <Button
         android:id="@+id/btnAPISettingsCancel"
-        android:theme="@style/RedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"

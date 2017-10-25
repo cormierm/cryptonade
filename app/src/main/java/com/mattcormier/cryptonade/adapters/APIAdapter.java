@@ -8,15 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.lib.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.exchanges.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
-import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.List;
 
@@ -44,6 +41,11 @@ public class APIAdapter extends ArrayAdapter {
         return exchangeList.size();
     }
 
+    @Override
+    public Exchange getItem(int position) {
+        return exchangeList.get(position);
+    }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -57,20 +59,24 @@ public class APIAdapter extends ArrayAdapter {
         }
 
         final Exchange currentExchange = exchangeList.get(position);
+        final long exchangeId = currentExchange.getId();
         ExchangeType exType = db.getExchangeTypeById((int)currentExchange.getTypeId());
 
         viewHolder.tvLiExchangeProfileName.setText(currentExchange.getName());
         viewHolder.tvLiExchangeType.setText(exType.getName());
         viewHolder.tvLiExchangeAPIKey.setText(currentExchange.getAPIKey());
         viewHolder.tvLiExchangeAPISecret.setText(currentExchange.getAPISecret());
-//        viewHolder.ivLiOpenOrdersCancel.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                String orderId = currentOrder.getOrderNumber();
-//                exchange.CancelOrder(getContext(), orderId);
-//                return true;
-//            }
-//        });
+        if (exType.getApiOther().isEmpty()) {
+            viewHolder.lblLiExchangeAPIOther.setVisibility(View.INVISIBLE);
+            viewHolder.tvLiExchangeAPIOther.setVisibility(View.INVISIBLE);
+            viewHolder.lblLiExchangeAPIOther.setHeight(0);
+            viewHolder.tvLiExchangeAPIOther.setHeight(0);
+        } else {
+            viewHolder.lblLiExchangeAPIOther.setVisibility(View.VISIBLE);
+            viewHolder.tvLiExchangeAPIOther.setVisibility(View.VISIBLE);
+            viewHolder.lblLiExchangeAPIOther.setText(exType.getApiOther());
+            viewHolder.tvLiExchangeAPIOther.setText(currentExchange.getAPIOther());
+        }
 
         return convertView;
     }
@@ -80,12 +86,16 @@ public class APIAdapter extends ArrayAdapter {
         final TextView tvLiExchangeType;
         final TextView tvLiExchangeAPIKey;
         final TextView tvLiExchangeAPISecret;
+        final TextView lblLiExchangeAPIOther;
+        final TextView tvLiExchangeAPIOther;
 
         ViewHolder(View v) {
             this.tvLiExchangeProfileName = v.findViewById(R.id.tvLiExchangeProfileName);
             this.tvLiExchangeType = v.findViewById(R.id.tvLiExchangeType);
             this.tvLiExchangeAPIKey = v.findViewById(R.id.tvLiExchangeAPIKey);
             this.tvLiExchangeAPISecret = v.findViewById(R.id.tvLiExchangeAPISecret);
+            this.lblLiExchangeAPIOther = v.findViewById(R.id.lblLiExchangeAPIOther);
+            this.tvLiExchangeAPIOther = v.findViewById(R.id.tvLiExchangeAPIOther);
         }
     }
 }
