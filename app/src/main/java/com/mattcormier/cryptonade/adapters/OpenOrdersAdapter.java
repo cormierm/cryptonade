@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.R;
+import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.PoloniexClient;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.clients.PoloniexClient;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.List;
@@ -28,17 +31,15 @@ public class OpenOrdersAdapter extends ArrayAdapter {
     private final int layoutResource;
     private final LayoutInflater layoutInflater;
     private List<OpenOrder> openOrders;
-    CryptoDB db;
-    PoloniexClient exchange;
+    APIClient client;
 
     public OpenOrdersAdapter(@NonNull Context context, @LayoutRes int resource, List<OpenOrder> openOrders) {
         super(context, resource);
         this.layoutResource = resource;
         this.layoutInflater = LayoutInflater.from(context);
         this.openOrders = openOrders;
-        db = new CryptoDB(context);
-        Exchange ex = db.getExchange(1);
-        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+
+        client = (APIClient) ((Spinner)((MainActivity)getContext()).findViewById(R.id.spnClients)).getSelectedItem();
     }
 
     @Override
@@ -70,7 +71,7 @@ public class OpenOrdersAdapter extends ArrayAdapter {
             @Override
             public boolean onLongClick(View v) {
                 String orderId = currentOrder.getOrderNumber();
-                exchange.CancelOrder(getContext(), orderId);
+                client.CancelOrder(getContext(), orderId);
                 return true;
             }
         });

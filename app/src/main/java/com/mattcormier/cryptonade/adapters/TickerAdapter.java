@@ -11,9 +11,10 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.R;
+import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.PoloniexClient;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.clients.PoloniexClient;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Ticker;
 
 import java.util.Collections;
@@ -29,8 +30,6 @@ public class TickerAdapter extends ArrayAdapter {
     private final int layoutResource;
     private final LayoutInflater layoutInflater;
     private List<Ticker> tickerList;
-    CryptoDB db;
-    PoloniexClient exchange;
 
     public TickerAdapter(@NonNull Context context, @LayoutRes int resource, List<Ticker> tickerList) {
         super(context, resource);
@@ -43,10 +42,6 @@ public class TickerAdapter extends ArrayAdapter {
             }
         });
         this.tickerList = tickerList;
-
-        db = new CryptoDB(context);
-        Exchange ex = db.getExchange(1);
-        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
     }
 
     @Override

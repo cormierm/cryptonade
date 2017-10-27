@@ -17,8 +17,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.lib.Crypto;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 
 import java.util.List;
@@ -110,7 +112,11 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                 if (edAPIOther.getVisibility() == View.VISIBLE) {
                     exchange.setAPIOther(edAPIOther.getText().toString());
                 }
-                db.insertExchange(exchange);
+                long rowId = db.insertExchange(exchange);
+                Exchange newEx = db.getExchange((int)rowId);
+                APIClient newClient = Crypto.getAPIClient(newEx);
+                newClient.RestorePairsInDB(getActivity());
+                ((MainActivity) getActivity()).UpdateClientSpinner();
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, new APIFragment())
                         .addToBackStack("api_settings")
@@ -124,6 +130,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                     ex.setAPIOther(edAPIOther.getText().toString());
                 }
                 db.updateExchange(ex);
+                ((MainActivity) getActivity()).UpdateClientSpinner();
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, new APIFragment())
                         .addToBackStack("api_settings")
@@ -138,6 +145,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
         }
         else if (v.getId() == btnDelete.getId()) {
             db.deleteExchange(exchangeId);
+            ((MainActivity) getActivity()).UpdateClientSpinner();
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new APIFragment())
                     .commit();

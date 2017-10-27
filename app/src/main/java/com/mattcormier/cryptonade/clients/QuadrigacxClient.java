@@ -1,4 +1,4 @@
-package com.mattcormier.cryptonade.exchanges;
+package com.mattcormier.cryptonade.clients;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,10 +15,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
 import com.mattcormier.cryptonade.models.Pair;
 import com.mattcormier.cryptonade.models.Ticker;
@@ -39,7 +41,7 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class QuadrigacxClient extends Exchange {
+public class QuadrigacxClient implements APIClient {
     private static final String TAG = "QuadrigacxClient";
     private long exchangeId;
     private static long typeId = 2;
@@ -100,13 +102,13 @@ public class QuadrigacxClient extends Exchange {
         queue.add(stringRequest);
     }
 
-    private void privateRequest(final Context c, String endpointUri, final String cmd) {
+    private void privateRequest(HashMap<String, String> params, final Context c, String endpointUri, final String cmd) {
         String url = apiUrl + endpointUri;
         Log.d(TAG, "privateRequest: url: " + url + " cmd: " + cmd);
 
         final String nonce = new BigDecimal(generateNonce()).toString();
         final String signature = createSignature(nonce);
-        final String body = createJsonBody(nonce, signature);
+        final String body = createJsonBody(nonce, signature, params);
 
         RequestQueue queue = Volley.newRequestQueue(c);
 
@@ -162,7 +164,6 @@ public class QuadrigacxClient extends Exchange {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
             TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            TextView tvBalances = ((Activity) c).findViewById(R.id.tvTradeBalances);
             String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs)).getSelectedItem().toString().split("-");
             String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
             String pair;
@@ -177,16 +178,16 @@ public class QuadrigacxClient extends Exchange {
             String headerValue = "0";
             while (keys.hasNext()) {
                 String key = (String) keys.next();
-                String value = (String) data.get(key);
-                if (!value.equals("0.00000000")) {
-                    if (key.equals(pair)) {
+                String[] splitKey = key.split("_");
+                String value = data.get(key).toString();
+                if (splitKey.length > 1 && splitKey[1].equals("balance") && Float.parseFloat(value) > 0) {
+                    if (splitKey[0].toUpperCase().equals(pair)) {
                         headerValue = value;
                     }
-                    output += key + ":" + value + "        ";
+                    output += splitKey[0].toUpperCase() + ": " + value + "        ";
                 }
             }
             tvHeaderRight.setText(headerValue + " " + pair + " Available");
-            tvBalances.setText(output);
         } catch (Exception ex) {
             Log.d(TAG, "Error in processRequestBalances.");
         }
@@ -200,15 +201,16 @@ public class QuadrigacxClient extends Exchange {
             String output = "";
             while (keys.hasNext()) {
                 String key = (String) keys.next();
-                String value = (String) data.get(key);
-                if (!value.equals("0.00000000")) {
-                    output += key + ":" + value + "        ";
+                String[] splitKey = key.split("_");
+                String value = data.get(key).toString();
+                if (splitKey.length > 1 && splitKey[1].equals("balance") && Float.parseFloat(value) > 0) {
+                    output += splitKey[0].toUpperCase() + ": " + value + "        ";
                 }
             }
             tvBalanceBar.setText(output);
         } catch (Exception ex) {
             tvBalanceBar.setText("Error updating balances.");
-            Log.d(TAG, "Error in processUpdateBalanceBar.");
+            Log.d(TAG, "Error in processUpdateBalanceBar: " + ex.getMessage());
         }
     }
 
@@ -239,9 +241,9 @@ public class QuadrigacxClient extends Exchange {
             if (jsonResp.has("error")) {
                 Toast.makeText(c, jsonResp.getString("error"), Toast.LENGTH_LONG).show();
             }
-            else if (jsonResp.has("orderNumber")) {
+            else if (jsonResp.has("id")) {
                 Toast.makeText(c, "Trade placed successfully.\nOrder number: " +
-                        jsonResp.getString("orderNumber"), Toast.LENGTH_LONG).show();
+                        jsonResp.getString("id"), Toast.LENGTH_LONG).show();
             }
             else {
                 Toast.makeText(c, response, Toast.LENGTH_LONG).show();
@@ -253,48 +255,34 @@ public class QuadrigacxClient extends Exchange {
     }
 
     private void processCancelOrder(String response, Context c) {
-        JSONObject jsonResp;
-        try {
-            jsonResp = new JSONObject(response);
-            if (jsonResp.has("error")) {
-                Toast.makeText(c, jsonResp.getString("error"), Toast.LENGTH_LONG).show();
-            }
-            else if (jsonResp.has("message")) {
-                Toast.makeText(c, jsonResp.getString("message"), Toast.LENGTH_LONG).show();
-            }
-            else {
-                Toast.makeText(c, response, Toast.LENGTH_LONG).show();
-            }
-        } catch (JSONException e) {
-            Toast.makeText(c, "Error happened!", Toast.LENGTH_LONG).show();
-            Log.d(this.name, "JSONException error in processPlacedOrder: " + e.toString());
-        }
+        if (response.equals("\"true\""))
+            Toast.makeText(c, "Order successfully cancelled.", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(c, response, Toast.LENGTH_LONG).show();
         UpdateOpenOrders(c);
     }
 
     private static void processUpdateOpenOrders(String response, Context c) {
+        Log.d(TAG, "processUpdateOpenOrders: " + response);
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
             ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
-            JSONObject json = new JSONObject(response);
-            Iterator<String> keys = json.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                JSONArray ordersList = json.getJSONArray(key);
-                if (ordersList.length() != 0) {
-                    for (int i=0; i < ordersList.length(); i++) {
-                        JSONObject jsonOrder = ordersList.getJSONObject(i);
-                        String orderNumber = jsonOrder.getString("orderNumber");
-                        String orderType = jsonOrder.getString("type");
-                        String orderRate = jsonOrder.getString("rate");
-                        String orderStartingAmount = jsonOrder.getString("startingAmount");
-                        String orderRemainingAmount = jsonOrder.getString("amount");
-                        String orderDate = jsonOrder.getString("date");
-                        OpenOrder order = new OpenOrder(orderNumber, key, orderType,
-                                orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
-                        openOrdersList.add(order);
-                    }
-                }
+            JSONArray json = new JSONArray(response);
+            for (int i=0; i < json.length(); i++) {
+                JSONObject jsonOrder = json.getJSONObject(i);
+                String orderNumber = jsonOrder.getString("id");
+                String orderType = jsonOrder.getString("type");
+                if (orderType.equals("1"))
+                    orderType = "Sell";
+                else
+                    orderType = "Buy";
+                String orderRate = jsonOrder.getString("price");
+                String orderStartingAmount = "undef";
+                String orderRemainingAmount = jsonOrder.getString("amount");
+                String orderDate = jsonOrder.getString("datetime");
+                OpenOrder order = new OpenOrder(orderNumber, "not set", orderType,
+                        orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
+                openOrdersList.add(order);
             }
 
             OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
@@ -352,8 +340,8 @@ public class QuadrigacxClient extends Exchange {
                 if (key.equals(pair)) {
                     JSONObject tickerInfo = data.getJSONObject(key);
                     tvLast.setText(tickerInfo.getString("last"));
-                    tvHighest.setText(tickerInfo.getString("highestBid"));
-                    tvLowest.setText(tickerInfo.getString("lowestAsk"));
+                    tvHighest.setText(tickerInfo.getString("bid"));
+                    tvLowest.setText(tickerInfo.getString("ask"));
                     edPrice.setText(tickerInfo.getString("last"));
                     break;
                 }
@@ -371,29 +359,30 @@ public class QuadrigacxClient extends Exchange {
     }
 
     public void RefreshBalances(Context c) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnBalances");
-        //privateRequest(params, c, "refreshBalances");
+        String endpointUri = "/balance";
+        privateRequest(null, c, endpointUri, "refreshBalances");
     }
 
     public void UpdateBalanceBar(Context c) {
         String endpointUri = "/balance";
-        privateRequest(c, endpointUri, "updateBalanceBar");
+        privateRequest(null, c, endpointUri, "updateBalanceBar");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
+        String endpointUri = "/cancel_order";
         Log.d(TAG, "CancelOrder: Order#: " + orderNumber);
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "cancelOrder");
-        params.put("orderNumber", orderNumber);
-       // privateRequest(params, c, "cancelOrder");
+        params.put("id", orderNumber);
+        privateRequest(params, c, endpointUri, "cancelOrder");
     }
 
     public void UpdateOpenOrders(Context c) {
+
+        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
+        String endpointUri = "/open_orders";
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnOpenOrders");
-        params.put("currencyPair", "all");
-        //privateRequest(params, c, "updateOpenOrders");
+        params.put("book", selectedPair.getExchangePair());
+        privateRequest(params, c, endpointUri, "updateOpenOrders");
     }
 
     public void UpdateTickerActivity(Context c) {
@@ -406,17 +395,24 @@ public class QuadrigacxClient extends Exchange {
     public void UpdateTradeTickerInfo(Context c) {
         String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
+        params.put("book", "all");
         publicRequest(params, c, endpointUri, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
+        String endpointUri = "";
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", orderType);
-        params.put("currencyPair", pair);
-        params.put("rate", rate);
+
+        if (orderType.equals("sell")) {
+            endpointUri = "/sell";
+        } else {
+            endpointUri = "/buy";
+        }
+
+        params.put("book", pair);
+        params.put("price", rate);
         params.put("amount", amount);
-        //privateRequest(params, c, "placeOrder");
+        privateRequest(params, c, endpointUri, "placeOrder");
     }
 
     private static String createTradePair(String pair) {
@@ -460,9 +456,14 @@ public class QuadrigacxClient extends Exchange {
         return body;
     }
 
-    private String createJsonBody(String nonce, String signature) {
+    private String createJsonBody(String nonce, String signature, HashMap<String, String> params) {
         JSONObject jsonBody = new JSONObject();
         try{
+            if (params != null) {
+                for(Map.Entry<String, String> param: params.entrySet()) {
+                    jsonBody.put(param.getKey(), param.getValue());
+                }
+            }
             jsonBody.put("key", apiKey);
             jsonBody.put("nonce", Integer.parseInt(nonce));
             jsonBody.put("signature", signature);
@@ -518,6 +519,11 @@ public class QuadrigacxClient extends Exchange {
 
     public void setAPIOther(String apiOther) {
         this.apiOther = apiOther;
+    }
+
+    @Override
+    public String toString() {
+        return this.name.toString();
     }
 
 }

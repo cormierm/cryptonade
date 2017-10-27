@@ -18,15 +18,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.lib.Crypto;
-import com.mattcormier.cryptonade.exchanges.PoloniexClient;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
 public class TradeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, TextView.OnEditorActionListener {
     private static final String TAG = "TradeFragment";
-    TextView tvBalances;
     TextView tvHeaderLeft;
     TextView tvHeaderRight;
     TextView tvLast;
@@ -44,9 +45,10 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     Button btnLowest;
     Button btnPlaceOrder;
     String orderType;
+    MainActivity mainActivity;
 
     CryptoDB db;
-    PoloniexClient exchange;
+    APIClient client;
     View tradeView;
     Context context;
 
@@ -55,8 +57,8 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         tradeView = inflater.inflate(R.layout.trade_layout, container, false);
         context = getActivity();
+        mainActivity = (MainActivity)getActivity();
 
-        tvBalances = (TextView) tradeView.findViewById(R.id.tvTradeBalances);
         tvHeaderLeft = (TextView) tradeView.findViewById(R.id.tvTradeHeaderLeft);
         tvHeaderRight = (TextView) tradeView.findViewById(R.id.tvTradeHeaderRight);
         tvLast = (TextView) tradeView.findViewById(R.id.tvTradeLastTrade);
@@ -75,8 +77,8 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         btnPlaceOrder = (Button) tradeView.findViewById(R.id.btnTradePlaceOrder);
 
         db = new CryptoDB(context);
-        Exchange ex = db.getExchange(1);
-        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        //client = (APIClient) ((Spinner)getActivity().findViewById(R.id.spnClients)).getSelectedItem();
+        client = mainActivity.selectedClient;
 
         spnPair.setOnItemSelectedListener(this);
         btnBuy.setOnClickListener(this);
@@ -90,9 +92,9 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         edAmount.setOnEditorActionListener(this);
         edPrice.setOnEditorActionListener(this);
 
-        exchange.RefreshBalances(context);
-        Crypto.UpdatePairsSpinner(context, spnPair, db);
-        exchange.UpdateTradeTickerInfo(context);
+        client.RefreshBalances(context);
+        Crypto.UpdatePairsSpinner(context, spnPair, db, (int)client.getId());
+        client.UpdateTradeTickerInfo(context);
 
         orderType = "buy";
         updatePage();
@@ -107,21 +109,21 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 //        return true;
 //    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menuRefresh:
-                exchange.RefreshBalances(context);
-                exchange.UpdateTradeTickerInfo(context);
-                return true;
-            case R.id.menuSettings:
-                getFragmentManager().beginTransaction().replace(
-                        R.id.content_frame, new APISettingsFragment()).commit();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.menuRefresh:
+//                client.RefreshBalances(context);
+//                client.UpdateTradeTickerInfo(context);
+//                return true;
+//            case R.id.menuSettings:
+//                getFragmentManager().beginTransaction().replace(
+//                        R.id.content_frame, new APISettingsFragment()).commit();
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//    }
 
     @Override
     public void onClick(View view) {
@@ -129,7 +131,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             String pair = ((Pair) spnPair.getSelectedItem()).getExchangePair();
             String amount = edAmount.getText().toString();
             String price = edPrice.getText().toString();
-            exchange.PlaceOrder(context, pair, price, amount, orderType);
+            client.PlaceOrder(context, pair, price, amount, orderType);
         }
         else if (view.getId() == btnBuy.getId()) {
             orderType = "buy";
@@ -182,6 +184,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     }
 
     private void updateAvailable(String pair) {
+        TextView tvBalances = (TextView) mainActivity.findViewById(R.id.tvBalanceBar);
         String[] balances = tvBalances.getText().toString().split("        ");
         String available = "0";
         for (String bal: balances) {
@@ -196,7 +199,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        exchange.UpdateTradeTickerInfo(context);
+        client.UpdateTradeTickerInfo(context);
         updatePage();
     }
 

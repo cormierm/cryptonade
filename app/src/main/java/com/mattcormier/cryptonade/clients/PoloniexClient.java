@@ -1,4 +1,4 @@
-package com.mattcormier.cryptonade.exchanges;
+package com.mattcormier.cryptonade.clients;
 
 import android.app.Activity;
 import android.content.Context;
@@ -32,6 +32,8 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Ticker;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -41,14 +43,13 @@ import com.mattcormier.cryptonade.adapters.TickerAdapter;
 
 import com.mattcormier.cryptonade.models.OpenOrder;
 
-public class PoloniexClient extends Exchange {
+public class PoloniexClient implements APIClient {
     private static final String TAG = "PoloniexClient";
     private long exchangeId;
     private static long typeId = 1;
     private String name;
     private String apiKey;
     private String apiSecret;
-    private String apiOther;
     private static String publicUrl = "https://poloniex.com/public?";
     private static String privateUrl = "https://poloniex.com/tradingApi";
 
@@ -56,15 +57,13 @@ public class PoloniexClient extends Exchange {
         name = "";
         apiKey = "";
         apiSecret = "";
-        apiOther = "";
     }
 
-    public PoloniexClient(int exchangeId, String name, String apiKey, String apiSecret, String apiOther) {
+    public PoloniexClient(int exchangeId, String name, String apiKey, String apiSecret) {
         this.exchangeId = exchangeId;
         this.name = name;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
-        this.apiOther = apiOther;
     }
 
     private void publicRequest(HashMap<String, String> params, final Context c, final String cmd) {
@@ -165,7 +164,6 @@ public class PoloniexClient extends Exchange {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
             TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            TextView tvBalances = ((Activity) c).findViewById(R.id.tvTradeBalances);
             String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs)).getSelectedItem().toString().split("-");
             String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
             String pair;
@@ -189,7 +187,6 @@ public class PoloniexClient extends Exchange {
                 }
             }
             tvHeaderRight.setText(headerValue + " " + pair + " Available");
-            tvBalances.setText(output);
         } catch (Exception ex) {
             Log.d(TAG, "Error in processRequestBalances.");
         }
@@ -493,12 +490,8 @@ public class PoloniexClient extends Exchange {
         this.apiSecret = apiSecret;
     }
 
-    public String getAPIOther() {
-        return apiOther;
+    @Override
+    public String toString() {
+        return this.name.toString();
     }
-
-    public void setAPIOther(String apiOther) {
-        this.apiOther = apiOther;
-    }
-
 }

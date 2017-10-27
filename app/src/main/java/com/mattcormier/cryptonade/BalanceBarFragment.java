@@ -4,25 +4,23 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.PoloniexClient;
-import com.mattcormier.cryptonade.exchanges.Exchange;
-import com.mattcormier.cryptonade.exchanges.QuadrigacxClient;
+import com.mattcormier.cryptonade.clients.APIClient;
 
 /**
  * Created by matt on 10/24/2017.
  */
 
 public class BalanceBarFragment extends Fragment {
+    private static final String TAG = "BalanceBarFragment";
     TextView tvBalances;
     View balanceView;
-    CryptoDB db;
-    Exchange exchange;
+    APIClient client;
     Context context;
 
     @Nullable
@@ -31,11 +29,8 @@ public class BalanceBarFragment extends Fragment {
         balanceView = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
         tvBalances = balanceView.findViewById(R.id.tvBalanceBar);
-        db = new CryptoDB(context);
-//        Exchange ex = db.getExchange(1);
-//        exchange = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
-        Exchange ex = db.getExchange(5);
-        exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
+        Log.d(TAG, "onCreateView: client: " + client);
+
         UpdateBalanceBar();
 
         return balanceView;
@@ -48,6 +43,16 @@ public class BalanceBarFragment extends Fragment {
     }
 
     public void UpdateBalanceBar() {
-        exchange.UpdateBalanceBar(context);
+        if (client != null) {
+            Log.d(TAG, "UpdateBalanceBar: client: " + client);
+            client.UpdateBalanceBar(context);
+        } else {
+            Log.d(TAG, "UpdateBalanceBar: client is null");
+            tvBalances.setText("No client selected");
+        }
+    }
+
+    public void setClient(APIClient client) {
+        this.client = client;
     }
 }

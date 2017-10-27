@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 
 import java.util.List;

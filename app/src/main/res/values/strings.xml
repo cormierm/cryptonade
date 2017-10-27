@@ -54,4 +54,5 @@
     <string name="create">Create</string>
     <string name="update">Update</string>
     <string name="restore_pairs_list_from_exchange">Restore Pairs List From Exchange</string>
+    <string name="refresh_balances">Refresh Balances</string>
 </resources>

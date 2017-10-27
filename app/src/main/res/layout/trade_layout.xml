@@ -6,27 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <HorizontalScrollView
-        android:id="@+id/svBalances"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/black"
-        android:fillViewport="false"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/tvTradeBalances"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/black"
-            android:text="ETH: 0.3212323    BTC: 43.23423432    USDT: 123.3213213"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </HorizontalScrollView>
-
     <LinearLayout
         android:id="@+id/llTradeBuySellButtons"
         android:layout_width="0dp"
@@ -35,7 +14,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/svBalances">
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/btnTradeBuy"
@@ -107,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
         android:layout_marginTop="0dp"
-        android:text="32.12312312"
+        android:text=""
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvTradeLowestAsk" />
 
@@ -118,7 +97,7 @@
         android:layout_marginBottom="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="0dp"
-        android:text="32.12312312"
+        android:text=""
         app:layout_constraintBottom_toBottomOf="@+id/lblTradeLowestAsk"
         app:layout_constraintLeft_toRightOf="@+id/lblTradeLowestAsk"
         app:layout_constraintTop_toTopOf="@+id/lblTradeLowestAsk" />
@@ -153,7 +132,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="0dp"
-        android:text="43.23423443"
+        android:text=""
         app:layout_constraintLeft_toRightOf="@+id/lblTradeHighestBid"
         app:layout_constraintTop_toTopOf="@+id/lblTradeHighestBid" />
 

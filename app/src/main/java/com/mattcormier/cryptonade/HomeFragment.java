@@ -36,7 +36,6 @@ public class HomeFragment extends Fragment implements OnClickListener {
         btnHomeApiSettings.setOnClickListener(this);
         btnHomeOrders.setOnClickListener(this);
         btnHomeTicker.setOnClickListener(this);
-        getFragmentManager().beginTransaction().replace(R.id.flHomeBalanceBar, new BalanceBarFragment()).commit();
 
         return homeView;
     }

@@ -14,8 +14,8 @@ import android.widget.ListView;
 
 import com.mattcormier.cryptonade.adapters.APIAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.exchanges.PoloniexClient;
-import com.mattcormier.cryptonade.exchanges.Exchange;
+import com.mattcormier.cryptonade.clients.PoloniexClient;
+import com.mattcormier.cryptonade.models.Exchange;
 
 import java.util.ArrayList;
 

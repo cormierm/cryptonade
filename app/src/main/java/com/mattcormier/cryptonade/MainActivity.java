@@ -7,16 +7,46 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.clients.PoloniexClient;
+import com.mattcormier.cryptonade.clients.QuadrigacxClient;
+import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
+import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.models.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
+    private static final String TAG = "MainActivity";
+    Spinner spnClients;
+    Spinner spnPairs;
+    APIClient selectedClient;
+    BalanceBarFragment fragBalanceBar;
+    CryptoDB db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        spnClients = (Spinner) findViewById(R.id.spnClients);
+        spnClients.setOnItemSelectedListener(this);
+        spnPairs = (Spinner) findViewById(R.id.spnPairs);
+
+        db = new CryptoDB(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -28,7 +58,39 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // initialize client spinner in action bar
+        UpdateClientSpinner();
+        selectedClient = (APIClient) spnClients.getSelectedItem();
+        Log.d(TAG, "onCreate: selectedClient: " + selectedClient);
+
+        UpdatePairsSpinner();
+
+        Log.d(TAG, "onCreate: init balance bar");
+        // initialize balance bar
+        fragBalanceBar = new BalanceBarFragment();
+        fragBalanceBar.setClient(selectedClient);
+
+        Log.d(TAG, "onCreate: implementing frags");
+        getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar).commit();
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
+    }
+
+    public void UpdateClientSpinner() {
+        List<Exchange> exchangeList = db.getExchanges();
+        ArrayList<APIClient> clientList = new ArrayList<APIClient>();
+        for (Exchange e: exchangeList) {
+            clientList.add(Crypto.getAPIClient(e));
+        }
+
+        try {
+            ArrayAdapter<APIClient> dataAdapter = new ArrayAdapter<>(this,
+                    R.layout.spinner_exchange_layout, clientList);
+            dataAdapter.setDropDownViewResource(R.layout.spinner_exchange_layout);
+            spnClients.setAdapter(dataAdapter);
+        } catch (Exception ex) {
+            Log.d(TAG, "onCreate: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -52,11 +114,15 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.menuAPISettings) {
             getFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame, new APISettingsFragment())
+                    .replace(R.id.content_frame, new APIFragment())
                     .addToBackStack("api_settings")
                     .commit();
+            return true;
+        }
+        else if (id == R.id.menuRefreshBalances) {
+            fragBalanceBar.UpdateBalanceBar();
             return true;
         }
 
@@ -98,5 +164,33 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        selectedClient = (APIClient)((Spinner)findViewById(R.id.spnClients)).getSelectedItem();
+        Log.d(TAG, "onItemSelected: selectedClient:" + selectedClient);
+        if (selectedClient != null) {
+            UpdatePairsSpinner();
+            fragBalanceBar.setClient(selectedClient);
+            fragBalanceBar.UpdateBalanceBar();
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    public void UpdatePairsSpinner() {
+        List<Pair> pairsList = db.getPairs((int)selectedClient.getId());
+        try {
+            ArrayAdapter<Pair> dataAdapter = new ArrayAdapter<>(this,
+                    R.layout.spinner_exchange_layout, pairsList);
+            dataAdapter.setDropDownViewResource(R.layout.spinner_exchange_layout);
+            spnPairs.setAdapter(dataAdapter);
+        } catch (Exception ex) {
+            Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
+        }
     }
 }
