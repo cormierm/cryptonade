@@ -67,10 +67,8 @@ public class APIAdapter extends ArrayAdapter {
         viewHolder.tvLiExchangeAPIKey.setText(currentExchange.getAPIKey());
         viewHolder.tvLiExchangeAPISecret.setText(currentExchange.getAPISecret());
         if (exType.getApiOther().isEmpty()) {
-            viewHolder.lblLiExchangeAPIOther.setVisibility(View.INVISIBLE);
-            viewHolder.tvLiExchangeAPIOther.setVisibility(View.INVISIBLE);
-            viewHolder.lblLiExchangeAPIOther.setHeight(0);
-            viewHolder.tvLiExchangeAPIOther.setHeight(0);
+            viewHolder.lblLiExchangeAPIOther.setVisibility(View.GONE);
+            viewHolder.tvLiExchangeAPIOther.setVisibility(View.GONE);
         } else {
             viewHolder.lblLiExchangeAPIOther.setVisibility(View.VISIBLE);
             viewHolder.tvLiExchangeAPIOther.setVisibility(View.VISIBLE);

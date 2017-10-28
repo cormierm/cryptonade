@@ -43,8 +43,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class QuadrigacxClient implements APIClient {
     private static final String TAG = "QuadrigacxClient";
-    private long exchangeId;
     private static long typeId = 2;
+    private long exchangeId;
+    private HashMap<String, Double> balances;
+    private HashMap<String, Double> availableBalances;
     private String name;
     private String apiKey;
     private String apiSecret;
@@ -117,11 +119,11 @@ public class QuadrigacxClient implements APIClient {
                     @Override
                     public void onResponse(String response) {
                         Log.d(TAG, "private.onResponse: " + response);
-                        if (cmd.equals("refreshBalances")) {
-                            processRefreshBalances(response, c);
+                        if (cmd.equals("updateBalances")) {
+                            processUpdateBalances(response, c);
                         }
-                        else if (cmd.equals("updateBalanceBar")) {
-                            processUpdateBalanceBar(response, c);
+                        else if (cmd.equals("refreshBalances")) {
+                            processRefreshBalances(response, c);
                         }
                         else if (cmd.equals("placeOrder")) {
                             processPlacedOrder(response, c);
@@ -160,6 +162,35 @@ public class QuadrigacxClient implements APIClient {
         queue.add(stringRequest);
     }
 
+
+    private void processUpdateBalances(String response, Context c) {
+        try {
+            HashMap<String, Double> balances = new HashMap<>();
+            HashMap<String, Double> availableBalances = new HashMap<>();
+
+            JSONObject jsonObject = new JSONObject(response);
+            if (jsonObject.has("error")) {
+                processAPIJSONError(jsonObject,  c);
+                return;
+            }
+            Iterator<?> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                String[] splitKey = key.split("_");
+                String value = jsonObject.get(key).toString();
+                if (splitKey.length > 1 && splitKey[1].equals("available") && Double.parseDouble(value) > 0) {
+                    availableBalances.put(splitKey[0].toUpperCase(), Double.parseDouble(value));
+                } else if (splitKey.length > 1 && splitKey[1].equals("available") && Double.parseDouble(value) > 0) {
+                    balances.put(splitKey[0].toUpperCase(), Double.parseDouble(value));
+                }
+            }
+            this.balances = balances;
+            this.availableBalances = availableBalances;
+        } catch (JSONException e) {
+            Log.d(TAG, "processUpdateBalances: JSONException: " + e.getMessage());
+        }
+    }
+
     private static void processRefreshBalances(String response, Context c) {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
@@ -193,27 +224,6 @@ public class QuadrigacxClient implements APIClient {
         }
     }
 
-    private static void processUpdateBalanceBar(String response, Context c) {
-        TextView tvBalanceBar = ((Activity) c).findViewById(R.id.tvBalanceBar);
-        try {
-            JSONObject data = new JSONObject(response);
-            Iterator<?> keys = data.keys();
-            String output = "";
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                String[] splitKey = key.split("_");
-                String value = data.get(key).toString();
-                if (splitKey.length > 1 && splitKey[1].equals("balance") && Float.parseFloat(value) > 0) {
-                    output += splitKey[0].toUpperCase() + ": " + value + "        ";
-                }
-            }
-            tvBalanceBar.setText(output);
-        } catch (Exception ex) {
-            tvBalanceBar.setText("Error updating balances.");
-            Log.d(TAG, "Error in processUpdateBalanceBar: " + ex.getMessage());
-        }
-    }
-
     private void processRestorePairsInDB(String response, Context c) {
         CryptoDB db = new CryptoDB(c);
         db.deletePairsByExchangeId(exchangeId);
@@ -235,15 +245,16 @@ public class QuadrigacxClient implements APIClient {
     }
 
     private void processPlacedOrder(String response, Context c) {
-        JSONObject jsonResp;
+        JSONObject jsonObject;
         try {
-            jsonResp = new JSONObject(response);
-            if (jsonResp.has("error")) {
-                Toast.makeText(c, jsonResp.getString("error"), Toast.LENGTH_LONG).show();
+            jsonObject = new JSONObject(response);
+            if (jsonObject.has("error")) {
+                processAPIJSONError(jsonObject,  c);
+                return;
             }
-            else if (jsonResp.has("id")) {
+            else if (jsonObject.has("id")) {
                 Toast.makeText(c, "Trade placed successfully.\nOrder number: " +
-                        jsonResp.getString("id"), Toast.LENGTH_LONG).show();
+                        jsonObject.getString("id"), Toast.LENGTH_LONG).show();
             }
             else {
                 Toast.makeText(c, response, Toast.LENGTH_LONG).show();
@@ -262,7 +273,7 @@ public class QuadrigacxClient implements APIClient {
         UpdateOpenOrders(c);
     }
 
-    private static void processUpdateOpenOrders(String response, Context c) {
+    private void processUpdateOpenOrders(String response, Context c) {
         Log.d(TAG, "processUpdateOpenOrders: " + response);
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
@@ -289,6 +300,16 @@ public class QuadrigacxClient implements APIClient {
             lvOpenOrders.setAdapter(openOrdersAdapter);
 
         } catch (JSONException e) {
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(response);
+            } catch (JSONException e1) {
+                Log.d(TAG, "processUpdateOpenOrders: "+ e1.getMessage());
+            }
+            if (jsonObject != null && jsonObject.has("error")) {
+                processAPIJSONError(jsonObject,  c);
+                return;
+            }
             Log.d(TAG, "Error in processUpdateOpenOrders: " + e.toString());
         }
     }
@@ -351,6 +372,11 @@ public class QuadrigacxClient implements APIClient {
         }
     }
 
+    public void UpdateBalances(Context c) {
+        String endpointUri = "/balance";
+        privateRequest(null, c, endpointUri, "updateBalances");
+    }
+
     public void RestorePairsInDB(Context c) {
         String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
@@ -361,11 +387,6 @@ public class QuadrigacxClient implements APIClient {
     public void RefreshBalances(Context c) {
         String endpointUri = "/balance";
         privateRequest(null, c, endpointUri, "refreshBalances");
-    }
-
-    public void UpdateBalanceBar(Context c) {
-        String endpointUri = "/balance";
-        privateRequest(null, c, endpointUri, "updateBalanceBar");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
@@ -525,6 +546,34 @@ public class QuadrigacxClient implements APIClient {
         return this.name.toString();
     }
 
+    public HashMap<String, Double> getBalances() {
+        return balances;
+    }
+
+    public void setBalances(HashMap<String, Double> balances) {
+        this.balances = balances;
+    }
+
+    public HashMap<String, Double> getAvailableBalances() {
+        return availableBalances;
+    }
+
+    public void setAvailableBalances(HashMap<String, Double> availableBalances) {
+        this.availableBalances = availableBalances;
+    }
+
+    private void processAPIJSONError(JSONObject json, Context c) {
+        try {
+            JSONObject jsonError = json.getJSONObject("error");
+            if (jsonError.getInt("code") == 12) {
+                Toast.makeText(c, "Invalid API key/secret pair.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(c, jsonError.getString("message"), Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "processAPIError: " + e.getMessage());
+        }
+    }
 }
 
 

@@ -58,23 +58,6 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
         return ordersView;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menuRefresh:
-//                client.UpdateOpenOrders(context);
-//                return true;
-////            case R.id.menuSettings:
-////                getFragmentManager().beginTransaction()
-////                        .replace(R.id.content_frame, new APISettingsFragment())
-////                        .addToBackStack("api_settings")
-////                        .commit();
-////                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
-
     public void UpdateOrdersFrag() {
         Log.d(TAG, "UpdateOrdersFrag: ");
         tvRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
@@ -87,7 +70,7 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
         lvOpenOrders.invalidateViews();
         if (parent.getId() == spnClients.getId()) {
             mainActivity.UpdatePairsSpinner();
-            mainActivity.fragBalanceBar.UpdateBalanceBar();
+            ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
         }
         UpdateOrdersFrag();
     }

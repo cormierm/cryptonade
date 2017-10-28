@@ -122,7 +122,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         else if (id == R.id.menuRefreshBalances) {
-            fragBalanceBar.UpdateBalanceBar();
+            //fragBalanceBar.UpdateBalanceBar();
+            ((APIClient) spnClients.getSelectedItem()).UpdateBalances(this);
             return true;
         }
 
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onItemSelected: selectedClient:" + selectedClient);
         if (selectedClient != null) {
             UpdatePairsSpinner();
-            fragBalanceBar.UpdateBalanceBar();
+            ((APIClient) spnClients.getSelectedItem()).UpdateBalances(this);
         }
     }
 

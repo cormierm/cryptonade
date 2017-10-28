@@ -53,7 +53,7 @@ public class TickerFragment extends Fragment implements AdapterView.OnItemSelect
             lvTickers.invalidateViews();
             client.UpdateTickerActivity(context);
             cachedClientId = client.getId();
-            mainActivity.fragBalanceBar.UpdateBalanceBar();
+            ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
         }
         mainActivity.UpdatePairsSpinner();
     }

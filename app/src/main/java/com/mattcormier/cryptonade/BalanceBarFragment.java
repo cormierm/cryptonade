@@ -13,13 +13,19 @@ import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Created by matt on 10/24/2017.
  */
 
 public class BalanceBarFragment extends Fragment {
     private static final String TAG = "BalanceBarFragment";
-    TextView tvBalances;
+    TextView tvBalanceBar;
+    HashMap<String, Double> currentBalances;
     View balanceView;
     Spinner spnClients;
     APIClient client;
@@ -31,29 +37,54 @@ public class BalanceBarFragment extends Fragment {
         spnClients = (Spinner)((MainActivity)getActivity()).findViewById(R.id.spnClients);
         balanceView = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
-        tvBalances = balanceView.findViewById(R.id.tvBalanceBar);
+        tvBalanceBar = balanceView.findViewById(R.id.tvBalanceBar);
         Log.d(TAG, "onCreateView: client: " + client);
 
-        UpdateBalanceBar();
 
         return balanceView;
     }
 
     @Override
     public void onResume() {
-        UpdateBalanceBar();
+       startBalanceBarTimer();
         super.onResume();
     }
 
-    public void UpdateBalanceBar() {
-        client = (APIClient)spnClients.getSelectedItem();
-        if (client != null) {
-            Log.d(TAG, "UpdateBalanceBar: client: " + client);
-            client.UpdateBalanceBar(context);
-        } else {
-            Log.d(TAG, "UpdateBalanceBar: client is null");
-            tvBalances.setText("No client selected");
-        }
+    public void startBalanceBarTimer() {
+        Log.d(TAG, "startBalanceBarTimer: start");
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                client = (APIClient)spnClients.getSelectedItem();
+                if (client != null) {
+                    HashMap<String, Double> availableBalances = client.getAvailableBalances();
+                    if (availableBalances == null) {
+                        setBalanceBarText("No Balance Information.");
+                    }
+                    else if (currentBalances != availableBalances) {
+                        String output = "";
+                        for (Map.Entry<String, Double> b: availableBalances.entrySet()) {
+                            output += b.getKey() + ":" + String.format("%.8f", b.getValue()) + "        ";
+                        }
+                        output.trim();
+                        if (output.isEmpty()) {
+                            output = "No Balance Information.";
+                        }
+                        setBalanceBarText(output);
+                    }
+                }
+            }
+        };
+        Timer timer = new Timer(true);
+        timer.schedule(task, 0, 1000);
     }
 
+    public void setBalanceBarText(final String text) {
+        tvBalanceBar.post(new Runnable() {
+            @Override
+            public void run() {
+                tvBalanceBar.setText(text);
+            }
+        });
+    }
 }

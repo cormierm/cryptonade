@@ -27,12 +27,13 @@ public class PairsFragment extends Fragment implements View.OnClickListener {
     Button btnUpdate;
     ListView lvPairsList;
     CryptoDB db;
-    APIClient client;
     View pairsView;
+    MainActivity mainActivity;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        mainActivity = (MainActivity) getActivity();
         pairsView = inflater.inflate(R.layout.pairs_layout, container, false);
         btnRefresh = (Button) pairsView.findViewById(R.id.btnTradingPairsRefresh);
         btnRefresh.setOnClickListener(this);
@@ -43,10 +44,6 @@ public class PairsFragment extends Fragment implements View.OnClickListener {
         lvPairsList = (ListView) pairsView.findViewById(R.id.lvTradingPairsList);
 
         db = new CryptoDB(getActivity());
-//        Exchange ex = db.getExchange(5);
-//        client = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret());
-        //exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
-        client = (APIClient) ((Spinner)getActivity().findViewById(R.id.spnClients)).getSelectedItem();
 
         updatePairsListView();
         return pairsView;
@@ -58,11 +55,12 @@ public class PairsFragment extends Fragment implements View.OnClickListener {
             updatePairsListView();
         }
         else if (v.getId() == btnUpdate.getId()) {
-            client.RestorePairsInDB(getActivity());
+            ((APIClient) mainActivity.spnClients.getSelectedItem()).RestorePairsInDB(getActivity());
         }
     }
 
     private void updatePairsListView() {
+        APIClient client = (APIClient) mainActivity.spnClients.getSelectedItem();
         Log.d(TAG, "updatePairsListView: " + client.getId());
         List<Pair> pairsList = db.getPairs((int)client.getId());
 

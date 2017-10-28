@@ -175,7 +175,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
         if (parent.getId() == spnClients.getId()) {
             mainActivity.UpdatePairsSpinner();
-            mainActivity.fragBalanceBar.UpdateBalanceBar();
+            ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
         }
         updatePage();
     }

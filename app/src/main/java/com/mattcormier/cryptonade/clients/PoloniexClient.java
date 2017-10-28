@@ -45,8 +45,10 @@ import com.mattcormier.cryptonade.models.OpenOrder;
 
 public class PoloniexClient implements APIClient {
     private static final String TAG = "PoloniexClient";
-    private long exchangeId;
     private static long typeId = 1;
+    private long exchangeId;
+    private HashMap<String, Double> balances;
+    private HashMap<String, Double> availableBalances;
     private String name;
     private String apiKey;
     private String apiSecret;
@@ -115,11 +117,12 @@ public class PoloniexClient implements APIClient {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if (cmd.equals("refreshBalances")) {
-                            processRefreshBalances(response, c);
+                        Log.d(TAG, "onResponse: response: " + response);
+                        if (cmd.equals("updateBalances")) {
+                            processUpdateBalances(response, c);
                         }
-                        else if (cmd.equals("updateBalanceBar")) {
-                            processUpdateBalanceBar(response, c);
+                        else if (cmd.equals("refreshBalances")) {
+                            processRefreshBalances(response, c);
                         }
                         else if (cmd.equals("placeOrder")) {
                             processPlacedOrder(response, c);
@@ -160,6 +163,36 @@ public class PoloniexClient implements APIClient {
         queue.add(stringRequest);
     }
 
+    private void processUpdateBalances(String response, Context c) {
+        Log.d(TAG, "processUpdateBalances: response: " + response);
+        HashMap<String, Double> availableBalances = new HashMap<>();
+        HashMap<String, Double> balances = new HashMap<>();
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if (jsonObject.has("error")) {
+                Toast.makeText(c, jsonObject.getString("error"), Toast.LENGTH_LONG).show();
+                Log.d(TAG, "processUpdateBalances: " + jsonObject.getString("error"));
+                return;
+            }
+            Iterator<String> currencyList = jsonObject.keys();
+            while(currencyList.hasNext()) {
+                String currency = currencyList.next();
+                JSONObject currencyInfo = jsonObject.getJSONObject(currency);
+                String available = currencyInfo.getString("available");
+                if (!available.equals("0.00000000")) {
+                    Double dblAvailable = Double.parseDouble(available);
+                    Double onOrders = Double.parseDouble(currencyInfo.getString("onOrders"));
+                    availableBalances.put(currency, dblAvailable);
+                    balances.put(currency, dblAvailable + onOrders);
+                }
+            }
+            this.availableBalances = availableBalances;
+            this.balances = balances;
+        } catch (JSONException e) {
+            Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
+        }
+    }
+
     private static void processRefreshBalances(String response, Context c) {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
@@ -189,26 +222,6 @@ public class PoloniexClient implements APIClient {
             tvHeaderRight.setText(headerValue + " " + pair + " Available");
         } catch (Exception ex) {
             Log.d(TAG, "Error in processRequestBalances.");
-        }
-    }
-
-    private static void processUpdateBalanceBar(String response, Context c) {
-        TextView tvBalanceBar = ((Activity) c).findViewById(R.id.tvBalanceBar);
-        try {
-            JSONObject data = new JSONObject(response);
-            Iterator<?> keys = data.keys();
-            String output = "";
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                String value = (String) data.get(key);
-                if (!value.equals("0.00000000")) {
-                    output += key + ":" + value + "        ";
-                }
-            }
-            tvBalanceBar.setText(output);
-        } catch (Exception ex) {
-            tvBalanceBar.setText("Error updating balances.");
-            Log.d(TAG, "Error in processUpdateBalanceBar.");
         }
     }
 
@@ -294,7 +307,17 @@ public class PoloniexClient implements APIClient {
             lvOpenOrders.setAdapter(openOrdersAdapter);
 
         } catch (JSONException e) {
-            Log.d(TAG, "Error in processUpdateOpenOrders: " + e.toString());
+            try {
+                JSONObject json = new JSONObject(response);
+                if (json.has("error")) {
+                    Toast.makeText(c, json.getString("error"), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "processUpdateOpenOrders: " + json.getString("error"));
+                } else {
+                    Log.d(TAG, "Error in processUpdateOpenOrders: " + e.toString());
+                }
+            } catch (JSONException e1) {
+                Log.d(TAG, "Error in processUpdateOpenOrders: " + e1.toString());
+            }
         }
     }
 
@@ -368,10 +391,10 @@ public class PoloniexClient implements APIClient {
         privateRequest(params, c, "refreshBalances");
     }
 
-    public void UpdateBalanceBar(Context c) {
+    public void UpdateBalances(Context c) {
         HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnBalances");
-        privateRequest(params, c, "updateBalanceBar");
+        params.put("command", "returnCompleteBalances");
+        privateRequest(params, c, "updateBalances");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
@@ -487,5 +510,21 @@ public class PoloniexClient implements APIClient {
     @Override
     public String toString() {
         return this.name.toString();
+    }
+
+    public HashMap<String, Double> getBalances() {
+        return balances;
+    }
+
+    public void setBalances(HashMap<String, Double> balances) {
+        this.balances = balances;
+    }
+
+    public HashMap<String, Double> getAvailableBalances() {
+        return availableBalances;
+    }
+
+    public void setAvailableBalances(HashMap<String, Double> availableBalances) {
+        this.availableBalances = availableBalances;
     }
 }

@@ -2,17 +2,19 @@ package com.mattcormier.cryptonade.clients;
 
 import android.content.Context;
 
+import java.util.HashMap;
+
 /**
  * Created by matt on 10/17/2017.
  */
 
 public interface APIClient {
 
+    void UpdateBalances(Context c);
+
     void RestorePairsInDB(Context c);
 
     void RefreshBalances(Context c);
-
-    void UpdateBalanceBar(Context c);
 
     void CancelOrder(Context c, String orderNumber);
 
@@ -31,4 +33,12 @@ public interface APIClient {
     String getName();
 
     String toString();
+
+    public HashMap<String, Double> getBalances();
+
+    public void setBalances(HashMap<String, Double> balances);
+
+    public HashMap<String, Double> getAvailableBalances();
+
+    public void setAvailableBalances(HashMap<String, Double> availableBalances);
 }
