@@ -164,7 +164,7 @@ public class PoloniexClient implements APIClient {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
             TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs)).getSelectedItem().toString().split("-");
+            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem().toString().split("-");
             String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
             String pair;
             if (orderType.equals("buy")) {
@@ -276,25 +276,18 @@ public class PoloniexClient implements APIClient {
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
             ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
-            JSONObject json = new JSONObject(response);
-            Iterator<String> keys = json.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                JSONArray ordersList = json.getJSONArray(key);
-                if (ordersList.length() != 0) {
-                    for (int i=0; i < ordersList.length(); i++) {
-                        JSONObject jsonOrder = ordersList.getJSONObject(i);
-                        String orderNumber = jsonOrder.getString("orderNumber");
-                        String orderType = jsonOrder.getString("type");
-                        String orderRate = jsonOrder.getString("rate");
-                        String orderStartingAmount = jsonOrder.getString("startingAmount");
-                        String orderRemainingAmount = jsonOrder.getString("amount");
-                        String orderDate = jsonOrder.getString("date");
-                        OpenOrder order = new OpenOrder(orderNumber, key, orderType,
-                                orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
-                        openOrdersList.add(order);
-                    }
-                }
+            JSONArray jsonArray = new JSONArray(response);
+            for (int i=0; i < jsonArray.length(); i++){
+                JSONObject json = jsonArray.getJSONObject(i);
+                String orderNumber = json.getString("orderNumber");
+                String orderType = json.getString("type");
+                String orderRate = json.getString("rate");
+                String orderStartingAmount = json.getString("startingAmount");
+                String orderRemainingAmount = json.getString("amount");
+                String orderDate = json.getString("date");
+                OpenOrder order = new OpenOrder(orderNumber, "asdf", orderType.toUpperCase(),
+                        orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
+                openOrdersList.add(order);
             }
 
             OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
@@ -341,7 +334,7 @@ public class PoloniexClient implements APIClient {
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs);
+        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
         String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
 
         try {
@@ -390,9 +383,10 @@ public class PoloniexClient implements APIClient {
     }
 
     public void UpdateOpenOrders(Context c) {
+        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnOpenOrders");
-        params.put("currencyPair", "all");
+        params.put("currencyPair", selectedPair.getExchangePair());
         privateRequest(params, c, "updateOpenOrders");
     }
 

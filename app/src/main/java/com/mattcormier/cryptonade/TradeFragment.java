@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -19,11 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.clients.QuadrigacxClient;
-import com.mattcormier.cryptonade.lib.Crypto;
-import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
 public class TradeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, TextView.OnEditorActionListener {
@@ -33,7 +28,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     TextView tvLast;
     TextView tvHighest;
     TextView tvLowest;
-    Spinner spnPair;
     EditText edPrice;
     EditText edAmount;
     EditText edTotal;
@@ -46,9 +40,10 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     Button btnPlaceOrder;
     String orderType;
     MainActivity mainActivity;
+    Spinner spnPairs;
+    Spinner spnClients;
 
     CryptoDB db;
-    APIClient client;
     View tradeView;
     Context context;
 
@@ -59,28 +54,29 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         context = getActivity();
         mainActivity = (MainActivity)getActivity();
 
-        tvHeaderLeft = (TextView) tradeView.findViewById(R.id.tvTradeHeaderLeft);
-        tvHeaderRight = (TextView) tradeView.findViewById(R.id.tvTradeHeaderRight);
-        tvLast = (TextView) tradeView.findViewById(R.id.tvTradeLastTrade);
-        tvHighest = (TextView) tradeView.findViewById(R.id.tvTradeHighestBid);
-        tvLowest = (TextView) tradeView.findViewById(R.id.tvTradeLowestAsk);
-        spnPair = (Spinner) tradeView.findViewById(R.id.spnTradeCurrencyPairs);
-        edPrice = (EditText) tradeView.findViewById(R.id.edTradePrice);
-        edAmount = (EditText) tradeView.findViewById(R.id.edTradeAmount);
-        edTotal = (EditText) tradeView.findViewById(R.id.edTradeTotal);
-        btnBuy = (Button) tradeView.findViewById(R.id.btnTradeBuy);
-        btnSell  = (Button) tradeView.findViewById(R.id.btnTradeSell);
-        btnMax = (Button) tradeView.findViewById(R.id.btnTradeMax);
-        btnLast = (Button) tradeView.findViewById(R.id.btnTradeLast);
-        btnHighest = (Button) tradeView.findViewById(R.id.btnTradeBuyHighestBid);
-        btnLowest = (Button) tradeView.findViewById(R.id.btnTradeBuyLowestAsk);
-        btnPlaceOrder = (Button) tradeView.findViewById(R.id.btnTradePlaceOrder);
+        tvHeaderLeft = tradeView.findViewById(R.id.tvTradeHeaderLeft);
+        tvHeaderRight = tradeView.findViewById(R.id.tvTradeHeaderRight);
+        tvLast = tradeView.findViewById(R.id.tvTradeLastTrade);
+        tvHighest = tradeView.findViewById(R.id.tvTradeHighestBid);
+        tvLowest = tradeView.findViewById(R.id.tvTradeLowestAsk);
+        edPrice = tradeView.findViewById(R.id.edTradePrice);
+        edAmount = tradeView.findViewById(R.id.edTradeAmount);
+        edTotal = tradeView.findViewById(R.id.edTradeTotal);
+        btnBuy = tradeView.findViewById(R.id.btnTradeBuy);
+        btnSell  = tradeView.findViewById(R.id.btnTradeSell);
+        btnMax = tradeView.findViewById(R.id.btnTradeMax);
+        btnLast = tradeView.findViewById(R.id.btnTradeLast);
+        btnHighest = tradeView.findViewById(R.id.btnTradeBuyHighestBid);
+        btnLowest = tradeView.findViewById(R.id.btnTradeBuyLowestAsk);
+        btnPlaceOrder = tradeView.findViewById(R.id.btnTradePlaceOrder);
+
+        spnPairs = (Spinner) mainActivity.findViewById(R.id.spnPairs);
+        spnPairs.setOnItemSelectedListener(this);
+        spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
+        spnClients.setOnItemSelectedListener(this);
 
         db = new CryptoDB(context);
-        //client = (APIClient) ((Spinner)getActivity().findViewById(R.id.spnClients)).getSelectedItem();
-        client = mainActivity.selectedClient;
 
-        spnPair.setOnItemSelectedListener(this);
         btnBuy.setOnClickListener(this);
         btnSell.setOnClickListener(this);
         btnMax.setOnClickListener(this);
@@ -92,9 +88,8 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         edAmount.setOnEditorActionListener(this);
         edPrice.setOnEditorActionListener(this);
 
-        client.RefreshBalances(context);
-        Crypto.UpdatePairsSpinner(context, spnPair, db, (int)client.getId());
-        client.UpdateTradeTickerInfo(context);
+        mainActivity.selectedClient.RefreshBalances(context);
+        mainActivity.selectedClient.UpdateTradeTickerInfo(context);
 
         orderType = "buy";
         updatePage();
@@ -102,36 +97,13 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         return tradeView;
     }
 
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.activity_main, menu);
-//        return true;
-//    }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menuRefresh:
-//                client.RefreshBalances(context);
-//                client.UpdateTradeTickerInfo(context);
-//                return true;
-//            case R.id.menuSettings:
-//                getFragmentManager().beginTransaction().replace(
-//                        R.id.content_frame, new APISettingsFragment()).commit();
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
-
     @Override
     public void onClick(View view) {
         if (view.getId() == btnPlaceOrder.getId()) {
-            String pair = ((Pair) spnPair.getSelectedItem()).getExchangePair();
+            String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
             String amount = edAmount.getText().toString();
             String price = edPrice.getText().toString();
-            client.PlaceOrder(context, pair, price, amount, orderType);
+            ((APIClient)spnClients.getSelectedItem()).PlaceOrder(context, pair, price, amount, orderType);
         }
         else if (view.getId() == btnBuy.getId()) {
             orderType = "buy";
@@ -169,7 +141,9 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     }
 
     private void updatePage() {
-        String[] pair = spnPair.getSelectedItem().toString().split("-");
+        Pair selectedPair = (Pair) spnPairs.getSelectedItem();
+        ((APIClient)spnClients.getSelectedItem()).UpdateTradeTickerInfo(context);
+        String[] pair = selectedPair.toString().split("-");
         String msg = orderType.toUpperCase() + " " + pair[1];
         btnPlaceOrder.setText(msg);
         tvHeaderLeft.setText(msg);
@@ -198,8 +172,11 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        client.UpdateTradeTickerInfo(context);
+    public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+        if (parent.getId() == spnClients.getId()) {
+            mainActivity.UpdatePairsSpinner();
+            mainActivity.fragBalanceBar.UpdateBalanceBar();
+        }
         updatePage();
     }
 

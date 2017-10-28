@@ -8,24 +8,32 @@
     tools:context="com.mattcormier.cryptonade.OrdersFragment">
 
     <TextView
-        android:id="@+id/lblOrdersOpenOrders"
+        android:id="@+id/tvOrdersHeaderLeft"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="0dp"
+        android:background="@android:color/darker_gray"
         android:padding="4dp"
         android:text="@string/openOrders"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:background="@android:color/darker_gray"
-        android:textColor="@color/white"
+        app:layout_constraintEnd_toStartOf="@+id/tvOrdersHeaderRight"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvOrdersHeaderRight"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@android:color/darker_gray"
+        android:padding="4dp"
+        android:text="eth-btc"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tvOrdersHeaderLeft"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        app:layout_constraintHorizontal_bias="0.503" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
         android:id="@+id/lvOpenOrders"
@@ -39,7 +47,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblOrdersOpenOrders"
+        app:layout_constraintTop_toBottomOf="@+id/tvOrdersHeaderRight"
         app:layout_constraintVertical_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>

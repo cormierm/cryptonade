@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity
     Spinner spnClients;
     Spinner spnPairs;
     APIClient selectedClient;
+    Pair selectedPair;
     BalanceBarFragment fragBalanceBar;
     CryptoDB db;
 
@@ -69,7 +70,6 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onCreate: init balance bar");
         // initialize balance bar
         fragBalanceBar = new BalanceBarFragment();
-        fragBalanceBar.setClient(selectedClient);
 
         Log.d(TAG, "onCreate: implementing frags");
         getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar).commit();
@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onItemSelected: selectedClient:" + selectedClient);
         if (selectedClient != null) {
             UpdatePairsSpinner();
-            fragBalanceBar.setClient(selectedClient);
             fragBalanceBar.UpdateBalanceBar();
         }
     }
@@ -183,14 +182,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void UpdatePairsSpinner() {
-        List<Pair> pairsList = db.getPairs((int)selectedClient.getId());
+        List<Pair> pairsList = db.getPairs((int)((APIClient)spnClients.getSelectedItem()).getId());
         try {
             ArrayAdapter<Pair> dataAdapter = new ArrayAdapter<>(this,
-                    R.layout.spinner_exchange_layout, pairsList);
-            dataAdapter.setDropDownViewResource(R.layout.spinner_exchange_layout);
+                    R.layout.spinner_pairs_layout, pairsList);
+            dataAdapter.setDropDownViewResource(R.layout.spinner_pairs_layout);
             spnPairs.setAdapter(dataAdapter);
         } catch (Exception ex) {
             Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
         }
+        selectedPair = (Pair)spnPairs.getSelectedItem();
     }
 }

@@ -164,7 +164,7 @@ public class QuadrigacxClient implements APIClient {
         try {
             TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
             TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs)).getSelectedItem().toString().split("-");
+            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem().toString().split("-");
             String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
             String pair;
             if (orderType.equals("buy")) {
@@ -280,7 +280,7 @@ public class QuadrigacxClient implements APIClient {
                 String orderStartingAmount = "undef";
                 String orderRemainingAmount = jsonOrder.getString("amount");
                 String orderDate = jsonOrder.getString("datetime");
-                OpenOrder order = new OpenOrder(orderNumber, "not set", orderType,
+                OpenOrder order = new OpenOrder(orderNumber, "not set", orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -329,7 +329,7 @@ public class QuadrigacxClient implements APIClient {
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnTradeCurrencyPairs);
+        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
         String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
 
         try {
@@ -377,7 +377,6 @@ public class QuadrigacxClient implements APIClient {
     }
 
     public void UpdateOpenOrders(Context c) {
-
         Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
         String endpointUri = "/open_orders";
         HashMap<String, String> params = new HashMap<>();

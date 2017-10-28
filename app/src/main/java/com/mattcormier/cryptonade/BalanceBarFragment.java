@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
@@ -20,12 +21,14 @@ public class BalanceBarFragment extends Fragment {
     private static final String TAG = "BalanceBarFragment";
     TextView tvBalances;
     View balanceView;
+    Spinner spnClients;
     APIClient client;
     Context context;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        spnClients = (Spinner)((MainActivity)getActivity()).findViewById(R.id.spnClients);
         balanceView = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
         tvBalances = balanceView.findViewById(R.id.tvBalanceBar);
@@ -43,6 +46,7 @@ public class BalanceBarFragment extends Fragment {
     }
 
     public void UpdateBalanceBar() {
+        client = (APIClient)spnClients.getSelectedItem();
         if (client != null) {
             Log.d(TAG, "UpdateBalanceBar: client: " + client);
             client.UpdateBalanceBar(context);
@@ -52,7 +56,4 @@ public class BalanceBarFragment extends Fragment {
         }
     }
 
-    public void setClient(APIClient client) {
-        this.client = client;
-    }
 }

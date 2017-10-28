@@ -62,7 +62,6 @@ public class OpenOrdersAdapter extends ArrayAdapter {
         final OpenOrder currentOrder = openOrders.get(position);
 
         viewHolder.tvliOpenOrdersId.setText(currentOrder.getOrderNumber());
-        viewHolder.tvliOpenOrdersPair.setText(currentOrder.getTradePair());
         viewHolder.tvliOpenOrdersType.setText(currentOrder.getType());
         viewHolder.tvliOpenOrdersAmount.setText(currentOrder.getRemainingAmount());
         viewHolder.tvliOpenOrdersRate.setText(currentOrder.getRate());
@@ -81,7 +80,6 @@ public class OpenOrdersAdapter extends ArrayAdapter {
 
     private class ViewHolder {
         final TextView tvliOpenOrdersId;
-        final TextView tvliOpenOrdersPair;
         final TextView tvliOpenOrdersType;
         final TextView tvliOpenOrdersAmount;
         final TextView tvliOpenOrdersRate;
@@ -90,7 +88,6 @@ public class OpenOrdersAdapter extends ArrayAdapter {
 
         ViewHolder(View v) {
             this.tvliOpenOrdersId = (TextView) v.findViewById(R.id.tvliOpenOrdersId);
-            this.tvliOpenOrdersPair = (TextView) v.findViewById(R.id.tvLiOpenOrdersPair);
             this.tvliOpenOrdersType = (TextView) v.findViewById(R.id.tvliOpenOrdersType);
             this.tvliOpenOrdersAmount = (TextView) v.findViewById(R.id.tvliOpenOrdersAmount);
             this.tvliOpenOrdersRate = (TextView) v.findViewById(R.id.tvLiOpenOrdersRate);

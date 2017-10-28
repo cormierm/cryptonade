@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -17,29 +18,49 @@ import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 
-public class TickerFragment extends Fragment {
+public class TickerFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "TickerFragment";
     ListView lvTickers;
     CryptoDB db;
     APIClient client;
     View tickerView;
     Context context;
+    long cachedClientId;
+    Spinner spnClients;
+    MainActivity mainActivity;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        mainActivity = (MainActivity)getActivity();
+        spnClients = (Spinner)mainActivity.findViewById(R.id.spnClients);
+        spnClients.setOnItemSelectedListener(this);
         tickerView = inflater.inflate(R.layout.ticker_layout, container, false);
         context = getActivity();
         lvTickers = (ListView) tickerView.findViewById(R.id.lvTickerList);
 
         db = new CryptoDB(context);
-//        Exchange ex = db.getExchange(5);
-//        client = new PoloniexClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret());
-//        exchange = new QuadrigacxClient((int)ex.getId(), ex.getName(), ex.getAPIKey(), ex.getAPISecret(), ex.getAPIOther());
-        client = (APIClient) ((Spinner)getActivity().findViewById(R.id.spnClients)).getSelectedItem();
+        client = (APIClient) spnClients.getSelectedItem();
 
         client.UpdateTickerActivity(context);
         return tickerView;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        client = (APIClient)spnClients.getSelectedItem();
+        if (client.getId() != cachedClientId) {
+            lvTickers.invalidateViews();
+            client.UpdateTickerActivity(context);
+            cachedClientId = client.getId();
+            mainActivity.fragBalanceBar.UpdateBalanceBar();
+        }
+        mainActivity.UpdatePairsSpinner();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
 //    @Override
