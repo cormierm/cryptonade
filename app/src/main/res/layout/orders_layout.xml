@@ -7,47 +7,128 @@
     android:orientation="vertical"
     tools:context="com.mattcormier.cryptonade.OrdersFragment">
 
-    <TextView
-        android:id="@+id/tvOrdersHeaderLeft"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
-        android:padding="4dp"
-        android:text="@string/openOrders"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/tvOrdersHeaderRight"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvOrdersHeaderRight"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:background="@android:color/darker_gray"
-        android:padding="4dp"
-        android:text="eth-btc"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/tvOrdersHeaderLeft"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ListView
-        android:id="@+id/lvOpenOrders"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/llOpenOrders"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/llOrderTransactions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:id="@+id/llOpenOrdersHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvOrdersHeaderLeft"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/darker_gray"
+                android:padding="4dp"
+                android:text="@string/openOrders"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/tvOrdersHeaderRight"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvOrdersHeaderRight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_weight="1"
+                android:background="@android:color/darker_gray"
+                android:padding="4dp"
+                android:text="eth-btc"
+                android:textAlignment="textEnd"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/tvOrdersHeaderLeft"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/lvOpenOrders"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llOpenOrdersHeader" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/llOrderTransactions"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvOrdersHeaderRight"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llOpenOrders"
+        app:layout_constraintVertical_bias="0.441">
+
+        <LinearLayout
+            android:id="@+id/llOrdertransactionsHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvOrdertransactionsHeaderLeft"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/darker_gray"
+                android:padding="4dp"
+                android:text="@string/order_transactions"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/tvOrdertransactionsHeaderRight"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvOrdertransactionsHeaderRight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_weight="1"
+                android:background="@android:color/darker_gray"
+                android:padding="4dp"
+                android:text="eth-btc"
+                android:textAlignment="textEnd"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/tvOrdertransactionsHeaderLeft"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/lvOrdertransactions"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llOrdertransactionsHeader" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

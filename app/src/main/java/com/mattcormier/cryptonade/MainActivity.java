@@ -137,28 +137,28 @@ public class MainActivity extends AppCompatActivity
         android.app.FragmentManager fragmentManager = getFragmentManager();
         if (id == R.id.nav_trade) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TradeFragment())
+                    .replace(R.id.content_frame, new TradeFragment(), "trade")
                     .addToBackStack("trade")
                     .commit();
         } else if (id == R.id.nav_orders) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new OrdersFragment())
+                    .replace(R.id.content_frame, new OrdersFragment(), "orders")
                     .addToBackStack("orders")
                     .commit();
         } else if (id == R.id.nav_ticker) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TickerFragment())
+                    .replace(R.id.content_frame, new TickerFragment(), "ticker")
                     .addToBackStack("ticker")
                     .commit();
         } else if (id == R.id.nav_pairs) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new PairsFragment())
+                    .replace(R.id.content_frame, new PairsFragment(), "pairs")
                     .addToBackStack("pairs")
                     .commit();
         } else if (id == R.id.nav_api_settings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
-                    .addToBackStack("api_settings")
+                    .replace(R.id.content_frame, new APIFragment(), "api")
+                    .addToBackStack("api")
                     .commit();
         }
 

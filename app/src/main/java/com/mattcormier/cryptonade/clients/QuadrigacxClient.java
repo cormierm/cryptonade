@@ -16,12 +16,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.OrdersFragment;
 import com.mattcormier.cryptonade.R;
+import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
+import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
+import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Pair;
 import com.mattcormier.cryptonade.models.Ticker;
 
@@ -122,9 +126,6 @@ public class QuadrigacxClient implements APIClient {
                         if (cmd.equals("updateBalances")) {
                             processUpdateBalances(response, c);
                         }
-                        else if (cmd.equals("refreshBalances")) {
-                            processRefreshBalances(response, c);
-                        }
                         else if (cmd.equals("placeOrder")) {
                             processPlacedOrder(response, c);
                         }
@@ -133,6 +134,9 @@ public class QuadrigacxClient implements APIClient {
                         }
                         else if (cmd.equals("updateOpenOrders")) {
                             processUpdateOpenOrders(response, c);
+                        }
+                        else if (cmd.equals("updateOrderTransactions")) {
+                            processUpdateOrderTransactions(response, c);
                         }
                     }
                 },
@@ -162,6 +166,53 @@ public class QuadrigacxClient implements APIClient {
         queue.add(stringRequest);
     }
 
+    private void processUpdateOrderTransactions(String response, Context c) {
+        Log.d(TAG, "processUpdateOrderTransactions: response: " + response);
+        ListView lvOrderTransactions = ((Activity) c).findViewById(R.id.lvOrdertransactions);
+        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
+        String[] pair = ((Pair) spnPairs.getSelectedItem()).getTradingPair().split("-");
+        try {
+            ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
+            JSONArray jsonArray = new JSONArray(response);
+            for (int i=0; i < jsonArray.length(); i++) {
+                JSONObject json = jsonArray.getJSONObject(i);
+                int orderType = json.getInt("type");
+                if (orderType == 2) {
+                    String orderNumber = json.getString("id");
+                    String timestamp = json.getString("datetime");
+                    String type;
+                    if (json.getDouble(pair[0].toLowerCase()) > 0) {
+                        type = "Sell";
+                    } else {
+                        type = "Buy";
+                    }
+                    String rate = json.getString("rate");
+                    String amount = json.getString(pair[1].toLowerCase());
+                    if (amount.charAt(0) == '-') {
+                        amount = amount.substring(1);
+                    }
+                    String fee = json.getString("fee");
+                    OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
+                            amount, rate, fee);
+                    orderTransactionsList.add(order);
+                }
+            }
+            OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
+            lvOrderTransactions.setAdapter(orderTransactionsAdapter);
+        } catch (JSONException e) {
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(response);
+            } catch (JSONException e1) {
+                Log.d(TAG, "processUpdateOrderTransactions: "+ e1.getMessage());
+            }
+            if (jsonObject != null && jsonObject.has("error")) {
+                processAPIJSONError(jsonObject,  c);
+                return;
+            }
+            Log.d(TAG, "Error in processUpdateOrderTransactions: " + e.toString());
+        }
+    }
 
     private void processUpdateBalances(String response, Context c) {
         try {
@@ -188,39 +239,6 @@ public class QuadrigacxClient implements APIClient {
             this.availableBalances = availableBalances;
         } catch (JSONException e) {
             Log.d(TAG, "processUpdateBalances: JSONException: " + e.getMessage());
-        }
-    }
-
-    private static void processRefreshBalances(String response, Context c) {
-        try {
-            TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
-            TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem().toString().split("-");
-            String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
-            String pair;
-            if (orderType.equals("buy")) {
-                pair = pairs[0];
-            } else {
-                pair = pairs[1];
-            }
-            JSONObject data = new JSONObject(response);
-            Iterator<?> keys = data.keys();
-            String output = "";
-            String headerValue = "0";
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                String[] splitKey = key.split("_");
-                String value = data.get(key).toString();
-                if (splitKey.length > 1 && splitKey[1].equals("balance") && Float.parseFloat(value) > 0) {
-                    if (splitKey[0].toUpperCase().equals(pair)) {
-                        headerValue = value;
-                    }
-                    output += splitKey[0].toUpperCase() + ": " + value + "        ";
-                }
-            }
-            tvHeaderRight.setText(headerValue + " " + pair + " Available");
-        } catch (Exception ex) {
-            Log.d(TAG, "Error in processRequestBalances.");
         }
     }
 
@@ -370,6 +388,7 @@ public class QuadrigacxClient implements APIClient {
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
+        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
     }
 
     public void UpdateBalances(Context c) {
@@ -377,16 +396,19 @@ public class QuadrigacxClient implements APIClient {
         privateRequest(null, c, endpointUri, "updateBalances");
     }
 
+    public void UpdateOrderTransactions(Context c) {
+        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
+        String endpointUri = "/user_transactions";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("book", selectedPair.getExchangePair());
+        privateRequest(params, c, endpointUri, "updateOrderTransactions");
+    }
+
     public void RestorePairsInDB(Context c) {
         String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
         params.put("book", "all");
         publicRequest(params, c, endpointUri, "restorePairsInDB");
-    }
-
-    public void RefreshBalances(Context c) {
-        String endpointUri = "/balance";
-        privateRequest(null, c, endpointUri, "refreshBalances");
     }
 
     public void CancelOrder(Context c, String orderNumber) {

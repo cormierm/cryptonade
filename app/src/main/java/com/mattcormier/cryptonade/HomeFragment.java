@@ -45,31 +45,31 @@ public class HomeFragment extends Fragment implements OnClickListener {
         FragmentManager fragmentManager = getFragmentManager();
         if (v.getId() == R.id.btnHomeTrade) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TradeFragment())
+                    .replace(R.id.content_frame, new TradeFragment(), "trade")
                     .addToBackStack("trade")
                     .commit();
         }
         else if (v.getId() == R.id.btnHomeTicker) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TickerFragment())
+                    .replace(R.id.content_frame, new TickerFragment(), "ticker")
                     .addToBackStack("ticker")
                     .commit();
         }
         else if (v.getId() == R.id.btnHomeTradingPairs) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new PairsFragment())
+                    .replace(R.id.content_frame, new PairsFragment(), "pairs")
                     .addToBackStack("pairs")
                     .commit();
         }
         else if (v.getId() == R.id.btnHomeOrders) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new OrdersFragment())
+                    .replace(R.id.content_frame, new OrdersFragment(), "orders")
                     .addToBackStack("orders")
                     .commit();
         }
         else if (v.getId() == R.id.btnHomeApiSettings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
+                    .replace(R.id.content_frame, new APIFragment(), "api")
                     .addToBackStack("trade")
                     .commit();
         }

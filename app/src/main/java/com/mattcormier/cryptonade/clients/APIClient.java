@@ -14,11 +14,11 @@ public interface APIClient {
 
     void RestorePairsInDB(Context c);
 
-    void RefreshBalances(Context c);
-
     void CancelOrder(Context c, String orderNumber);
 
     void UpdateOpenOrders(Context c);
+
+    void UpdateOrderTransactions(Context c);
 
     void UpdateTickerActivity(Context c);
 

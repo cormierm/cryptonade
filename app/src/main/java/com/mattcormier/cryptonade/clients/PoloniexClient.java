@@ -33,7 +33,10 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.TradeFragment;
+import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.models.Exchange;
+import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Ticker;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -121,9 +124,6 @@ public class PoloniexClient implements APIClient {
                         if (cmd.equals("updateBalances")) {
                             processUpdateBalances(response, c);
                         }
-                        else if (cmd.equals("refreshBalances")) {
-                            processRefreshBalances(response, c);
-                        }
                         else if (cmd.equals("placeOrder")) {
                             processPlacedOrder(response, c);
                         }
@@ -132,6 +132,9 @@ public class PoloniexClient implements APIClient {
                         }
                         else if (cmd.equals("updateOpenOrders")) {
                             processUpdateOpenOrders(response, c);
+                        }
+                        else if (cmd.equals("updateOrderTransactions")) {
+                            processUpdateOrderTransactions(response, c);
                         }
                     }
                 },
@@ -163,6 +166,45 @@ public class PoloniexClient implements APIClient {
         queue.add(stringRequest);
     }
 
+    private void processUpdateOrderTransactions(String response, Context c) {
+        Log.d(TAG, "processUpdateOrderTransactions: response: " + response);
+        ListView lvOrderTransactions = ((Activity) c).findViewById(R.id.lvOrdertransactions);
+        try {
+            ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
+            JSONArray jsonArray = new JSONArray(response);
+
+            for (int i=0; i < jsonArray.length(); i++){
+                JSONObject json = jsonArray.getJSONObject(i);
+                String orderNumber = json.getString("orderNumber");
+                String timestamp = json.getString("date");
+                String type = json.getString("type");
+                String amount = json.getString("amount");
+                String rate = json.getString("rate");
+                String fee = json.getString("fee");
+                OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
+                        amount, rate, fee);
+                Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
+                orderTransactionsList.add(order);
+            }
+
+            OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
+            lvOrderTransactions.setAdapter(orderTransactionsAdapter);
+
+        } catch (JSONException e) {
+            try {
+                JSONObject json = new JSONObject(response);
+                if (json.has("error")) {
+                    Toast.makeText(c, json.getString("error"), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "processUpdateOrderTransactions: " + json.getString("error"));
+                } else {
+                    Log.d(TAG, "Error in processUpdateOrderTransactions: " + e.toString());
+                }
+            } catch (JSONException e1) {
+                Log.d(TAG, "Error in processUpdateOrderTransactions: " + e1.toString());
+            }
+        }
+    }
+
     private void processUpdateBalances(String response, Context c) {
         Log.d(TAG, "processUpdateBalances: response: " + response);
         HashMap<String, Double> availableBalances = new HashMap<>();
@@ -190,38 +232,6 @@ public class PoloniexClient implements APIClient {
             this.balances = balances;
         } catch (JSONException e) {
             Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
-        }
-    }
-
-    private static void processRefreshBalances(String response, Context c) {
-        try {
-            TextView tvHeaderRight = ((Activity) c).findViewById(R.id.tvTradeHeaderRight);
-            TextView tvHeaderLeft = ((Activity) c).findViewById(R.id.tvTradeHeaderLeft);
-            String[] pairs = ((Spinner) ((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem().toString().split("-");
-            String orderType = tvHeaderLeft.getText().toString().split(" ")[0].toLowerCase();
-            String pair;
-            if (orderType.equals("buy")) {
-                pair = pairs[0];
-            } else {
-                pair = pairs[1];
-            }
-            JSONObject data = new JSONObject(response);
-            Iterator<?> keys = data.keys();
-            String output = "";
-            String headerValue = "0";
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                String value = (String) data.get(key);
-                if (!value.equals("0.00000000")) {
-                    if (key.equals(pair)) {
-                        headerValue = value;
-                    }
-                    output += key + ":" + value + "        ";
-                }
-            }
-            tvHeaderRight.setText(headerValue + " " + pair + " Available");
-        } catch (Exception ex) {
-            Log.d(TAG, "Error in processRequestBalances.");
         }
     }
 
@@ -285,7 +295,7 @@ public class PoloniexClient implements APIClient {
         UpdateOpenOrders(c);
     }
 
-    private static void processUpdateOpenOrders(String response, Context c) {
+    private void processUpdateOpenOrders(String response, Context c) {
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
             ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
@@ -377,18 +387,13 @@ public class PoloniexClient implements APIClient {
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
+        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
     }
 
     public void RestorePairsInDB(Context c) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
         publicRequest(params, c, "restorePairsInDB");
-    }
-
-    public void RefreshBalances(Context c) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnBalances");
-        privateRequest(params, c, "refreshBalances");
     }
 
     public void UpdateBalances(Context c) {
@@ -411,6 +416,14 @@ public class PoloniexClient implements APIClient {
         params.put("command", "returnOpenOrders");
         params.put("currencyPair", selectedPair.getExchangePair());
         privateRequest(params, c, "updateOpenOrders");
+    }
+
+    public void UpdateOrderTransactions(Context c) {
+        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("command", "returnTradeHistory");
+        params.put("currencyPair", selectedPair.getExchangePair());
+        privateRequest(params, c, "updateOrderTransactions");
     }
 
     public void UpdateTickerActivity(Context c) {
@@ -477,10 +490,6 @@ public class PoloniexClient implements APIClient {
 
     public long getTypeId() {
         return typeId;
-    }
-
-    public void setTypeId(long typeId) {
-        this.typeId = typeId;
     }
 
     public String getName() {

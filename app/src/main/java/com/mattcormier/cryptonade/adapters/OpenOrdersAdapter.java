@@ -63,6 +63,11 @@ public class OpenOrdersAdapter extends ArrayAdapter {
 
         viewHolder.tvliOpenOrdersId.setText(currentOrder.getOrderNumber());
         viewHolder.tvliOpenOrdersType.setText(currentOrder.getType());
+        if (currentOrder.getType().equalsIgnoreCase("sell")) {
+            viewHolder.tvliOpenOrdersType.setTextColor(parent.getResources().getColor(R.color.red));
+        } else {
+            viewHolder.tvliOpenOrdersType.setTextColor(parent.getResources().getColor(R.color.green));
+        }
         viewHolder.tvliOpenOrdersAmount.setText(currentOrder.getRemainingAmount());
         viewHolder.tvliOpenOrdersRate.setText(currentOrder.getRate());
         viewHolder.tvliOpenOrdersTimestamp.setText(currentOrder.getDate());

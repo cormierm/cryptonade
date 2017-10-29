@@ -21,6 +21,11 @@ import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Pair;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+
 public class TradeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, TextView.OnEditorActionListener {
     private static final String TAG = "TradeFragment";
     TextView tvHeaderLeft;
@@ -88,7 +93,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         edAmount.setOnEditorActionListener(this);
         edPrice.setOnEditorActionListener(this);
 
-        mainActivity.selectedClient.RefreshBalances(context);
         mainActivity.selectedClient.UpdateTradeTickerInfo(context);
 
         orderType = "buy";
@@ -119,9 +123,9 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
                 float available = Float.parseFloat(tvHeaderRight.getText().toString().split(" ")[0]);
                 if (available > 0) {
                     if(orderType.equals("buy")) {
-                        edAmount.setText(Float.toString(available / price));
+                        edAmount.setText(String.format("%.8f", (available / price)));
                     } else {
-                        edAmount.setText(Float.toString(available));
+                        edAmount.setText(String.format("%.8f", (available)));
                     }
                 }
             } catch (Exception ex) {
@@ -141,38 +145,26 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     }
 
     private void updatePage() {
+        Log.d(TAG, "updatePage: start");
         Pair selectedPair = (Pair) spnPairs.getSelectedItem();
         ((APIClient)spnClients.getSelectedItem()).UpdateTradeTickerInfo(context);
         String[] pair = selectedPair.toString().split("-");
-        String msg = orderType.toUpperCase() + " " + pair[1];
-        btnPlaceOrder.setText(msg);
-        tvHeaderLeft.setText(msg);
+        String leftHeaderText = orderType.toUpperCase() + " " + pair[1];
+        btnPlaceOrder.setText(leftHeaderText);
+        tvHeaderLeft.setText(leftHeaderText);
         if (orderType.equals("buy")) {
             btnPlaceOrder.setBackgroundResource(R.color.green);
-            updateAvailable(pair[0]);
         }
         else {
             btnPlaceOrder.setBackgroundResource(R.color.red);
-            updateAvailable(pair[1]);
         }
-    }
-
-    private void updateAvailable(String pair) {
-        TextView tvBalances = (TextView) mainActivity.findViewById(R.id.tvBalanceBar);
-        String[] balances = tvBalances.getText().toString().split("        ");
-        String available = "0";
-        for (String bal: balances) {
-            String[] b = bal.split(":");
-            if (b[0].equals(pair)) {
-                available = b[1];
-                break;
-            }
-        }
-        tvHeaderRight.setText(available + " " + pair + " Available");
+        updateAvailableInfo();
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+        edAmount.setText("");
+        edTotal.setText("");
         if (parent.getId() == spnClients.getId()) {
             mainActivity.UpdatePairsSpinner();
             ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
@@ -181,9 +173,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
-    }
+    public void onNothingSelected(AdapterView<?> adapterView) {}
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -202,5 +192,31 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             edTotal.setText(total);
         }
         return false;
+    }
+
+    public void updateAvailableInfo() {
+        Log.d(TAG, "updateAvailableInfo: start");
+        HashMap<String, Double> availableBalances = ((APIClient)spnClients.getSelectedItem()).getAvailableBalances();
+        if (availableBalances != null) {
+            String headerValue = "0";
+            String[] pairs = spnPairs.getSelectedItem().toString().split("-");
+            String pair;
+            if (orderType.equals("buy")) {
+                pair = pairs[0];
+            } else {
+                pair = pairs[1];
+            }
+            for (Map.Entry<String, Double> bal: availableBalances.entrySet()) {
+                Double balAmount = bal.getValue();
+                if (balAmount > 0 && bal.getKey().equals(pair)) {
+                    headerValue = String.format("%.8f", balAmount);
+                }
+            }
+            tvHeaderRight.setText(headerValue + " " + pair + " Available");
+        }
+        else {
+            tvHeaderRight.setText("");
+        }
+
     }
 }

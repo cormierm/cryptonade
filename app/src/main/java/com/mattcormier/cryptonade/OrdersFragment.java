@@ -27,9 +27,11 @@ import org.w3c.dom.Text;
 public class OrdersFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "OrdersFragment";
     ListView lvOpenOrders;
+    ListView lvOrderTransactions;
     Spinner spnPairs;
     Spinner spnClients;
     TextView tvRightHeader;
+    TextView tvOrderTransactionsRightHeader;
 
     MainActivity mainActivity;
     View ordersView;
@@ -46,6 +48,7 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
         ordersView = inflater.inflate(R.layout.orders_layout, container, false);
 
         tvRightHeader = ordersView.findViewById(R.id.tvOrdersHeaderRight);
+        tvOrderTransactionsRightHeader = ordersView.findViewById(R.id.tvOrdertransactionsHeaderRight);
         spnPairs = (Spinner) mainActivity.findViewById(R.id.spnPairs);
         spnPairs.setOnItemSelectedListener(this);
         spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
@@ -53,6 +56,7 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
         context = getActivity();
         lvOpenOrders = (ListView) ordersView.findViewById(R.id.lvOpenOrders);
+        lvOrderTransactions = (ListView) ordersView.findViewById(R.id.lvOrdertransactions);
 
         UpdateOrdersFrag();
         return ordersView;
@@ -61,13 +65,17 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
     public void UpdateOrdersFrag() {
         Log.d(TAG, "UpdateOrdersFrag: ");
         tvRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
-
-        ((APIClient)spnClients.getSelectedItem()).UpdateOpenOrders(context);
+        tvOrderTransactionsRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
+        APIClient client = (APIClient) spnClients.getSelectedItem();
+        client.UpdateOpenOrders(context);
+        client.UpdateOrderTransactions(context);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         lvOpenOrders.invalidateViews();
+        lvOrderTransactions.invalidateViews();
+
         if (parent.getId() == spnClients.getId()) {
             mainActivity.UpdatePairsSpinner();
             ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);

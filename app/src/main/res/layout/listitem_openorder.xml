@@ -11,7 +11,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="4dp"
         android:text="1.00000000"
         android:textStyle="bold"
         app:layout_constraintHorizontal_bias="0.75"
@@ -49,12 +48,13 @@
         android:id="@+id/tvliOpenOrdersTimestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:text="October 10, 2017 11:00AM"
         android:textAllCaps="false"
         android:textSize="10sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvliOpenOrdersType" />
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/lblLiOpenOrdersTimestamp"
+        app:layout_constraintTop_toTopOf="@+id/lblLiOpenOrdersTimestamp" />
 
     <ImageView
         android:id="@+id/ivLiOpenOrdersCancel"
@@ -112,9 +112,9 @@
         android:id="@+id/tvliOpenOrdersId"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="2dp"
         android:text="asdfuiysd78fasd768f6asd78sdf678"
         android:textSize="10sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/lblLiOpenOrdersId"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -128,7 +128,18 @@
         android:layout_marginLeft="8dp"
         android:text="@string/lbl_id"
         android:textSize="10sp"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvliOpenOrdersTimestamp" />
+
+    <TextView
+        android:id="@+id/lblLiOpenOrdersTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Created:"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvliOpenOrdersType" />
 
 </android.support.constraint.ConstraintLayout>

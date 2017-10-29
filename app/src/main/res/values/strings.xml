@@ -55,4 +55,10 @@
     <string name="update">Update</string>
     <string name="restore_pairs_list_from_exchange">Restore Pairs List From Exchange</string>
     <string name="refresh_balances">Refresh Balances</string>
+    <string name="order_transactions">Order Transactions</string>
+    <string name="timestamp">Timestamp</string>
+    <string name="rate">Rate</string>
+    <string name="fee">Fee</string>
+    <string name="type">Type</string>
+    <string name="order_id">Order Id</string>
 </resources>

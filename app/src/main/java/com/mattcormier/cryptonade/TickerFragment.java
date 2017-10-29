@@ -25,35 +25,36 @@ public class TickerFragment extends Fragment implements AdapterView.OnItemSelect
     APIClient client;
     View tickerView;
     Context context;
-    long cachedClientId;
+    long currentClientId;
     Spinner spnClients;
     MainActivity mainActivity;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        mainActivity = (MainActivity)getActivity();
-        spnClients = (Spinner)mainActivity.findViewById(R.id.spnClients);
+        mainActivity = (MainActivity) getActivity();
+        spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
         spnClients.setOnItemSelectedListener(this);
         tickerView = inflater.inflate(R.layout.ticker_layout, container, false);
         context = getActivity();
         lvTickers = (ListView) tickerView.findViewById(R.id.lvTickerList);
 
         db = new CryptoDB(context);
-        client = (APIClient) spnClients.getSelectedItem();
 
+        client = (APIClient) spnClients.getSelectedItem();
         client.UpdateTickerActivity(context);
+
         return tickerView;
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        client = (APIClient)spnClients.getSelectedItem();
-        if (client.getId() != cachedClientId) {
+        client = (APIClient) spnClients.getSelectedItem();
+        if (client.getId() != currentClientId) {
             lvTickers.invalidateViews();
             client.UpdateTickerActivity(context);
-            cachedClientId = client.getId();
-            ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
+            currentClientId = client.getId();
+            ((APIClient) spnClients.getSelectedItem()).UpdateBalances(context);
         }
         mainActivity.UpdatePairsSpinner();
     }
@@ -62,19 +63,4 @@ public class TickerFragment extends Fragment implements AdapterView.OnItemSelect
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menuRefresh:
-//                client.UpdateTickerActivity(context);
-//                return true;
-//            case R.id.menuSettings:
-//                getFragmentManager().beginTransaction().replace(
-//                        R.id.content_frame, new APISettingsFragment()).commit();
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
 }
