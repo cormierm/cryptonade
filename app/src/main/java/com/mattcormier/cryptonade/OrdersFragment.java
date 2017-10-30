@@ -3,9 +3,12 @@ package com.mattcormier.cryptonade;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +16,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
-import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.models.Exchange;
-import com.mattcormier.cryptonade.clients.QuadrigacxClient;
-import com.mattcormier.cryptonade.models.Pair;
 
-import org.w3c.dom.Text;
+import java.util.Timer;
 
 public class OrdersFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "OrdersFragment";
@@ -58,15 +55,17 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
         lvOpenOrders = (ListView) ordersView.findViewById(R.id.lvOpenOrders);
         lvOrderTransactions = (ListView) ordersView.findViewById(R.id.lvOrdertransactions);
 
-        UpdateOrdersFrag();
+        setHasOptionsMenu(true);
+
+        updateOrdersFrag();
         return ordersView;
     }
 
-    public void UpdateOrdersFrag() {
-        Log.d(TAG, "UpdateOrdersFrag: ");
+    public void updateOrdersFrag() {
+        Log.d(TAG, "updateOrdersFrag: ");
         tvRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
         tvOrderTransactionsRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
-        APIClient client = (APIClient) spnClients.getSelectedItem();
+        final APIClient client = (APIClient) spnClients.getSelectedItem();
         client.UpdateOpenOrders(context);
         client.UpdateOrderTransactions(context);
     }
@@ -80,11 +79,23 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
             mainActivity.UpdatePairsSpinner();
             ((APIClient)spnClients.getSelectedItem()).UpdateBalances(context);
         }
-        UpdateOrdersFrag();
+        updateOrdersFrag();
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_menu, menu);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuRefresh) {
+            updateOrdersFrag();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {}
 }

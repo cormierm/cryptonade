@@ -1,5 +1,6 @@
 package com.mattcormier.cryptonade;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,18 +25,21 @@ import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
     private static final String TAG = "MainActivity";
+    public ArrayList<APIClient> apiClientArrayList;
     Spinner spnClients;
     Spinner spnPairs;
     APIClient selectedClient;
     Pair selectedPair;
     BalanceBarFragment fragBalanceBar;
     CryptoDB db;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity
         spnPairs = (Spinner) findViewById(R.id.spnPairs);
 
         db = new CryptoDB(this);
+        sharedPreferences = getSharedPreferences("main", MODE_PRIVATE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -72,7 +77,7 @@ public class MainActivity extends AppCompatActivity
         fragBalanceBar = new BalanceBarFragment();
 
         Log.d(TAG, "onCreate: implementing frags");
-        getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar).commit();
+        getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar, "balance_bar").commit();
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
     }
 
@@ -82,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         for (Exchange e: exchangeList) {
             clientList.add(Crypto.getAPIClient(e));
         }
-
+        apiClientArrayList = clientList;
         try {
             ArrayAdapter<APIClient> dataAdapter = new ArrayAdapter<>(this,
                     R.layout.spinner_exchange_layout, clientList);
@@ -91,6 +96,24 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception ex) {
             Log.d(TAG, "onCreate: " + ex.getMessage());
         }
+    }
+
+    @Override
+    protected void onPause() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("clientSpinnerPosition", spnClients.getSelectedItemPosition());
+        editor.putInt("pairsSpinnerPosition", spnPairs.getSelectedItemPosition());
+        editor.commit();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UpdateClientSpinner();
+        spnClients.setSelection(sharedPreferences.getInt("clientSpinnerPosition", 0));
+        UpdatePairsSpinner();
+        spnPairs.setSelection(sharedPreferences.getInt("pairsSpinnerPosition", 0));
     }
 
     @Override
@@ -145,6 +168,11 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.content_frame, new OrdersFragment(), "orders")
                     .addToBackStack("orders")
                     .commit();
+        } else if (id == R.id.nav_balances) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, new BalancesFragment(), "balances")
+                    .addToBackStack("balances")
+                    .commit();
         } else if (id == R.id.nav_ticker) {
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new TickerFragment(), "ticker")
@@ -178,17 +206,29 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) {}
 
     public void UpdatePairsSpinner() {
         List<Pair> pairsList = db.getPairs((int)((APIClient)spnClients.getSelectedItem()).getId());
+        Pair tmpPair = (Pair)spnPairs.getSelectedItem();
+        String currentPair = "";
+        if (tmpPair != null) {
+            currentPair = tmpPair.getTradingPair();
+        }
         try {
             ArrayAdapter<Pair> dataAdapter = new ArrayAdapter<>(this,
                     R.layout.spinner_pairs_layout, pairsList);
             dataAdapter.setDropDownViewResource(R.layout.spinner_pairs_layout);
             spnPairs.setAdapter(dataAdapter);
+
+            // set pair to current pair of previous client
+            for(int i=0; i < dataAdapter.getCount(); i++) {
+                String tradePair = ((Pair)spnPairs.getItemAtPosition(i)).getTradingPair();
+                if (tradePair.equalsIgnoreCase(currentPair)) {
+                    spnPairs.setSelection(i);
+                    break;
+                }
+            }
         } catch (Exception ex) {
             Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
         }

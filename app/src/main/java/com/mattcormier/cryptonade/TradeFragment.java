@@ -7,6 +7,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -98,7 +101,23 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         orderType = "buy";
         updatePage();
 
+        setHasOptionsMenu(true);
+
         return tradeView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuRefresh) {
+            updatePage();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -181,10 +200,10 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
                 actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_NONE){
             String amount = edAmount.getText().toString();
             String price = edPrice.getText().toString();
-            String total = "0";
+            String total = "";
             if (!amount.isEmpty() && !price.isEmpty()) {
                 try {
-                    total = Float.toString(Float.parseFloat(amount) * Float.parseFloat(price));
+                    total = String.format("%.8f", (Float.parseFloat(amount) * Float.parseFloat(price)));
                 } catch (Exception ex) {
                     Log.d(TAG, "onEditorAction: " + ex.getMessage());
                 }

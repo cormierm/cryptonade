@@ -11,6 +11,10 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="Orders" />
         <item
+            android:id="@+id/nav_balances"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Balances" />
+        <item
             android:id="@+id/nav_ticker"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Ticker" />
@@ -24,7 +28,7 @@
         <menu>
             <item
                 android:id="@+id/nav_api_settings"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_menu_manage"
                 android:title="@string/api_settings" />
         </menu>
     </item>

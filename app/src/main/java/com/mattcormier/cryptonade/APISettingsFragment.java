@@ -76,7 +76,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
         }
 
         if (exchangeId == 0) {
-            edProfileName.setText("API Name");
+            edProfileName.setText(spnType.getSelectedItem().toString());
             edAPIKey.setText("");
             edAPISecret.setText("");
             edAPIOther.setText("");
@@ -154,6 +154,9 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (exchangeId == 0) {
+            edProfileName.setText(spnType.getSelectedItem().toString());
+        }
         setAPIOtherVisibility();
     }
 

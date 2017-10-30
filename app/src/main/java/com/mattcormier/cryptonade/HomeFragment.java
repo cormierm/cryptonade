@@ -18,6 +18,7 @@ public class HomeFragment extends Fragment implements OnClickListener {
     Button btnHomeApiSettings;
     Button btnHomeTrade;
     Button btnHomeOrders;
+    Button btnHomeBalances;
     Button btnHomeTicker;
     View homeView;
 
@@ -29,12 +30,14 @@ public class HomeFragment extends Fragment implements OnClickListener {
         btnHomeTrade = (Button) homeView.findViewById(R.id.btnHomeTrade);
         btnHomeTradingPairs = (Button) homeView.findViewById(R.id.btnHomeTradingPairs);
         btnHomeOrders = (Button) homeView.findViewById(R.id.btnHomeOrders);
+        btnHomeBalances = (Button) homeView.findViewById(R.id.btnHomeBalances);
         btnHomeTicker = (Button) homeView.findViewById(R.id.btnHomeTicker);
         btnHomeApiSettings = (Button) homeView.findViewById(R.id.btnHomeApiSettings);
         btnHomeTrade.setOnClickListener(this);
         btnHomeTradingPairs.setOnClickListener(this);
         btnHomeApiSettings.setOnClickListener(this);
         btnHomeOrders.setOnClickListener(this);
+        btnHomeBalances.setOnClickListener(this);
         btnHomeTicker.setOnClickListener(this);
 
         return homeView;
@@ -53,6 +56,12 @@ public class HomeFragment extends Fragment implements OnClickListener {
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new TickerFragment(), "ticker")
                     .addToBackStack("ticker")
+                    .commit();
+        }
+        else if (v.getId() == R.id.btnHomeBalances) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, new BalancesFragment(), "balances")
+                    .addToBackStack("balances")
                     .commit();
         }
         else if (v.getId() == R.id.btnHomeTradingPairs) {

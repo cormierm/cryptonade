@@ -36,9 +36,5 @@ public interface APIClient {
 
     public HashMap<String, Double> getBalances();
 
-    public void setBalances(HashMap<String, Double> balances);
-
     public HashMap<String, Double> getAvailableBalances();
-
-    public void setAvailableBalances(HashMap<String, Double> availableBalances);
 }

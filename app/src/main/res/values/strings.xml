@@ -60,5 +60,7 @@
     <string name="rate">Rate</string>
     <string name="fee">Fee</string>
     <string name="type">Type</string>
+    <string name="invalid_api_msg">Invalid API key/secret.</string>
     <string name="order_id">Order Id</string>
+    <string name="balances">Balances</string>
 </resources>

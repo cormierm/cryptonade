@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.BalanceBarFragment;
 import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.OrdersFragment;
 import com.mattcormier.cryptonade.R;
@@ -203,12 +204,20 @@ public class QuadrigacxClient implements APIClient {
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(response);
+                if (jsonObject != null && jsonObject.has("error")) {
+                    JSONObject jsonError = jsonObject.getJSONObject("error");
+                    if (jsonError.getInt("code") == 12) {
+                        Toast.makeText(c, "Invalid API key/secret pair.", Toast.LENGTH_LONG).show();
+                    }
+                    else if (jsonError.getInt("code") == 104) {
+                        UpdateOrderTransactions(c);
+                    }
+                    else {
+                        Toast.makeText(c, jsonError.getString("message"), Toast.LENGTH_LONG).show();
+                    }
+                }
             } catch (JSONException e1) {
                 Log.d(TAG, "processUpdateOrderTransactions: "+ e1.getMessage());
-            }
-            if (jsonObject != null && jsonObject.has("error")) {
-                processAPIJSONError(jsonObject,  c);
-                return;
             }
             Log.d(TAG, "Error in processUpdateOrderTransactions: " + e.toString());
         }
@@ -220,9 +229,17 @@ public class QuadrigacxClient implements APIClient {
             HashMap<String, Double> availableBalances = new HashMap<>();
 
             JSONObject jsonObject = new JSONObject(response);
-            if (jsonObject.has("error")) {
-                processAPIJSONError(jsonObject,  c);
-                return;
+            if (jsonObject != null && jsonObject.has("error")) {
+                JSONObject jsonError = jsonObject.getJSONObject("error");
+                if (jsonError.getInt("code") == 12) {
+                    Toast.makeText(c, c.getResources().getString(R.string.invalid_api_msg), Toast.LENGTH_LONG).show();
+                }
+                else if (jsonError.getInt("code") == 104) {
+                    UpdateBalances(c);
+                }
+                else {
+                    Toast.makeText(c, jsonError.getString("message"), Toast.LENGTH_LONG).show();
+                }
             }
             Iterator<?> keys = jsonObject.keys();
             while (keys.hasNext()) {
@@ -321,12 +338,20 @@ public class QuadrigacxClient implements APIClient {
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(response);
+                if (jsonObject != null && jsonObject.has("error")) {
+                    JSONObject jsonError = jsonObject.getJSONObject("error");
+                    if (jsonError.getInt("code") == 12) {
+                        Toast.makeText(c, "Invalid API key/secret pair.", Toast.LENGTH_LONG).show();
+                    }
+                    else if (jsonError.getInt("code") == 104) {
+                        UpdateOpenOrders(c);
+                    }
+                    else {
+                        Toast.makeText(c, jsonError.getString("message"), Toast.LENGTH_LONG).show();
+                    }
+                }
             } catch (JSONException e1) {
                 Log.d(TAG, "processUpdateOpenOrders: "+ e1.getMessage());
-            }
-            if (jsonObject != null && jsonObject.has("error")) {
-                processAPIJSONError(jsonObject,  c);
-                return;
             }
             Log.d(TAG, "Error in processUpdateOpenOrders: " + e.toString());
         }
@@ -468,21 +493,18 @@ public class QuadrigacxClient implements APIClient {
 
     private String createSignature(String nonce) {
         try {
-
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(this.apiSecret.getBytes("utf-8"), "HmacSHA256"));
             String msg = nonce + apiOther + apiKey;
-            Log.d(TAG, "createSignature: msg: " + msg);
             final byte[] macData = mac.doFinal(msg.getBytes("utf-8"));
             return new String(Hex.encodeHex(macData));
-
         } catch (Exception e1) {
             e1.printStackTrace();
         }
         return null;
     }
 
-    private static int generateNonce() {
+    private int generateNonce() {
         Date d = new Date();
         return (int)d.getTime();
     }
@@ -527,61 +549,21 @@ public class QuadrigacxClient implements APIClient {
         return typeId;
     }
 
-    public void setTypeId(long typeId) {
-        this.typeId = typeId;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAPIKey() {
-        return apiKey;
-    }
-
-    public void setAPIKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public String getAPISecret() {
-        return apiSecret;
-    }
-
-    public void setAPISecret(String apiSecret) {
-        this.apiSecret = apiSecret;
-    }
-
-    public String getAPIOther() {
-        return apiOther;
-    }
-
-    public void setAPIOther(String apiOther) {
-        this.apiOther = apiOther;
-    }
-
     @Override
     public String toString() {
-        return this.name.toString();
+        return this.name;
     }
 
     public HashMap<String, Double> getBalances() {
         return balances;
     }
 
-    public void setBalances(HashMap<String, Double> balances) {
-        this.balances = balances;
-    }
-
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
-    }
-
-    public void setAvailableBalances(HashMap<String, Double> availableBalances) {
-        this.availableBalances = availableBalances;
     }
 
     private void processAPIJSONError(JSONObject json, Context c) {

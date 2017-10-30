@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="@string/ticker"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/btnHomeOrders"
+        app:layout_constraintTop_toBottomOf="@+id/btnHomeBalances"
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="8dp"
@@ -63,6 +63,18 @@
         android:text="@string/apiSettings"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/btnHomeTradingPairs"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <Button
+        android:id="@+id/btnHomeBalances"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/balances"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/btnHomeOrders"
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="8dp"

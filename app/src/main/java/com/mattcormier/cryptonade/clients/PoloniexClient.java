@@ -496,44 +496,16 @@ public class PoloniexClient implements APIClient {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAPIKey() {
-        return apiKey;
-    }
-
-    public void setAPIKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public String getAPISecret() {
-        return apiSecret;
-    }
-
-    public void setAPISecret(String apiSecret) {
-        this.apiSecret = apiSecret;
-    }
-
     @Override
     public String toString() {
-        return this.name.toString();
+        return this.name;
     }
 
     public HashMap<String, Double> getBalances() {
         return balances;
     }
 
-    public void setBalances(HashMap<String, Double> balances) {
-        this.balances = balances;
-    }
-
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
-    }
-
-    public void setAvailableBalances(HashMap<String, Double> availableBalances) {
-        this.availableBalances = availableBalances;
     }
 }
