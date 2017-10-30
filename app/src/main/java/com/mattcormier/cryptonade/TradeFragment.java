@@ -125,7 +125,13 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         if (view.getId() == btnPlaceOrder.getId()) {
             String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
             String amount = edAmount.getText().toString();
+            if (amount.charAt(0) == '.') {
+                amount = "0" + amount;
+            }
             String price = edPrice.getText().toString();
+            if (price.charAt(0) == '.') {
+                price = "0" + price;
+            }
             ((APIClient)spnClients.getSelectedItem()).PlaceOrder(context, pair, price, amount, orderType);
         }
         else if (view.getId() == btnBuy.getId()) {

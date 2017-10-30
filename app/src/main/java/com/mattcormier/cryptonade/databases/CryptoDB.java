@@ -21,7 +21,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 5;
+    public static final int     DB_VERSION = 6;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -112,17 +112,18 @@ public class CryptoDB {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.d(TAG, "onCreate: starting.");
-            db.execSQL(CREATE_EXCHANGE_TABLE);
+            // db.execSQL(CREATE_EXCHANGE_TABLE);
             db.execSQL(CREATE_PAIR_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
 
             // insert sample exchange
-            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
+            // db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
             // insert sample pair
             db.execSQL("INSERT INTO pair VALUES (1, 1, 'btc-eth', 'btc-eth')");
 
             db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
             db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
+            db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
             Log.d(TAG, "onCreate: done.");
         }
 

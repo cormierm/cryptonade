@@ -6,12 +6,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.clients.BitfinexClient;
 import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +40,16 @@ public class Crypto {
         else if (exchange.getTypeId() == 2) {
             return new QuadrigacxClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret(), exchange.getAPIOther());
         }
+        else if (exchange.getTypeId() == 3) {
+            return new BitfinexClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret());
+        }
         return null;
     }
 
+    public static String formatDate(String dateString) {
+        long longDate = (long)Double.parseDouble(dateString) * 1000;
+        Date dateTime = new Date(longDate);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("y-MM-dd HH:mm:ss");
+        return dateFormat.format(dateTime);
+    }
 }

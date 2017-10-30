@@ -63,4 +63,5 @@
     <string name="invalid_api_msg">Invalid API key/secret.</string>
     <string name="order_id">Order Id</string>
     <string name="balances">Balances</string>
+    <string name="order_successfully_cancelled">Order successfully cancelled.</string>
 </resources>
