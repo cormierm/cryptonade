@@ -70,9 +70,9 @@ public class BitfinexClient implements APIClient {
         this.apiSecret = apiSecret;
     }
 
-    private void publicRequest(HashMap<String, String> params, String endpoint, final Context c, final String cmd) {
+    private void publicRequest(String endpoint, final Context c, final String cmd) {
         Log.d(TAG, "publicRequest: " + cmd);
-        String url = baseUrl + endpoint + createBody(params);
+        String url = baseUrl + endpoint;
         RequestQueue queue = Volley.newRequestQueue(c);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -208,6 +208,7 @@ public class BitfinexClient implements APIClient {
         } catch (JSONException e) {
             Log.d(TAG, "processUpdateOrderTransactions: "  + e.getMessage());
         }
+        UpdateOpenOrders(c);
     }
 
     private void processUpdateBalances(String response, Context c) {
@@ -392,7 +393,7 @@ public class BitfinexClient implements APIClient {
 
     public void RestorePairsInDB(Context c) {
         String endpoint = "/symbols";
-        publicRequest(null, endpoint, c, "restorePairsInDB");
+        publicRequest(endpoint, c, "restorePairsInDB");
     }
 
     public void UpdateBalances(Context c) {
@@ -430,14 +431,12 @@ public class BitfinexClient implements APIClient {
         }
     }
 
-    public void UpdateOrderTransactions(Context c) {
-        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
-
+    public void UpdateOrderTransactions(Context c, String pair) {
         String endpoint = "/mytrades";
         JSONObject jsonPayload = new JSONObject();
         try {
             jsonPayload.put("request", "/v1/mytrades");
-            jsonPayload.put("symbol", selectedPair.getExchangePair());
+            jsonPayload.put("symbol", pair);
             jsonPayload.put("timestamp", 0);
             privateRequest(jsonPayload, endpoint, c, "updateOrderTransactions");
         } catch (JSONException e) {
@@ -446,15 +445,12 @@ public class BitfinexClient implements APIClient {
     }
 
     public void UpdateTickerActivity(Context c) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
-        // publicRequest(params, c, "updateTickerActivity");
+        Toast.makeText(c, "Ticker is not supported by Bitfinex at this time.", Toast.LENGTH_LONG).show();
     }
 
-    public void UpdateTradeTickerInfo(Context c) {
-        String symbol = ((Pair)((Spinner)((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem()).getExchangePair();
-        String endpoint = "/pubticker" + "/" + symbol;
-        publicRequest(null, endpoint, c, "updateTradeTickerInfo");
+    public void UpdateTradeTickerInfo(Context c, String pair) {
+        String endpoint = "/pubticker" + "/" + pair;
+        publicRequest(endpoint, c, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

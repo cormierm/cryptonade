@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.Timer;
 
@@ -63,11 +64,11 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
     public void updateOrdersFrag() {
         Log.d(TAG, "updateOrdersFrag: ");
-        tvRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
+        Pair pair = (Pair)((Spinner)spnPairs).getSelectedItem();
+        tvRightHeader.setText(pair.toString());
         tvOrderTransactionsRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
-        final APIClient client = (APIClient) spnClients.getSelectedItem();
-        client.UpdateOpenOrders(context);
-        client.UpdateOrderTransactions(context);
+        APIClient client = (APIClient) spnClients.getSelectedItem();
+        client.UpdateOrderTransactions(context, pair.getExchangePair());
     }
 
     @Override

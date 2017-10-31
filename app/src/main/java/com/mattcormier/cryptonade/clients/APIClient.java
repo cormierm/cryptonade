@@ -18,11 +18,11 @@ public interface APIClient {
 
     void UpdateOpenOrders(Context c);
 
-    void UpdateOrderTransactions(Context c);
+    void UpdateOrderTransactions(Context c, String pair);
 
     void UpdateTickerActivity(Context c);
 
-    void UpdateTradeTickerInfo(Context c);
+    void UpdateTradeTickerInfo(Context c, String pair);
 
     void PlaceOrder(Context c, String pair, String rate, String amount, String orderType);
 

@@ -204,13 +204,10 @@ public class QuadrigacxClient implements APIClient {
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(response);
-                if (jsonObject != null && jsonObject.has("error")) {
+                if (jsonObject.has("error")) {
                     JSONObject jsonError = jsonObject.getJSONObject("error");
                     if (jsonError.getInt("code") == 12) {
                         Toast.makeText(c, "Invalid API key/secret pair.", Toast.LENGTH_LONG).show();
-                    }
-                    else if (jsonError.getInt("code") == 104) {
-                        UpdateOrderTransactions(c);
                     }
                     else {
                         Toast.makeText(c, jsonError.getString("message"), Toast.LENGTH_LONG).show();
@@ -221,6 +218,7 @@ public class QuadrigacxClient implements APIClient {
             }
             Log.d(TAG, "Error in processUpdateOrderTransactions: " + e.toString());
         }
+        UpdateOpenOrders(c);
     }
 
     private void processUpdateBalances(String response, Context c) {
@@ -389,29 +387,20 @@ public class QuadrigacxClient implements APIClient {
     }
 
     private static void processUpdateTradeTickerInfo(String response, Context c) {
+        Log.d(TAG, "processUpdateTradeTickerInfo: " + response);
         TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
-        String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
 
         try {
-            JSONObject data = new JSONObject(response);
-            Iterator<String> keys = data.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (key.equals(pair)) {
-                    JSONObject tickerInfo = data.getJSONObject(key);
-                    tvLast.setText(tickerInfo.getString("last"));
-                    tvHighest.setText(tickerInfo.getString("bid"));
-                    tvLowest.setText(tickerInfo.getString("ask"));
-                    edPrice.setText(tickerInfo.getString("last"));
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
+            JSONObject json = new JSONObject(response);
+            tvLast.setText(json.getString("last"));
+            tvHighest.setText(json.getString("bid"));
+            tvLowest.setText(json.getString("ask"));
+            edPrice.setText(json.getString("last"));
+        } catch (JSONException ex) {
+            Log.d(TAG, "Error in processTradingPairs: JSONException: " + ex.toString());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
     }
@@ -421,11 +410,10 @@ public class QuadrigacxClient implements APIClient {
         privateRequest(null, c, endpointUri, "updateBalances");
     }
 
-    public void UpdateOrderTransactions(Context c) {
-        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
+    public void UpdateOrderTransactions(Context c, String pair) {
         String endpointUri = "/user_transactions";
         HashMap<String, String> params = new HashMap<>();
-        params.put("book", selectedPair.getExchangePair());
+        params.put("book", pair);
         privateRequest(params, c, endpointUri, "updateOrderTransactions");
     }
 
@@ -459,10 +447,10 @@ public class QuadrigacxClient implements APIClient {
         publicRequest(params, c, endpointUri, "updateTickerActivity");
     }
 
-    public void UpdateTradeTickerInfo(Context c) {
+    public void UpdateTradeTickerInfo(Context c, String pair) {
         String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
-        params.put("book", "all");
+        params.put("book", pair);
         publicRequest(params, c, endpointUri, "updateTradeTickerInfo");
     }
 

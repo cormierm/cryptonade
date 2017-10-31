@@ -64,4 +64,5 @@
     <string name="order_id">Order Id</string>
     <string name="balances">Balances</string>
     <string name="order_successfully_cancelled">Order successfully cancelled.</string>
+    <string name="order_successfully_placed">Trade placed successfully.\nOrder number:</string>
 </resources>

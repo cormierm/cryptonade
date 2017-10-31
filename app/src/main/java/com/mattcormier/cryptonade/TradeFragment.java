@@ -96,8 +96,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         edAmount.setOnEditorActionListener(this);
         edPrice.setOnEditorActionListener(this);
 
-        mainActivity.selectedClient.UpdateTradeTickerInfo(context);
-
         orderType = "buy";
         updatePage();
 
@@ -172,7 +170,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     private void updatePage() {
         Log.d(TAG, "updatePage: start");
         Pair selectedPair = (Pair) spnPairs.getSelectedItem();
-        ((APIClient)spnClients.getSelectedItem()).UpdateTradeTickerInfo(context);
+        ((APIClient)spnClients.getSelectedItem()).UpdateTradeTickerInfo(context, selectedPair.getExchangePair());
         String[] pair = selectedPair.toString().split("-");
         String leftHeaderText = orderType.toUpperCase() + " " + pair[1];
         btnPlaceOrder.setText(leftHeaderText);

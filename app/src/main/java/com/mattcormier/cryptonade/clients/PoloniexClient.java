@@ -189,6 +189,7 @@ public class PoloniexClient implements APIClient {
 
             OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
             lvOrderTransactions.setAdapter(orderTransactionsAdapter);
+            UpdateOpenOrders(c);
 
         } catch (JSONException e) {
             try {
@@ -418,11 +419,10 @@ public class PoloniexClient implements APIClient {
         privateRequest(params, c, "updateOpenOrders");
     }
 
-    public void UpdateOrderTransactions(Context c) {
-        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
+    public void UpdateOrderTransactions(Context c, String pair) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTradeHistory");
-        params.put("currencyPair", selectedPair.getExchangePair());
+        params.put("currencyPair", pair);
         privateRequest(params, c, "updateOrderTransactions");
     }
 
@@ -432,7 +432,7 @@ public class PoloniexClient implements APIClient {
         publicRequest(params, c, "updateTickerActivity");
     }
 
-    public void UpdateTradeTickerInfo(Context c) {
+    public void UpdateTradeTickerInfo(Context c, String pair) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
         publicRequest(params, c, "updateTradeTickerInfo");

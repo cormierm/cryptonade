@@ -7,6 +7,7 @@ import android.widget.Spinner;
 
 import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.clients.BitfinexClient;
+import com.mattcormier.cryptonade.clients.BittrexClient;
 import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
@@ -42,6 +43,9 @@ public class Crypto {
         }
         else if (exchange.getTypeId() == 3) {
             return new BitfinexClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret());
+        }
+        else if (exchange.getTypeId() == 4) {
+            return new BittrexClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret());
         }
         return null;
     }

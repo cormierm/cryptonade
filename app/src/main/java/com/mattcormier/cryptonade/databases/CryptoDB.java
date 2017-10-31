@@ -21,7 +21,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 6;
+    public static final int     DB_VERSION = 8;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -112,18 +112,19 @@ public class CryptoDB {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.d(TAG, "onCreate: starting.");
-            // db.execSQL(CREATE_EXCHANGE_TABLE);
+            db.execSQL(CREATE_EXCHANGE_TABLE);
             db.execSQL(CREATE_PAIR_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
 
-            // insert sample exchange
-            // db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
+            //insert sample exchange
+            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
             // insert sample pair
-            db.execSQL("INSERT INTO pair VALUES (1, 1, 'btc-eth', 'btc-eth')");
+            db.execSQL("INSERT INTO pair VALUES (1, 1, 'BTC-ETH', 'BTC-ETH')");
 
             db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
             db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
             db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
+            db.execSQL("INSERT INTO type VALUES (4, 'Bittrex', '')");
             Log.d(TAG, "onCreate: done.");
         }
 
@@ -132,10 +133,16 @@ public class CryptoDB {
             Log.d(TAG, "onUpgrade: starting.");
             Log.d("Crypto DB", "Upgrading db from version "
                     + oldVersion + " to " + newVersion);
-            // db.execSQL(CryptoDB.DROP_EXCHANGE_TABLE);
-            db.execSQL(CryptoDB.DROP_PAIR_TABLE);
+
             db.execSQL(CryptoDB.DROP_TYPE_TABLE);
-            onCreate(db);
+
+            db.execSQL(CREATE_TYPE_TABLE);
+
+            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
+            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
+            db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
+            db.execSQL("INSERT INTO type VALUES (4, 'Bittrex', '')");
+
             Log.d(TAG, "onUpgrade: done.");
         }
     }
