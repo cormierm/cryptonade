@@ -101,7 +101,6 @@ public class QuadrigacxClient implements APIClient {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, "publicRequest.onErrorResponse: " + error.getMessage());
-                        Toast.makeText(c, "Currency update failed.", Toast.LENGTH_LONG).show();
                     }
                 }
         );

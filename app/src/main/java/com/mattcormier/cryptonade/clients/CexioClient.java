@@ -22,6 +22,7 @@ import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.OpenOrder;
 import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Pair;
@@ -33,7 +34,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,22 +43,24 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class BittrexClient implements APIClient {
-    private static final String TAG = "BittrexClient";
-    private static long typeId = 4;
+public class CexioClient implements APIClient {
+    private static final String TAG = "CexioClient";
+    private static long typeId = 5;
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
     private String name;
     private String apiKey;
     private String apiSecret;
-    private static String baseUrl = "https://bittrex.com/api/v1.1";
+    private String apiUsername;
+    private static String baseUrl = "https://cex.io/api";
 
-    public BittrexClient(int exchangeId, String name, String apiKey, String apiSecret) {
+    public CexioClient(int exchangeId, String name, String apiKey, String apiSecret, String apiUsername) {
         this.exchangeId = exchangeId;
         this.name = name;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
+        this.apiUsername = apiUsername;
     }
 
     private void publicRequest(String endpoint, HashMap<String, String> params, final Context c, final String cmd) {
@@ -89,27 +91,35 @@ public class BittrexClient implements APIClient {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "publicRequest.onErrorResponse: " + error.getMessage());
+                        Log.d(TAG, "publicRequest.onErrorResponse: " + error.getMessage());
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e(TAG, "onErrorResponse: " + jsonError);
+                        }
                     }
                 }
         );
-        // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
 
     private void privateRequest(String endpoint, HashMap<String, String> params, final Context c, final String cmd) {
         Log.d(TAG, "privateRequest: " + cmd);
+        String url = baseUrl + endpoint;
+        Log.d(TAG, "privateRequest: url: " +url);
         final String nonce = Long.toString(generateNonce());
+
+        String msg = nonce + this.apiUsername + this.apiKey;
+        final String signature = createSignature(msg).toUpperCase();
 
         if (params == null) {
             params = new HashMap<>();
         }
-        params.put("apikey", this.apiKey);
+        params.put("key", this.apiKey);
         params.put("nonce", nonce);
-        String requestParams = createBody(params);
-        String url = baseUrl + endpoint + "?" + requestParams;
+        params.put("signature", signature);
 
-        final String signature = createSignature(url);
+        final String body = createBody(params);
 
         RequestQueue queue = Volley.newRequestQueue(c);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -146,31 +156,31 @@ public class BittrexClient implements APIClient {
                     }
                 }
         ) {
-//            @Override
-//            public byte[] getBody() throws AuthFailureError {
-//                try {
-//                    return body == null ? null : body.getBytes("utf-8");
-//                } catch (UnsupportedEncodingException uee) {
-//                    Log.d("BalanceRequest", "Unsupported Encoding while trying to get the bytes of " + body + "using utf-8");
-//                    return null;
-//                }
-//            }
-
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("apisign", signature);
-                return headers;
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    return body == null ? null : body.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    Log.d("BalanceRequest", "Unsupported Encoding while trying to get the bytes of " + body + "using utf-8");
+                    return null;
+                }
             }
+
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> headers = new HashMap<>();
+//                headers.put("apisign", signature);
+//                return headers;
+//            }
         };
         queue.add(stringRequest);
     }
 
-    private String createSignature(String url) {
+    private String createSignature(String msg) {
         try {
-            Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(new SecretKeySpec(this.apiSecret.getBytes("utf-8"), "HmacSHA512"));
-            final byte[] macData = mac.doFinal(url.getBytes("utf-8"));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(this.apiSecret.getBytes("utf-8"), "HmacSHA256"));
+            final byte[] macData = mac.doFinal(msg.getBytes("utf-8"));
             return new String(Hex.encodeHex(macData));
         } catch (Exception e1) {
             e1.printStackTrace();
@@ -201,37 +211,25 @@ public class BittrexClient implements APIClient {
         Log.d(TAG, "processUpdateOrderTransactions: response: " + response);
         ListView lvOrderTransactions = ((Activity) c).findViewById(R.id.lvOrdertransactions);
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            if (jsonResponse.getBoolean("success")) {
-                ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
-                JSONArray jsonResult = jsonResponse.getJSONArray("result");
-                for (int i=0; i < jsonResult.length(); i++){
-                    JSONObject json = jsonResult.getJSONObject(i);
-                    String orderNumber = json.getString("OrderUuid");
-                    String timestamp = json.getString("TimeStamp");
-                    String type = json.getString("OrderType");
-                    if (type.equalsIgnoreCase("LIMIT_SELL")) {
-                        type = "Sell";
-                    } else if (type.equalsIgnoreCase("LIMIT_BUY")) {
-                        type = "Buy";
-                    }
-                    String amount = String.format("%.8f", json.getDouble("Quantity"));
-                    String rate = String.format("%.8f", json.getDouble("Price"));
-                    String fee = String.format("%.8f", json.getDouble("Commission"));
-                    OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
-                            amount, rate, fee);
-                    Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
-                    orderTransactionsList.add(order);
-                }
-
-                OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
-                lvOrderTransactions.setAdapter(orderTransactionsAdapter);
-                UpdateOpenOrders(c);
-            } else {
-                String jsonMsg = jsonResponse.getString("message");
-                Toast.makeText(c, jsonMsg, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "processUpdateOrderTransactions: " + jsonMsg);
+            ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
+            JSONArray jsonResult = new JSONArray(response);
+            for (int i=0; i < jsonResult.length(); i++){
+                JSONObject json = jsonResult.getJSONObject(i);
+                String orderNumber = json.getString("id");
+                String timestamp = json.getString("time");
+                String type = json.getString("type");
+                String amount = json.getString("amount");
+                String rate = json.getString("price");
+                String fee = "";
+                OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
+                        amount, rate, fee);
+                Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
+                orderTransactionsList.add(order);
             }
+
+            OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
+            lvOrderTransactions.setAdapter(orderTransactionsAdapter);
+            UpdateOpenOrders(c);
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateOrderTransactions: JSONException Error: " + e.getMessage());
         } catch (Exception e) {
@@ -244,22 +242,38 @@ public class BittrexClient implements APIClient {
         HashMap<String, Double> availableBalances = new HashMap<>();
         HashMap<String, Double> balances = new HashMap<>();
         try {
-            JSONObject jsonObject = new JSONObject(response);
-            JSONArray jsonArray = jsonObject.getJSONArray("result");
-            for(int i=0; i < jsonArray.length(); i++) {
-                JSONObject jsonBalances = jsonArray.getJSONObject(i);
-                String currency = jsonBalances.getString("Currency");
-                Double available = jsonBalances.getDouble("Available");
-                Double amount = jsonBalances.getDouble("Balance");
-                if (amount > 0) {
+            JSONObject jsonResponse = new JSONObject(response);
+            Iterator<String> keys = jsonResponse.keys();
+            while(keys.hasNext()) {
+                String key = keys.next();
+                if (key.equals("timestamp") || key.equals("username")) {
+                    continue;
+                }
+                JSONObject jsonBalance = jsonResponse.getJSONObject(key);
+                String currency = key;
+                Double available = Double.parseDouble(jsonBalance.getString("available"));
+                Double balance;
+                if (jsonBalance.has("orders")) {
+                    Double onOrders = Double.parseDouble(jsonBalance.getString("orders"));
+                    if (onOrders > 0) {
+                        balance = available + onOrders;
+                    } else {
+                        balance = available;
+                    }
+                } else {
+                    balance = available;
+                }
+                if (balance > 0) {
                     availableBalances.put(currency, available);
-                    balances.put(currency, amount);
+                    balances.put(currency, balance);
                 }
             }
             this.availableBalances = availableBalances;
             this.balances = balances;
         } catch (JSONException e) {
-            Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
+            Log.e(TAG, "processUpdateBalances: JSONException: " + e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "processUpdateBalances: " + e.getMessage());
         }
     }
 
@@ -268,12 +282,19 @@ public class BittrexClient implements APIClient {
         db.deletePairsByExchangeId(exchangeId);
         try {
             ArrayList<Pair> pairsList = new ArrayList<>();
-            JSONObject jsonObject = new JSONObject(response);
-            JSONArray jsonArray = jsonObject.getJSONArray("result");
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONObject jsonData = jsonResponse.getJSONObject("data");
+            JSONArray jsonArray = jsonData.getJSONArray("pairs");
             for(int i=0; i < jsonArray.length(); i++) {
                 JSONObject json = jsonArray.optJSONObject(i);
-                String tradingPair = json.getString("MarketName");
-                Pair pair = new Pair(0, (int)exchangeId, tradingPair, tradingPair);
+                String tradingPair;
+                if (json.getString("symbol2").equalsIgnoreCase("btc")) {
+                    tradingPair = json.getString("symbol2") + "-" + json.getString("symbol1");
+                } else {
+                    tradingPair = json.getString("symbol1") + "-" + json.getString("symbol2");
+                }
+                String exchangePair = json.getString("symbol1") + "/" + json.getString("symbol2");;
+                Pair pair = new Pair(0, (int)exchangeId, exchangePair, tradingPair);
                 pairsList.add(pair);
             }
             db.insertPairs(pairsList);
@@ -283,16 +304,16 @@ public class BittrexClient implements APIClient {
     }
 
     private void processPlacedOrder(String response, Context c) {
-        JSONObject jsonObject;
+        Log.d(TAG, "processPlacedOrder: response");
+        JSONObject jsonResponse;
         try {
-            jsonObject = new JSONObject(response);
-            if (jsonObject.getBoolean("success")) {
-                JSONObject jsonResult = jsonObject.getJSONObject("result");
+            jsonResponse = new JSONObject(response);
+            if (jsonResponse.has("id")) {
                 Toast.makeText(c, c.getResources().getString(R.string.order_successfully_placed) +
-                        jsonResult.getString("uuid"), Toast.LENGTH_LONG).show();
+                        jsonResponse.getString("id"), Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(c, jsonObject.getString("message"), Toast.LENGTH_LONG).show();
+                Toast.makeText(c, jsonResponse.getString("message"), Toast.LENGTH_LONG).show();
             }
         } catch (JSONException e) {
             Toast.makeText(c, "Unknown Error happened!", Toast.LENGTH_LONG).show();
@@ -301,22 +322,12 @@ public class BittrexClient implements APIClient {
     }
 
     private void processCancelOrder(String response, Context c) {
-        Log.d(TAG, "processCancelOrder: ");
-        JSONObject jsonResp;
-        try {
-            jsonResp = new JSONObject(response);
-            if (jsonResp.getBoolean("success")) {
-                Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled),
-                        Toast.LENGTH_LONG).show();
-            } else {
-                String jsonMsg = jsonResp.getString("message");
-                Toast.makeText(c, jsonMsg, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "processCancelOrder: " + jsonMsg);
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "processCancelOrder: JSONException Error: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "processCancelOrder: Exception: " + e.getMessage());
+        Log.d(TAG, "processCancelOrder: response" + response);
+        if (response.equals("true")) {
+            Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(c, "Error: " + response, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "processCancelOrder: Unknown response:" + response);
         }
         UpdateOpenOrders(c);
     }
@@ -325,35 +336,24 @@ public class BittrexClient implements APIClient {
         Log.d(TAG, "processUpdateOpenOrders: ");
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            if (jsonResponse.getBoolean("success")) {
-                JSONArray jsonResult = jsonResponse.getJSONArray("result");
-                ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
-                for (int i=0; i < jsonResult.length(); i++){
-                    JSONObject json = jsonResult.getJSONObject(i);
-                    String orderNumber = json.getString("OrderUuid");
-                    String orderPair = json.getString("Exchange");
-                    String orderType = json.getString("OrderType");
-                    if (orderType.equalsIgnoreCase("LIMIT_SELL")) {
-                        orderType = "Sell";
-                    } else if (orderType.equalsIgnoreCase("LIMIT_BUY")) {
-                        orderType = "Buy";
-                    }
-                    String orderRate = String.format("%.8f", json.getDouble("Limit"));
-                    String orderStartingAmount = String.format("%.8f", json.getDouble("Quantity"));
-                    String orderRemainingAmount = String.format("%.8f", json.getDouble("QuantityRemaining"));
-                    String orderDate = json.getString("Opened");
-                    OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
-                            orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
-                    openOrdersList.add(order);
-                }
-                OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
-                lvOpenOrders.setAdapter(openOrdersAdapter);
-            } else {
-                String jsonMsg = jsonResponse.getString("message");
-                Toast.makeText(c, jsonMsg, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "processUpdateOpenOrders: " + jsonMsg);
+            JSONArray jsonResult = new JSONArray(response);
+            ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
+            for (int i=0; i < jsonResult.length(); i++){
+                JSONObject json = jsonResult.getJSONObject(i);
+                String orderNumber = json.getString("id");
+                String orderPair = "";
+                String orderType = json.getString("type");
+                String orderRate = json.getString("price");
+                String orderStartingAmount = json.getString("amount");
+                String orderRemainingAmount = json.getString("pending");
+                String orderDate = Crypto.formatDate(Long.toString(Long.parseLong(json.getString("time"))/1000));
+                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                        orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
+                openOrdersList.add(order);
             }
+            OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
+            lvOpenOrders.setAdapter(openOrdersAdapter);
+
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateOpenOrders: JSONException Error: " + e.getMessage());
         } catch (Exception e) {
@@ -362,33 +362,40 @@ public class BittrexClient implements APIClient {
     }
 
     private static void processUpdateTickerActivity(String response, Context c) {
-        Log.d(TAG, "processUpdateTickerActivity: ");
+        Log.d(TAG, "processUpdateTickerActivity: " + response);
         ListView lvTickerList = ((Activity) c).findViewById(R.id.lvTickerList);
         try {
             JSONObject jsonResponse = new JSONObject(response);
-            if (jsonResponse.getBoolean("success")) {
-                JSONArray jsonResult = jsonResponse.getJSONArray("result");
-                ArrayList<Ticker> tickerList = new ArrayList<>();
-                for (int i=0; i < jsonResult.length(); i++) {
-                    JSONObject json = jsonResult.getJSONObject(i);
-                    String tickerPair = json.getString("MarketName");
-                    String last = String.format("%.8f", json.getDouble("Last"));
-                    String volume = String.format("%.2f", json.getDouble("Volume"));
-                    String lowestAsk = String.format("%.8f", json.getDouble("Ask"));
-                    String lowest24hr = String.format("%.8f", json.getDouble("Low"));
-                    String highestBid = String.format("%.8f", json.getDouble("Bid"));
-                    String highest24hr = String.format("%.8f", json.getDouble("High"));
-                    Ticker ticker = new Ticker(tickerPair, last, volume,
-                            lowestAsk, lowest24hr, highestBid, highest24hr);
-                    tickerList.add(ticker);
+            JSONArray jsonResult = jsonResponse.getJSONArray("data");
+            ArrayList<Ticker> tickerList = new ArrayList<>();
+            for (int i=0; i < jsonResult.length(); i++) {
+                JSONObject json = jsonResult.getJSONObject(i);
+                String tickerPair = json.getString("pair");
+                String []tickerSplit = tickerPair.split(":");
+                if (tickerSplit[1].equals("BTC")) {
+                    tickerPair = tickerSplit[1] + "-" + tickerSplit[0];
+                } else {
+                    tickerPair = tickerSplit[0] + "-" + tickerSplit[1];
                 }
-                TickerAdapter tickerAdapter = new TickerAdapter(c, R.layout.listitem_ticker, tickerList);
-                lvTickerList.setAdapter(tickerAdapter);
-            } else {
-                String jsonMsg = jsonResponse.getString("message");
-                Toast.makeText(c, jsonMsg, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "processUpdateTickerActivity: " + jsonMsg);
+                String last = json.getString("last");
+                String volume = json.getString("volume");
+                String lowestAsk = "";
+                if (json.has("ask")) {
+                    lowestAsk = json.getString("ask");
+                }
+                String lowest24hr = json.getString("low");
+                String highestBid = "";
+                if (json.has("bid")) {
+                    highestBid = json.getString("bid");
+                }
+                String highest24hr = json.getString("high");
+                Ticker ticker = new Ticker(tickerPair, last, volume,
+                        lowestAsk, lowest24hr, highestBid, highest24hr);
+                tickerList.add(ticker);
             }
+            TickerAdapter tickerAdapter = new TickerAdapter(c, R.layout.listitem_ticker, tickerList);
+            lvTickerList.setAdapter(tickerAdapter);
+
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateTickerActivity: JSONException Error: " + e.getMessage());
         } catch (Exception e) {
@@ -404,84 +411,78 @@ public class BittrexClient implements APIClient {
 
         try {
             JSONObject jsonReponse = new JSONObject(response);
-            if (jsonReponse.getBoolean("success")) {
-                JSONObject jsonResult = jsonReponse.getJSONObject("result");
-                tvLast.setText(String.format("%.8f", jsonResult.getDouble("Last")));
-                tvHighest.setText(String.format("%.8f", jsonResult.getDouble("Bid")));
-                tvLowest.setText(String.format("%.8f", jsonResult.getDouble("Ask")));
-                edPrice.setText(String.format("%.8f", jsonResult.getDouble("Last")));
-            }
+            tvLast.setText(jsonReponse.getString("last"));
+            tvHighest.setText(jsonReponse.getString("high"));
+            tvLowest.setText(jsonReponse.getString("low"));
+            edPrice.setText(jsonReponse.getString("last"));
         } catch (JSONException ex) {
-            Log.d(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
+            Log.e(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
-            Log.d(TAG, "Error in processTradingPairs: Exception Error: " + ex.getMessage());
+            Log.e(TAG, "Error in processTradingPairs: Exception Error: " + ex.getMessage());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
     }
 
     public void RestorePairsInDB(Context c) {
-        String endpoint = "/public/getmarkets";
+        String endpoint = "/currency_limits";
         publicRequest(endpoint, null, c, "restorePairsInDB");
     }
 
     public void UpdateBalances(Context c) {
-        String endpoint = "/account/getbalances";
+        String endpoint = "/balance/";
         privateRequest(endpoint, null, c, "updateBalances");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
         Log.d(TAG, "CancelOrder: Order#: " + orderNumber);
-        String endpoint = "/market/cancel";
+        String endpoint = "/cancel_order/";
         HashMap<String, String> params = new HashMap<>();
-        params.put("uuid", orderNumber);
+        params.put("id", orderNumber);
         privateRequest(endpoint, params, c, "cancelOrder");
     }
 
     public void UpdateOpenOrders(Context c) {
-        String endpoint = "/market/getopenorders";
         Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
-        HashMap<String, String> params = new HashMap<>();
-        params.put("market", selectedPair.getExchangePair());
-        privateRequest(endpoint, params, c, "updateOpenOrders");
+        String endpoint = "/open_orders/" + selectedPair.getExchangePair();
+        privateRequest(endpoint, null, c, "updateOpenOrders");
     }
 
     public void UpdateOrderTransactions(Context c, String pair) {
-        String endpoint = "/account/getorderhistory";
+        String endpoint = "/archived_orders/" + pair;
         HashMap<String, String> params = new HashMap<>();
-        params.put("market", pair);
-        params.put("count", "50");
+        params.put("limit", "50");
+        params.put("status", "d");
         privateRequest(endpoint, params, c, "updateOrderTransactions");
     }
 
     public void UpdateTickerActivity(Context c) {
-        String endpoint = "/public/getmarketsummaries";
+        Log.d(TAG, "UpdateTickerActivity: ");
+        String endpoint = "/tickers/BTC/ETH/CAD/RUB/USD/DASH/ZEC/BCH/GBP/EUR";
         publicRequest(endpoint, null, c, "updateTickerActivity");
     }
 
     public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpoint = "/public/getticker?";
-        HashMap<String, String> params = new HashMap<>();
-        params.put("market", pair);
-        publicRequest(endpoint, params, c, "updateTradeTickerInfo");
+        String endpoint = "/ticker/" + pair;
+        publicRequest(endpoint, null, c, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
-        String endpoint;
-        if (orderType.equalsIgnoreCase("buy")) {
-            endpoint = "/market/buylimit";
-        } else {
-            endpoint = "/market/selllimit";
-        }
+        String endpoint = "/place_order/" + pair;
         HashMap<String, String> params = new HashMap<>();
-        params.put("market", pair);
-        params.put("rate", rate);
-        params.put("quantity", amount);
+        params.put("type", orderType);
+        params.put("amount", amount);
+        params.put("price", rate);
         privateRequest(endpoint, params, c, "placeOrder");
     }
 
     private static String createTradePair(String pair) {
-        String[] parts = pair.split("_");
-        return (parts[0] + "-" + parts[1]).toUpperCase();
+        String[] parts = pair.split("/");
+        if (parts[1].equals("BTC")) {
+            return (parts[1] + "-" + parts[0]).toUpperCase();
+        } else {
+            return (parts[0] + "-" + parts[1]).toUpperCase();
+        }
+
     }
 
     public long getId() {
