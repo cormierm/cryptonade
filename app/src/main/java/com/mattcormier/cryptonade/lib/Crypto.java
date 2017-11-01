@@ -9,6 +9,7 @@ import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.clients.BitfinexClient;
 import com.mattcormier.cryptonade.clients.BittrexClient;
 import com.mattcormier.cryptonade.clients.CexioClient;
+import com.mattcormier.cryptonade.clients.GDAXClient;
 import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
@@ -50,6 +51,9 @@ public class Crypto {
         }
         else if (exchange.getTypeId() == 5) {
             return new CexioClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret(), exchange.getAPIOther());
+        }
+        else if (exchange.getTypeId() == 6) {
+            return new GDAXClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret(), exchange.getAPIOther());
         }
         return null;
     }

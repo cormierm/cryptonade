@@ -101,7 +101,6 @@ public class BitfinexClient implements APIClient {
                     }
                 }
         );
-        // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
 
