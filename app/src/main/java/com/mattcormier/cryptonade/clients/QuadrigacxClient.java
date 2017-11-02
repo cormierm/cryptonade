@@ -245,7 +245,7 @@ public class QuadrigacxClient implements APIClient {
                 String value = jsonObject.get(key).toString();
                 if (splitKey.length > 1 && splitKey[1].equals("available") && Double.parseDouble(value) > 0) {
                     availableBalances.put(splitKey[0].toUpperCase(), Double.parseDouble(value));
-                } else if (splitKey.length > 1 && splitKey[1].equals("available") && Double.parseDouble(value) > 0) {
+                } else if (splitKey.length > 1 && splitKey[1].equals("balance") && Double.parseDouble(value) > 0) {
                     balances.put(splitKey[0].toUpperCase(), Double.parseDouble(value));
                 }
             }

@@ -63,7 +63,7 @@ public class BalancesAdapter extends ArrayAdapter {
 
         viewHolder.tvHeader.setText(currentClient.getName());
         String balanceOutput = "";
-        HashMap<String, Double> availBals = currentClient.getAvailableBalances();
+        HashMap<String, Double> availBals = currentClient.getBalances();
         if (availBals != null) {
             for(Map.Entry<String, Double> bal: availBals.entrySet()) {
                 if (balanceOutput != "") {

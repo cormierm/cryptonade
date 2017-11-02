@@ -202,7 +202,7 @@ public class GeminiClient implements APIClient {
 
     private static long generateNonce() {
         Date d = new Date();
-        return d.getTime() / 1000;
+        return d.getTime();
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -296,30 +296,41 @@ public class GeminiClient implements APIClient {
     }
 
     private void processPlacedOrder(String response, Context c) {
-        Log.d(TAG, "processPlacedOrder: response");
-        JSONObject jsonResponse;
+        JSONObject jsonResp;
         try {
-            jsonResponse = new JSONObject(response);
-            if (jsonResponse.has("id")) {
-                Toast.makeText(c, c.getResources().getString(R.string.order_successfully_placed) +
-                        jsonResponse.getString("id"), Toast.LENGTH_LONG).show();
+            jsonResp = new JSONObject(response);
+            if (jsonResp.has("id")) {
+                Toast.makeText(c, "Trade placed successfully.\nOrder number: " +
+                        jsonResp.getString("id"), Toast.LENGTH_LONG).show();
+            }
+            else if (jsonResp.has("message")) {
+                Toast.makeText(c, jsonResp.getString("message"), Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(c, jsonResponse.getString("message"), Toast.LENGTH_LONG).show();
+                Toast.makeText(c, response, Toast.LENGTH_LONG).show();
             }
         } catch (JSONException e) {
-            Toast.makeText(c, "Unknown Error happened!", Toast.LENGTH_LONG).show();
-            Log.d(TAG, "JSONException error in processPlacedOrder: " + e.toString());
+            Toast.makeText(c, "Error happened!", Toast.LENGTH_LONG).show();
+            Log.d(this.name, "JSONException error in processPlacedOrder: " + e.toString());
         }
     }
 
     private void processCancelOrder(String response, Context c) {
-        Log.d(TAG, "processCancelOrder: response" + response);
-        if (response.equals("true")) {
-            Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled), Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(c, "Error: " + response, Toast.LENGTH_LONG).show();
-            Log.e(TAG, "processCancelOrder: Unknown response:" + response);
+        JSONObject jsonResp;
+        try {
+            jsonResp = new JSONObject(response);
+            if (jsonResp.has("id")) {
+                Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled), Toast.LENGTH_LONG).show();
+            }
+            else if (jsonResp.has("message")) {
+                Toast.makeText(c, jsonResp.getString("message"), Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(c, response, Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            Toast.makeText(c, "Error happened!", Toast.LENGTH_LONG).show();
+            Log.d(this.name, "JSONException error in processPlacedOrder: " + e.toString());
         }
         UpdateOpenOrders(c);
     }
@@ -413,15 +424,13 @@ public class GeminiClient implements APIClient {
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
 
         try {
-            JSONObject jsonReponse = new JSONObject(response);
-            tvLast.setText(jsonReponse.getString("last"));
-            tvHighest.setText(jsonReponse.getString("high"));
-            tvLowest.setText(jsonReponse.getString("low"));
-            edPrice.setText(jsonReponse.getString("last"));
-        } catch (JSONException ex) {
-            Log.e(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
+            JSONObject json = new JSONObject(response);
+            tvLast.setText(json.getString("last"));
+            tvHighest.setText(json.getString("bid"));
+            tvLowest.setText(json.getString("ask"));
+            edPrice.setText(json.getString("last"));
         } catch (Exception ex) {
-            Log.e(TAG, "Error in processTradingPairs: Exception Error: " + ex.getMessage());
+            Log.e(TAG, "Error in processTradingPairs: " + ex.toString());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
     }
@@ -440,9 +449,10 @@ public class GeminiClient implements APIClient {
 
     public void CancelOrder(Context c, String orderNumber) {
         Log.d(TAG, "CancelOrder: Order#: " + orderNumber);
-        String endpoint = "/cancel_order/";
+        String endpoint = "/v1/order/cancel";
         HashMap<String, String> params = new HashMap<>();
-        params.put("id", orderNumber);
+        params.put("request", endpoint);
+        params.put("order_id", orderNumber);
         privateRequest(endpoint, params, c, "cancelOrder");
     }
 
@@ -469,16 +479,19 @@ public class GeminiClient implements APIClient {
     }
 
     public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpoint = "/ticker/" + pair;
+        String endpoint = "/v1/pubticker/" + pair;
         publicRequest(endpoint, null, c, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
-        String endpoint = "/place_order/" + pair;
+        String endpoint = "/v1/order/new";
         HashMap<String, String> params = new HashMap<>();
-        params.put("type", orderType);
+        params.put("request", endpoint);
+        params.put("symbol", pair);
         params.put("amount", amount);
         params.put("price", rate);
+        params.put("side", orderType);
+        params.put("type", "exchange limit");
         privateRequest(endpoint, params, c, "placeOrder");
     }
 
