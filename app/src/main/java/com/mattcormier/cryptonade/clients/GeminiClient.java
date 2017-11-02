@@ -44,24 +44,22 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class GDAXClient implements APIClient {
-    private static final String TAG = "GDAXClient";
-    private static long typeId = 5;
+public class GeminiClient implements APIClient {
+    private static final String TAG = "GeminiClient";
+    private static long typeId = 7;
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
     private String name;
     private String apiKey;
     private String apiSecret;
-    private String apiPassphrase;
-    private static String baseUrl = "https://api.gdax.com";
+    private static String baseUrl = "https://api.gemini.com";
 
-    public GDAXClient(int exchangeId, String name, String apiKey, String apiSecret, String apiPassphrase) {
+    public GeminiClient(int exchangeId, String name, String apiKey, String apiSecret) {
         this.exchangeId = exchangeId;
         this.name = name;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
-        this.apiPassphrase = apiPassphrase;
     }
 
     private void publicRequest(String endpoint, HashMap<String, String> params, final Context c, final String cmd) {
@@ -111,33 +109,39 @@ public class GDAXClient implements APIClient {
         queue.add(stringRequest);
     }
 
-    private void privateRequest(String endpoint, HashMap<String, String> params, String method, final Context c, final String cmd) {
+    private void privateRequest(String endpoint, HashMap<String, String> params, final Context c, final String cmd) {
         Log.d(TAG, "privateRequest: " + cmd);
         String url = baseUrl + endpoint;
-        Log.d(TAG, "privateRequest: url: " + url);
+        Log.d(TAG, "privateRequest: url: " +url);
 
-        final String timestamp = createTimestamp();
-        final String getBody = createBody(params);
-        String json = "";
-        if (params != null) {
-            json = new JSONObject(params).toString();
+        if (params == null) {
+            params = new HashMap<>();
         }
-        final String jsonBody = json;
 
-        Log.d(TAG, "privateRequest: body: " + jsonBody);
-        String msg = timestamp + method + endpoint + jsonBody;
-        final String signature = createSignature(msg);
+        final String nonce = Long.toString(generateNonce());
+        params.put("nonce", nonce);
+
+        JSONObject jsonPayload = new JSONObject(params);
+        Log.d(TAG, "privateRequest: jsonPayload: " + jsonPayload);
+
+        String b64_payload = Base64.encodeToString(jsonPayload.toString().getBytes(), Base64.DEFAULT);
+
+        String sign = "";
+        try {
+            Mac mac = Mac.getInstance("HmacSHA384");
+            mac.init(new SecretKeySpec(apiSecret.getBytes(), "HmacSHA384"));
+            byte[] macData = mac.doFinal(b64_payload.getBytes());
+            sign = new String(Hex.encodeHex(macData));
+        } catch (Exception e) {
+            Log.e(TAG, "createSignature: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        final String payload = b64_payload;
+        final String signature = sign;
 
         RequestQueue queue = Volley.newRequestQueue(c);
-
-        int requestMethedInt = Request.Method.GET;
-        if (method.equals("POST")){
-            requestMethedInt = Request.Method.POST;
-        }
-        else if (method.equals("DELETE")) {
-            requestMethedInt = Request.Method.DELETE;
-        }
-        StringRequest stringRequest = new StringRequest(requestMethedInt, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -179,23 +183,11 @@ public class GDAXClient implements APIClient {
                 }
         ) {
             @Override
-            public byte[] getBody() throws AuthFailureError {
-                try {
-                    return jsonBody == null ? null : jsonBody.getBytes("utf-8");
-                } catch (UnsupportedEncodingException uee) {
-                    Log.d("BalanceRequest", "Unsupported Encoding while trying to get the bytes of " + getBody + "using utf-8");
-                    return null;
-                }
-            }
-
-            @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("CB-ACCESS-SIGN", signature);
-                headers.put("CB-ACCESS-TIMESTAMP", timestamp);
-                headers.put("CB-ACCESS-KEY", apiKey);
-                headers.put("CB-ACCESS-PASSPHRASE", apiPassphrase);
-                headers.put("Content-Type", "Application/JSON");
+                headers.put("X-GEMINI-APIKEY", apiKey);
+                headers.put("X-GEMINI-PAYLOAD", payload);
+                headers.put("X-GEMINI-SIGNATURE", signature);
                 Log.d(TAG, "getHeaders: " + headers.toString());
                 return headers;
             }
@@ -203,22 +195,22 @@ public class GDAXClient implements APIClient {
         queue.add(stringRequest);
     }
 
-    private String createSignature(String msg) {
+    private String createSignature(String b64_payload) {
         try {
-            byte[] secretDecoded = Base64.decode(apiSecret, Base64.DEFAULT);
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secretDecoded, "HmacSHA256"));
-            final byte[] macData = mac.doFinal(msg.getBytes());
-            return Base64.encodeToString(macData, Base64.NO_WRAP);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+            Mac mac = Mac.getInstance("HmacSHA384");
+            mac.init(new SecretKeySpec(this.apiSecret.getBytes(), "HmacSHA384"));
+            final byte[] macData = mac.doFinal(b64_payload.getBytes());
+            return new String(Hex.encodeHex(macData));
+        } catch (Exception e) {
+            Log.e(TAG, "createSignature: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
-    private static String createTimestamp() {
+    private static long generateNonce() {
         Date d = new Date();
-        return Long.toString(d.getTime() / 1000);
+        return d.getTime();
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -244,11 +236,11 @@ public class GDAXClient implements APIClient {
             for (int i=0; i < jsonResult.length(); i++){
                 JSONObject json = jsonResult.getJSONObject(i);
                 String orderNumber = json.getString("id");
-                String timestamp = json.getString("done_at");
-                String type = json.getString("side");
-                String amount = json.getString("size");
+                String timestamp = json.getString("time");
+                String type = json.getString("type");
+                String amount = json.getString("amount");
                 String rate = json.getString("price");
-                String fee = json.getString("fill_fees").substring(0, json.getString("fill_fees").indexOf('.') + 9);
+                String fee = "";
                 OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
                         amount, rate, fee);
                 Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
@@ -270,12 +262,27 @@ public class GDAXClient implements APIClient {
         HashMap<String, Double> availableBalances = new HashMap<>();
         HashMap<String, Double> balances = new HashMap<>();
         try {
-            JSONArray jsonArray = new JSONArray(response);
-            for(int i=0; i < jsonArray.length(); i++) {
-                JSONObject json = jsonArray.getJSONObject(i);
-                String currency = json.getString("currency");
-                Double available = json.getDouble("available");
-                Double balance = json.getDouble("balance");
+            JSONObject jsonResponse = new JSONObject(response);
+            Iterator<String> keys = jsonResponse.keys();
+            while(keys.hasNext()) {
+                String key = keys.next();
+                if (key.equals("timestamp") || key.equals("username")) {
+                    continue;
+                }
+                JSONObject jsonBalance = jsonResponse.getJSONObject(key);
+                String currency = key;
+                Double available = Double.parseDouble(jsonBalance.getString("available"));
+                Double balance;
+                if (jsonBalance.has("orders")) {
+                    Double onOrders = Double.parseDouble(jsonBalance.getString("orders"));
+                    if (onOrders > 0) {
+                        balance = available + onOrders;
+                    } else {
+                        balance = available;
+                    }
+                } else {
+                    balance = available;
+                }
                 if (balance > 0) {
                     availableBalances.put(currency, available);
                     balances.put(currency, balance);
@@ -297,11 +304,9 @@ public class GDAXClient implements APIClient {
             ArrayList<Pair> pairsList = new ArrayList<>();
             JSONArray jsonArray = new JSONArray(response);
             for(int i=0; i < jsonArray.length(); i++) {
-                JSONObject json = jsonArray.optJSONObject(i);
-                String exchangePair = json.getString("id");
-                String tradingPair = createTradePair(exchangePair);
-
-                Pair pair = new Pair(0, (int)exchangeId, exchangePair, tradingPair);
+                String exchangePair = jsonArray.getString(i);
+                String appPair = createTradePair(exchangePair);
+                Pair pair = new Pair(0, (int)exchangeId, exchangePair, appPair);
                 pairsList.add(pair);
             }
             db.insertPairs(pairsList);
@@ -330,7 +335,12 @@ public class GDAXClient implements APIClient {
 
     private void processCancelOrder(String response, Context c) {
         Log.d(TAG, "processCancelOrder: response" + response);
-        Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled), Toast.LENGTH_LONG).show();
+        if (response.equals("true")) {
+            Toast.makeText(c, c.getResources().getString(R.string.order_successfully_cancelled), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(c, "Error: " + response, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "processCancelOrder: Unknown response:" + response);
+        }
         UpdateOpenOrders(c);
     }
 
@@ -344,11 +354,11 @@ public class GDAXClient implements APIClient {
                 JSONObject json = jsonResult.getJSONObject(i);
                 String orderNumber = json.getString("id");
                 String orderPair = "";
-                String orderType = json.getString("side");
+                String orderType = json.getString("type");
                 String orderRate = json.getString("price");
-                String orderStartingAmount = json.getString("size");
-                String orderRemainingAmount = String.format("%.8f", Double.parseDouble(json.getString("size")) - Double.parseDouble(json.getString("filled_size")));
-                String orderDate = json.getString("created_at");
+                String orderStartingAmount = json.getString("amount");
+                String orderRemainingAmount = json.getString("pending");
+                String orderDate = Crypto.formatDate(Long.toString(Long.parseLong(json.getString("time"))/1000));
                 OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
@@ -364,22 +374,37 @@ public class GDAXClient implements APIClient {
     }
 
     private static void processUpdateTickerActivity(String response, Context c) {
-        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
         Log.d(TAG, "processUpdateTickerActivity: " + response);
         ListView lvTickerList = ((Activity) c).findViewById(R.id.lvTickerList);
         try {
             JSONObject jsonResponse = new JSONObject(response);
+            JSONArray jsonResult = jsonResponse.getJSONArray("data");
             ArrayList<Ticker> tickerList = new ArrayList<>();
-            String tickerPair = selectedPair.getTradingPair();
-            String last = jsonResponse.getString("price");
-            String volume = jsonResponse.getString("volume");
-            String lowestAsk = jsonResponse.getString("ask");
-            String lowest24hr = "";
-            String highestBid = jsonResponse.getString("bid");
-            String highest24hr = "";
-            Ticker ticker = new Ticker(tickerPair, last, volume,
-                    lowestAsk, lowest24hr, highestBid, highest24hr);
-            tickerList.add(ticker);
+            for (int i=0; i < jsonResult.length(); i++) {
+                JSONObject json = jsonResult.getJSONObject(i);
+                String tickerPair = json.getString("pair");
+                String []tickerSplit = tickerPair.split(":");
+                if (tickerSplit[1].equals("BTC")) {
+                    tickerPair = tickerSplit[1] + "-" + tickerSplit[0];
+                } else {
+                    tickerPair = tickerSplit[0] + "-" + tickerSplit[1];
+                }
+                String last = json.getString("last");
+                String volume = json.getString("volume");
+                String lowestAsk = "";
+                if (json.has("ask")) {
+                    lowestAsk = json.getString("ask");
+                }
+                String lowest24hr = json.getString("low");
+                String highestBid = "";
+                if (json.has("bid")) {
+                    highestBid = json.getString("bid");
+                }
+                String highest24hr = json.getString("high");
+                Ticker ticker = new Ticker(tickerPair, last, volume,
+                        lowestAsk, lowest24hr, highestBid, highest24hr);
+                tickerList.add(ticker);
+            }
             TickerAdapter tickerAdapter = new TickerAdapter(c, R.layout.listitem_ticker, tickerList);
             lvTickerList.setAdapter(tickerAdapter);
 
@@ -398,10 +423,10 @@ public class GDAXClient implements APIClient {
 
         try {
             JSONObject jsonReponse = new JSONObject(response);
-            tvLast.setText(jsonReponse.getString("price"));
-            tvHighest.setText(jsonReponse.getString("bid"));
-            tvLowest.setText(jsonReponse.getString("ask"));
-            edPrice.setText(jsonReponse.getString("price"));
+            tvLast.setText(jsonReponse.getString("last"));
+            tvHighest.setText(jsonReponse.getString("high"));
+            tvLowest.setText(jsonReponse.getString("low"));
+            edPrice.setText(jsonReponse.getString("last"));
         } catch (JSONException ex) {
             Log.e(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
@@ -411,68 +436,64 @@ public class GDAXClient implements APIClient {
     }
 
     public void RestorePairsInDB(Context c) {
-        String endpoint = "/products";
+        String endpoint = "/v1/symbols";
         publicRequest(endpoint, null, c, "restorePairsInDB");
     }
 
     public void UpdateBalances(Context c) {
-        String endpoint = "/accounts/";
-        String method = "GET";
-        privateRequest(endpoint, null, method, c, "updateBalances");
+        String endpoint = "/v1/balances";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("request", endpoint);
+        privateRequest(endpoint, params, c, "updateBalances");
     }
 
     public void CancelOrder(Context c, String orderNumber) {
         Log.d(TAG, "CancelOrder: Order#: " + orderNumber);
-        String endpoint = "/orders/" + orderNumber;
-        String method = "DELETE";
-        privateRequest(endpoint, null, method, c, "cancelOrder");
+        String endpoint = "/cancel_order/";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("id", orderNumber);
+        privateRequest(endpoint, params, c, "cancelOrder");
     }
 
     public void UpdateOpenOrders(Context c) {
         Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
-        String endpoint = "/orders/" + "?product_id=" + selectedPair.getExchangePair();
-        String method = "GET";
-        privateRequest(endpoint, null, method, c, "updateOpenOrders");
+        String endpoint = "/open_orders/" + selectedPair.getExchangePair();
+        privateRequest(endpoint, null, c, "updateOpenOrders");
     }
 
     public void UpdateOrderTransactions(Context c, String pair) {
-        String endpoint = "/orders?status=done&status=pending";
-        String method = "GET";
-        privateRequest(endpoint, null, method, c, "updateOrderTransactions");
+        String endpoint = "/archived_orders/" + pair;
+        HashMap<String, String> params = new HashMap<>();
+        params.put("limit", "50");
+        params.put("status", "d");
+        privateRequest(endpoint, params, c, "updateOrderTransactions");
     }
 
     public void UpdateTickerActivity(Context c) {
-        Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
         Log.d(TAG, "UpdateTickerActivity: ");
-        String endpoint = "/products/" + selectedPair.getExchangePair() + "/ticker";
-        Toast.makeText(c, "This exchange only shows ticker information for select pair.", Toast.LENGTH_LONG).show();
+        String endpoint = "/tickers/BTC/ETH/CAD/RUB/USD/DASH/ZEC/BCH/GBP/EUR";
         publicRequest(endpoint, null, c, "updateTickerActivity");
     }
 
     public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpoint = "/products/" + pair + "/ticker";
+        String endpoint = "/ticker/" + pair;
         publicRequest(endpoint, null, c, "updateTradeTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
-        String endpoint = "/orders";
-        String method = "POST";
+        String endpoint = "/place_order/" + pair;
         HashMap<String, String> params = new HashMap<>();
-        params.put("size", amount);
+        params.put("type", orderType);
+        params.put("amount", amount);
         params.put("price", rate);
-        params.put("side", orderType);
-        params.put("product_id", pair);
-        privateRequest(endpoint, params, method, c, "placeOrder");
+        privateRequest(endpoint, params, c, "placeOrder");
     }
 
     private static String createTradePair(String pair) {
-        String[] parts = pair.split("-");
-        if (parts[1].equals("BTC")) {
-            return (parts[1] + "-" + parts[0]).toUpperCase();
-        } else {
-            return (parts[0] + "-" + parts[1]).toUpperCase();
+        if (pair.substring(3).equalsIgnoreCase("btc")) {
+            return (pair.substring(3) + "-" + pair.substring(0,3)).toUpperCase();
         }
-
+        return (pair.substring(0,3) + "-" + pair.substring(3)).toUpperCase();
     }
 
     public long getId() {
