@@ -125,9 +125,9 @@ public class BalancesFragment extends Fragment {
     public void updateTotals() {
         HashMap<String, Double> totals = new HashMap<>();
         for(APIClient client: mainActivity.apiClientArrayList) {
-            HashMap<String, Double> availBal = client.getAvailableBalances();
-            if (availBal != null) {
-                for(Map.Entry<String, Double> bal: availBal.entrySet()) {
+            HashMap<String, Double> balances = client.getBalances();
+            if (balances != null) {
+                for(Map.Entry<String, Double> bal: balances.entrySet()) {
                     String currency = bal.getKey();
                     Double balance = bal.getValue();
                     Double totalBalance = totals.get(currency);

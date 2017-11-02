@@ -166,8 +166,8 @@ public class BitfinexClient implements APIClient {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("X-BFX-APIKEY", apiKey);
-                headers.put("X-BFX-SIGNATURE", signature);
                 headers.put("X-BFX-PAYLOAD", base64_body);
+                headers.put("X-BFX-SIGNATURE", signature);
                 return headers;
             }
 
@@ -215,11 +215,6 @@ public class BitfinexClient implements APIClient {
         HashMap<String, Double> balances = new HashMap<>();
         try {
             JSONArray jsonArray = new JSONArray(response);
-//            if (jsonObject.has("error")) {
-//                Toast.makeText(c, jsonObject.getString("error"), Toast.LENGTH_LONG).show();
-//                Log.d(TAG, "processUpdateBalances: " + jsonObject.getString("error"));
-//                return;
-//            }
             for(int i=0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 if (jsonObject.getString("type").equalsIgnoreCase("exchange") &&
@@ -229,9 +224,10 @@ public class BitfinexClient implements APIClient {
                     String balance = jsonObject.getString("amount");
                     Double dblAvailable = Double.parseDouble(available);
                     Double dblBalance = Double.parseDouble(balance);
-
-                    availableBalances.put(currency, dblAvailable);
-                    balances.put(currency, dblBalance);
+                    if (dblBalance > 0) {
+                        availableBalances.put(currency, dblAvailable);
+                        balances.put(currency, dblBalance);
+                    }
                 }
             }
             this.availableBalances = availableBalances;

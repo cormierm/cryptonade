@@ -117,28 +117,15 @@ public class GeminiClient implements APIClient {
         if (params == null) {
             params = new HashMap<>();
         }
-
-        final String nonce = Long.toString(generateNonce());
-        params.put("nonce", nonce);
-
+        params.put("nonce", Long.toString(generateNonce()));
         JSONObject jsonPayload = new JSONObject(params);
-        Log.d(TAG, "privateRequest: jsonPayload: " + jsonPayload);
 
-        String b64_payload = Base64.encodeToString(jsonPayload.toString().getBytes(), Base64.DEFAULT);
+        Log.d(TAG, "privateRequest: jsonPayload: " + jsonPayload.toString());
 
-        String sign = "";
-        try {
-            Mac mac = Mac.getInstance("HmacSHA384");
-            mac.init(new SecretKeySpec(apiSecret.getBytes(), "HmacSHA384"));
-            byte[] macData = mac.doFinal(b64_payload.getBytes());
-            sign = new String(Hex.encodeHex(macData));
-        } catch (Exception e) {
-            Log.e(TAG, "createSignature: " + e.getMessage());
-            e.printStackTrace();
-        }
+        final String b64_payload = Base64.encodeToString(jsonPayload.toString().getBytes(), Base64.NO_WRAP);
+        Log.d(TAG, "privateRequest: b64_payload: " + b64_payload);
 
-        final String payload = b64_payload;
-        final String signature = sign;
+        final String signature = createSignature(b64_payload);
 
         RequestQueue queue = Volley.newRequestQueue(c);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -186,10 +173,15 @@ public class GeminiClient implements APIClient {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("X-GEMINI-APIKEY", apiKey);
-                headers.put("X-GEMINI-PAYLOAD", payload);
+                headers.put("X-GEMINI-PAYLOAD", b64_payload);
                 headers.put("X-GEMINI-SIGNATURE", signature);
                 Log.d(TAG, "getHeaders: " + headers.toString());
                 return headers;
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
             }
         };
         queue.add(stringRequest);
@@ -198,8 +190,8 @@ public class GeminiClient implements APIClient {
     private String createSignature(String b64_payload) {
         try {
             Mac mac = Mac.getInstance("HmacSHA384");
-            mac.init(new SecretKeySpec(this.apiSecret.getBytes(), "HmacSHA384"));
-            final byte[] macData = mac.doFinal(b64_payload.getBytes());
+            mac.init(new SecretKeySpec(apiSecret.getBytes(), "HmacSHA384"));
+            byte[] macData = mac.doFinal(b64_payload.getBytes());
             return new String(Hex.encodeHex(macData));
         } catch (Exception e) {
             Log.e(TAG, "createSignature: " + e.getMessage());
@@ -210,7 +202,7 @@ public class GeminiClient implements APIClient {
 
     private static long generateNonce() {
         Date d = new Date();
-        return d.getTime();
+        return d.getTime() / 1000;
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -232,15 +224,16 @@ public class GeminiClient implements APIClient {
         ListView lvOrderTransactions = ((Activity) c).findViewById(R.id.lvOrdertransactions);
         try {
             ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
-            JSONArray jsonResult = new JSONArray(response);
-            for (int i=0; i < jsonResult.length(); i++){
-                JSONObject json = jsonResult.getJSONObject(i);
-                String orderNumber = json.getString("id");
-                String timestamp = json.getString("time");
+            JSONArray jsonArray = new JSONArray(response);
+
+            for (int i=0; i < jsonArray.length(); i++){
+                JSONObject json = jsonArray.getJSONObject(i);
+                String orderNumber = json.getString("order_id");
+                String timestamp = Crypto.formatDate(json.getString("timestamp"));
                 String type = json.getString("type");
                 String amount = json.getString("amount");
                 String rate = json.getString("price");
-                String fee = "";
+                String fee = json.getString("fee_amount");
                 OrderTransaction order = new OrderTransaction(orderNumber, timestamp, type,
                         amount, rate, fee);
                 Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
@@ -249,12 +242,11 @@ public class GeminiClient implements APIClient {
 
             OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
             lvOrderTransactions.setAdapter(orderTransactionsAdapter);
-            UpdateOpenOrders(c);
+
         } catch (JSONException e) {
-            Log.e(TAG, "processUpdateOrderTransactions: JSONException Error: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "processUpdateOrderTransactions: Exception: " + e.getMessage());
+            Log.d(TAG, "processUpdateOrderTransactions: "  + e.getMessage());
         }
+        UpdateOpenOrders(c);
     }
 
     private void processUpdateBalances(String response, Context c) {
@@ -262,38 +254,26 @@ public class GeminiClient implements APIClient {
         HashMap<String, Double> availableBalances = new HashMap<>();
         HashMap<String, Double> balances = new HashMap<>();
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            Iterator<String> keys = jsonResponse.keys();
-            while(keys.hasNext()) {
-                String key = keys.next();
-                if (key.equals("timestamp") || key.equals("username")) {
-                    continue;
-                }
-                JSONObject jsonBalance = jsonResponse.getJSONObject(key);
-                String currency = key;
-                Double available = Double.parseDouble(jsonBalance.getString("available"));
-                Double balance;
-                if (jsonBalance.has("orders")) {
-                    Double onOrders = Double.parseDouble(jsonBalance.getString("orders"));
-                    if (onOrders > 0) {
-                        balance = available + onOrders;
-                    } else {
-                        balance = available;
+            JSONArray jsonArray = new JSONArray(response);
+            for(int i=0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (jsonObject.getString("type").equalsIgnoreCase("exchange") &&
+                        !jsonObject.getString("amount").equals("0.0")) {
+                    String currency = jsonObject.getString("currency").toUpperCase();
+                    String available = jsonObject.getString("available");
+                    String balance = jsonObject.getString("amount");
+                    Double dblAvailable = Double.parseDouble(available);
+                    Double dblBalance = Double.parseDouble(balance);
+                    if (dblBalance > 0) {
+                        availableBalances.put(currency, dblAvailable);
+                        balances.put(currency, dblBalance);
                     }
-                } else {
-                    balance = available;
-                }
-                if (balance > 0) {
-                    availableBalances.put(currency, available);
-                    balances.put(currency, balance);
                 }
             }
             this.availableBalances = availableBalances;
             this.balances = balances;
         } catch (JSONException e) {
-            Log.e(TAG, "processUpdateBalances: JSONException: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "processUpdateBalances: " + e.getMessage());
+            Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
         }
     }
 
@@ -348,28 +328,39 @@ public class GeminiClient implements APIClient {
         Log.d(TAG, "processUpdateOpenOrders: ");
         ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
-            JSONArray jsonResult = new JSONArray(response);
+            String currentExchangePair = ((Pair)((Spinner)((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem()).getExchangePair();
             ArrayList<OpenOrder> openOrdersList = new ArrayList<>();
-            for (int i=0; i < jsonResult.length(); i++){
-                JSONObject json = jsonResult.getJSONObject(i);
-                String orderNumber = json.getString("id");
-                String orderPair = "";
-                String orderType = json.getString("type");
-                String orderRate = json.getString("price");
-                String orderStartingAmount = json.getString("amount");
-                String orderRemainingAmount = json.getString("pending");
-                String orderDate = Crypto.formatDate(Long.toString(Long.parseLong(json.getString("time"))/1000));
-                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
-                        orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
-                openOrdersList.add(order);
+            JSONArray jsonArray = new JSONArray(response);
+            for (int i=0; i < jsonArray.length(); i++){
+                JSONObject json = jsonArray.getJSONObject(i);
+                String orderPair = json.getString("symbol");
+                if (orderPair.equalsIgnoreCase(currentExchangePair)){
+                    String orderNumber = json.getString("id");
+                    String orderType = json.getString("side");
+                    String orderRate = json.getString("price");
+                    String orderStartingAmount = json.getString("original_amount");
+                    String orderRemainingAmount = json.getString("remaining_amount");
+                    String orderDate = Crypto.formatDate(json.getString("timestamp"));
+                    OpenOrder order = new OpenOrder(orderNumber, createTradePair(orderPair), orderType.toUpperCase(),
+                            orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
+                    openOrdersList.add(order);
+                }
             }
             OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
             lvOpenOrders.setAdapter(openOrdersAdapter);
 
         } catch (JSONException e) {
-            Log.e(TAG, "processUpdateOpenOrders: JSONException Error: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "processUpdateOpenOrders: Exception: " + e.getMessage());
+            try {
+                JSONObject json = new JSONObject(response);
+                if (json.has("error")) {
+                    Toast.makeText(c, json.getString("error"), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "processUpdateOpenOrders: " + json.getString("error"));
+                } else {
+                    Log.d(TAG, "Error in processUpdateOpenOrders: " + e.toString());
+                }
+            } catch (JSONException e1) {
+                Log.d(TAG, "Error in processUpdateOpenOrders: " + e1.toString());
+            }
         }
     }
 
@@ -441,7 +432,7 @@ public class GeminiClient implements APIClient {
     }
 
     public void UpdateBalances(Context c) {
-        String endpoint = "/v1/balances";
+        String endpoint = "/v1/balances".replace("\\/", "/");
         HashMap<String, String> params = new HashMap<>();
         params.put("request", endpoint);
         privateRequest(endpoint, params, c, "updateBalances");
@@ -457,15 +448,17 @@ public class GeminiClient implements APIClient {
 
     public void UpdateOpenOrders(Context c) {
         Pair selectedPair = (Pair) ((Spinner)((Activity)c).findViewById(R.id.spnPairs)).getSelectedItem();
-        String endpoint = "/open_orders/" + selectedPair.getExchangePair();
-        privateRequest(endpoint, null, c, "updateOpenOrders");
+        String endpoint = "/v1/orders";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("request", endpoint);
+        privateRequest(endpoint, params, c, "updateOpenOrders");
     }
 
     public void UpdateOrderTransactions(Context c, String pair) {
-        String endpoint = "/archived_orders/" + pair;
+        String endpoint = "/v1/mytrades";
         HashMap<String, String> params = new HashMap<>();
-        params.put("limit", "50");
-        params.put("status", "d");
+        params.put("request", endpoint);
+        params.put("symbol", pair);
         privateRequest(endpoint, params, c, "updateOrderTransactions");
     }
 
