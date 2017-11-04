@@ -21,7 +21,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 12;
+    public static final int     DB_VERSION = 14;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -43,6 +43,9 @@ public class CryptoDB {
 
     public static final String  EXCHANGE_API_OTHER = "api_other";
     public static final int     EXCHANGE_API_OTHER_COL = 5;
+
+    public static final String  EXCHANGE_ACTIVE = "active";
+    public static final int     EXCHANGE_ACTIVE_COL = 6;
 
     // Pair table
     public static final String  PAIR_TABLE = "pair";
@@ -71,6 +74,15 @@ public class CryptoDB {
     public static final String  TYPE_API_OTHER = "api_other";
     public static final int     TYPE_API_OTHER_COL = 2;
 
+    // Setting Table
+    public static final String  SETTINGS_TABLE = "settings";
+
+    public static final String  SETTINGS_ID = "_id";
+    public static final int     SETTINGS_ID_COL = 0;
+
+    public static final String  SETTINGS_VALUE = "value";
+    public static final int     SETTINGS_VALUE_COL = 1;
+
     // create and drop table statements
     public static final String CREATE_EXCHANGE_TABLE =
             "CREATE TABLE " + EXCHANGE_TABLE + " (" +
@@ -79,7 +91,8 @@ public class CryptoDB {
             EXCHANGE_NAME + " TEXT NOT NULL, " +
             EXCHANGE_API_KEY + " TEXT, " +
             EXCHANGE_API_SECRET + " TEXT, " +
-            EXCHANGE_API_OTHER + " TEXT);";
+            EXCHANGE_API_OTHER + " TEXT, " +
+            EXCHANGE_ACTIVE + " INT1 DEFAULT 1);";
 
     public static final String CREATE_PAIR_TABLE =
             "CREATE TABLE " + PAIR_TABLE + " (" +
@@ -94,6 +107,11 @@ public class CryptoDB {
                     TYPE_NAME + " TEXT NOT NULL, " +
                     TYPE_API_OTHER + " TEXT);";
 
+    public static final String CREATE_SETTINGS_TABLE =
+            "CREATE TABLE " + SETTINGS_TABLE + " (" +
+                    SETTINGS_ID + " INTEGER PRIMARY KEY, " +
+                    SETTINGS_VALUE + " TEXT NOT NULL);";
+
     public static final String DROP_EXCHANGE_TABLE =
             "DROP TABLE IF EXISTS " + EXCHANGE_TABLE;
 
@@ -102,6 +120,9 @@ public class CryptoDB {
 
     public static final String DROP_TYPE_TABLE =
             "DROP TABLE IF EXISTS " + TYPE_TABLE;
+
+    public static final String DROP_SETTINGS_TABLE =
+            "DROP TABLE IF EXISTS " + SETTINGS_TABLE;
 
 
     private static class DBHelper extends SQLiteOpenHelper {
@@ -115,6 +136,7 @@ public class CryptoDB {
             db.execSQL(CREATE_EXCHANGE_TABLE);
             db.execSQL(CREATE_PAIR_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
+            db.execSQL(CREATE_SETTINGS_TABLE);
 
             //insert sample exchange
             db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
@@ -129,6 +151,10 @@ public class CryptoDB {
             db.execSQL("INSERT INTO type VALUES (6, 'GDAX', 'Passphrase')");
             db.execSQL("INSERT INTO type VALUES (7, 'Gemini', '')");
             db.execSQL("INSERT INTO type VALUES (8, 'HitBTC', '')");
+
+            // set password blank
+            db.execSQL("INSERT INTO settings VALUES (1, '')");
+
             Log.d(TAG, "onCreate: done.");
         }
 
@@ -138,10 +164,11 @@ public class CryptoDB {
             Log.d("Crypto DB", "Upgrading db from version "
                     + oldVersion + " to " + newVersion);
 
+            db.execSQL(CREATE_SETTINGS_TABLE);
+            db.execSQL("INSERT INTO settings VALUES (1, '')");
+
             db.execSQL(CryptoDB.DROP_TYPE_TABLE);
-
             db.execSQL(CREATE_TYPE_TABLE);
-
             db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
             db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
             db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
@@ -226,7 +253,8 @@ public class CryptoDB {
                         cursor.getString(EXCHANGE_NAME_COL),
                         cursor.getString(EXCHANGE_API_KEY_COL),
                         cursor.getString(EXCHANGE_API_SECRET_COL),
-                        cursor.getString(EXCHANGE_API_OTHER_COL));
+                        cursor.getString(EXCHANGE_API_OTHER_COL),
+                        cursor.getInt(EXCHANGE_ACTIVE_COL));
                 return exchange;
             }
             catch(Exception e) {
@@ -242,6 +270,7 @@ public class CryptoDB {
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
         cv.put(EXCHANGE_API_OTHER, exchange.getAPIOther());
+        cv.put(EXCHANGE_ACTIVE, exchange.getAPIOther());
 
         this.openWriteableDB();
         long rowID = db.insert(EXCHANGE_TABLE, null, cv);
@@ -257,6 +286,7 @@ public class CryptoDB {
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
         cv.put(EXCHANGE_API_OTHER, exchange.getAPIOther());
+        cv.put(EXCHANGE_ACTIVE, exchange.getAPIOther());
 
         String where = EXCHANGE_ID + "= ?";
         String[] whereArgs = { String.valueOf(exchange.getId()) };
@@ -443,6 +473,46 @@ public class CryptoDB {
                         cursor.getString(TYPE_NAME_COL),
                         cursor.getString(TYPE_API_OTHER_COL));
                 return exType;
+            }
+            catch(Exception e) {
+                return null;
+            }
+        }
+    }
+
+    public int updatePasswordHash(String passwordHash) {
+        ContentValues cv = new ContentValues();
+        cv.put(SETTINGS_ID, 1);
+        cv.put(SETTINGS_VALUE, passwordHash);
+        String where = SETTINGS_ID + "= ?";
+        String[] whereArgs = { "1" };
+        this.openWriteableDB();
+        int rowCount = db.update(SETTINGS_TABLE, cv, where, whereArgs);
+        this.closeDB();
+        return rowCount;
+    }
+
+    public String getPasswordHash() {
+        String where = SETTINGS_ID + "= ?";
+        String[] whereArgs = { "1" };
+        this.openReadableDB();
+        Cursor cursor = db.query(SETTINGS_TABLE,
+                null, where, whereArgs, null, null, null);
+        cursor.moveToFirst();
+        String passwordHash = getSettingFromCursor(cursor);
+        if (cursor != null)
+            cursor.close();
+        this.closeDB();
+        return passwordHash;
+    }
+
+    private String getSettingFromCursor(Cursor cursor) {
+        if (cursor == null || cursor.getCount() == 0){
+            return null;
+        }
+        else {
+            try {
+                return cursor.getString(SETTINGS_VALUE_COL);
             }
             catch(Exception e) {
                 return null;

@@ -49,6 +49,7 @@ public class CexioClient implements APIClient {
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
+    private HashMap<String, String> tickerInfo;
     private String name;
     private String apiKey;
     private String apiSecret;
@@ -403,18 +404,22 @@ public class CexioClient implements APIClient {
         }
     }
 
-    private static void processUpdateTradeTickerInfo(String response, Context c) {
+    private void processUpdateTradeTickerInfo(String response, Context c) {
         TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
 
         try {
-            JSONObject jsonReponse = new JSONObject(response);
-            tvLast.setText(jsonReponse.getString("last"));
-            tvHighest.setText(jsonReponse.getString("high"));
-            tvLowest.setText(jsonReponse.getString("low"));
-            edPrice.setText(jsonReponse.getString("last"));
+            JSONObject jsonTicker = new JSONObject(response);
+            tvLast.setText(jsonTicker.getString("last"));
+            tvHighest.setText(jsonTicker.getString("bid"));
+            tvLowest.setText(jsonTicker.getString("ask"));
+            edPrice.setText(jsonTicker.getString("last"));
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("last", jsonTicker.getString("last"));
+            tickerInfo.put("bid", jsonTicker.getString("bid"));
+            tickerInfo.put("ask", jsonTicker.getString("ask"));
         } catch (JSONException ex) {
             Log.e(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
@@ -512,5 +517,9 @@ public class CexioClient implements APIClient {
 
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
+    }
+
+    public HashMap<String, String> getTickerInfo() {
+        return tickerInfo;
     }
 }

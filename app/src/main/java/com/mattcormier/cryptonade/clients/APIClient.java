@@ -37,4 +37,6 @@ public interface APIClient {
     public HashMap<String, Double> getBalances();
 
     public HashMap<String, Double> getAvailableBalances();
+
+    public HashMap<String, String> getTickerInfo();
 }

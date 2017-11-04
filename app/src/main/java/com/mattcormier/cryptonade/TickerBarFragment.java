@@ -22,11 +22,11 @@ import java.util.TimerTask;
  * Created by matt on 10/24/2017.
  */
 
-public class BalanceBarFragment extends Fragment {
+public class TickerBarFragment extends Fragment {
     private static final String TAG = "BalanceBarFragment";
-    TextView tvBalanceBar;
+    TextView tvTickerBar;
     HashMap<String, Double> currentBalances;
-    View balanceView;
+    View view;
     Spinner spnClients;
     APIClient client;
     Context context;
@@ -34,43 +34,41 @@ public class BalanceBarFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        spnClients = (Spinner)((MainActivity)getActivity()).findViewById(R.id.spnClients);
-        balanceView = inflater.inflate(R.layout.balance_bar_layout, container, false);
+        spnClients = ((MainActivity)getActivity()).findViewById(R.id.spnClients);
+        view = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
-        tvBalanceBar = balanceView.findViewById(R.id.tvBalanceBar);
-        Log.d(TAG, "onCreateView: client: " + client);
+        tvTickerBar = view.findViewById(R.id.tvBalanceBar);
 
-
-        return balanceView;
+        return view;
     }
 
     @Override
     public void onResume() {
-       startBalanceBarTimer();
+        startTickerBarTimer();
         super.onResume();
     }
 
-    public void startBalanceBarTimer() {
-        Log.d(TAG, "startBalanceBarTimer: start");
+    public void startTickerBarTimer() {
+        Log.d(TAG, "startTickerBarTimer: start");
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 client = (APIClient)spnClients.getSelectedItem();
                 if (client != null) {
-                    HashMap<String, Double> availableBalances = client.getAvailableBalances();
-                    if (availableBalances == null) {
-                        setBalanceBarText("No Balance Information.");
+                    HashMap<String, String> tickerInfo = client.getTickerInfo();
+                    if (tickerInfo == null) {
+                        setTickerBarText("");
                     }
-                    else if (currentBalances != availableBalances) {
+                    else {
                         String output = "";
-                        for (Map.Entry<String, Double> b: availableBalances.entrySet()) {
-                            output += b.getKey() + ": " + String.format("%.8f", b.getValue()) + "        ";
+                        for (Map.Entry<String, String> t: tickerInfo.entrySet()) {
+                            output += t.getKey() + ": " + t.getValue() + "    ";
                         }
                         output.trim();
                         if (output.isEmpty()) {
-                            output = "No Balance Information.";
+                            output = "";
                         }
-                        setBalanceBarText(output);
+                        setTickerBarText(output);
                     }
                 }
             }
@@ -79,11 +77,11 @@ public class BalanceBarFragment extends Fragment {
         timer.schedule(task, 0, 1000);
     }
 
-    public void setBalanceBarText(final String text) {
-        tvBalanceBar.post(new Runnable() {
+    public void setTickerBarText(final String text) {
+        tvTickerBar.post(new Runnable() {
             @Override
             public void run() {
-                tvBalanceBar.setText(text);
+                tvTickerBar.setText(text);
             }
         });
     }

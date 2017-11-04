@@ -13,6 +13,7 @@ public class Exchange {
     private String apiKey;
     private String apiSecret;
     private String apiOther;
+    private int active;
 
     public Exchange() {
         typeId = 0;
@@ -20,16 +21,18 @@ public class Exchange {
         apiKey = "";
         apiSecret = "";
         apiOther = "";
+        active = 0;
     }
 
     public Exchange(int exchangeId, int typeId, String name, String apiKey, String apiSecret,
-                    String apiOther) {
+                    String apiOther, int active) {
         this.exchangeId = exchangeId;
         this.typeId = typeId;
         this.name = name;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
         this.apiOther = apiOther;
+        this.active = active;
     }
 
     public long getId() {
@@ -78,6 +81,14 @@ public class Exchange {
 
     public void setAPIOther(String apiOther) {
         this.apiOther = apiOther;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
     }
 
     @Override

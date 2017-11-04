@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
@@ -34,8 +38,8 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
     TextView tvAPIOther;
     EditText edAPIOther;
     Button btnSave;
-    Button btnDelete;
     Button btnCancel;
+    Switch swActive;
     CryptoDB db;
     Exchange ex;
     View apiView;
@@ -54,11 +58,11 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
         tvAPIOther = apiView.findViewById(R.id.lblAPISettingsAPIOther);
         edAPIOther = apiView.findViewById(R.id.edAPISettingsAPIOther);
         btnSave = apiView.findViewById(R.id.btnAPISettingsSave);
-        btnDelete = apiView.findViewById(R.id.btnAPISettingsDelete);
         btnCancel = apiView.findViewById(R.id.btnAPISettingsCancel);
+        swActive = apiView.findViewById(R.id.swAPISettingsActive);
         btnSave.setOnClickListener(this);
-        btnDelete.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
+
 
         db = new CryptoDB(getActivity());
 
@@ -80,8 +84,8 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             edAPIKey.setText("");
             edAPISecret.setText("");
             edAPIOther.setText("");
-            btnDelete.setVisibility(View.INVISIBLE);
             btnSave.setText(getString(R.string.create));
+            setHasOptionsMenu(false);
         } else {
             Log.d(TAG, "onCreateView: setting existing exchange info");
             ex = db.getExchange(exchangeId);
@@ -92,11 +96,30 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             edAPIKey.setText(ex.getAPIKey());
             edAPISecret.setText(ex.getAPISecret());
             edAPIOther.setText(ex.getAPIOther());
-            btnDelete.setVisibility(View.VISIBLE);
             btnSave.setText(getString(R.string.update));
+            setHasOptionsMenu(true);
         }
 
+
         return apiView;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuDelete) {
+            db.deleteExchange(exchangeId);
+            ((MainActivity) getActivity()).UpdateClientSpinner();
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, new APIFragment())
+                    .commit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.apisettings_menu, menu);
     }
 
     @Override
@@ -109,6 +132,11 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                 exchange.setName(edProfileName.getText().toString());
                 exchange.setAPIKey(edAPIKey.getText().toString());
                 exchange.setAPISecret(edAPISecret.getText().toString());
+                if (swActive.isChecked()) {
+                    exchange.setActive(1);
+                } else {
+                    exchange.setActive(0);
+                }
                 if (edAPIOther.getVisibility() == View.VISIBLE) {
                     exchange.setAPIOther(edAPIOther.getText().toString());
                 }
@@ -126,6 +154,11 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                 ex.setName(edProfileName.getText().toString());
                 ex.setAPIKey(edAPIKey.getText().toString());
                 ex.setAPISecret(edAPISecret.getText().toString());
+                if (swActive.isChecked()) {
+                    ex.setActive(1);
+                } else {
+                    ex.setActive(0);
+                }
                 if (edAPIOther.getVisibility() == View.VISIBLE) {
                     ex.setAPIOther(edAPIOther.getText().toString());
                 }
@@ -139,13 +172,6 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
 
         }
         else if (v.getId() == btnCancel.getId()) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
-                    .commit();
-        }
-        else if (v.getId() == btnDelete.getId()) {
-            db.deleteExchange(exchangeId);
-            ((MainActivity) getActivity()).UpdateClientSpinner();
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new APIFragment())
                     .commit();

@@ -2,6 +2,7 @@ package com.mattcormier.cryptonade;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,8 +10,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.TextView;
+
+import com.mattcormier.cryptonade.lib.Crypto;
 
 public class HomeFragment extends Fragment implements OnClickListener {
 

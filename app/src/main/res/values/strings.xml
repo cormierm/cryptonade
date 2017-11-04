@@ -65,4 +65,9 @@
     <string name="balances">Balances</string>
     <string name="order_successfully_cancelled">Order successfully cancelled.</string>
     <string name="order_successfully_placed">Trade placed successfully.\nOrder number:</string>
+    <string name="security">Security</string>
+
+    <string name="title_activity_start">StartActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

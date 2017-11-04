@@ -51,6 +51,7 @@ public class BitfinexClient implements APIClient {
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
+    private HashMap<String, String> tickerInfo;
     private String name;
     private String apiKey;
     private String apiSecret;
@@ -367,18 +368,22 @@ public class BitfinexClient implements APIClient {
         }
     }
 
-    private static void processUpdateTradeTickerInfo(String response, Context c) {
+    private void processUpdateTradeTickerInfo(String response, Context c) {
         TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
 
         try {
-            JSONObject json = new JSONObject(response);
-            tvLast.setText(json.getString("last_price"));
-            tvHighest.setText(json.getString("high"));
-            tvLowest.setText(json.getString("low"));
-            edPrice.setText(json.getString("last_price"));
+            JSONObject jsonTicker = new JSONObject(response);
+            tvLast.setText(jsonTicker.getString("last_price"));
+            tvHighest.setText(jsonTicker.getString("bid"));
+            tvLowest.setText(jsonTicker.getString("ask"));
+            edPrice.setText(jsonTicker.getString("last_price"));
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("last", jsonTicker.getString("last_price"));
+            tickerInfo.put("bid", jsonTicker.getString("bid"));
+            tickerInfo.put("ask", jsonTicker.getString("ask"));
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
@@ -484,7 +489,7 @@ public class BitfinexClient implements APIClient {
 
     private static long generateNonce() {
         Date d = new Date();
-        return d.getTime();
+        return d.getTime() * 1000;
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -528,5 +533,9 @@ public class BitfinexClient implements APIClient {
 
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
+    }
+
+    public HashMap<String, String> getTickerInfo() {
+        return tickerInfo;
     }
 }

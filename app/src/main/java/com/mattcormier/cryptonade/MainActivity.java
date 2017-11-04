@@ -1,5 +1,6 @@
 package com.mattcormier.cryptonade;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     APIClient selectedClient;
     Pair selectedPair;
     BalanceBarFragment fragBalanceBar;
+    TickerBarFragment tickerBarFragment;
     CryptoDB db;
     SharedPreferences sharedPreferences;
 
@@ -75,13 +77,18 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onCreate: init balance bar");
         // initialize balance bar
         fragBalanceBar = new BalanceBarFragment();
+        tickerBarFragment = new TickerBarFragment();
 
         Log.d(TAG, "onCreate: implementing frags");
         getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar, "balance_bar").commit();
+        getFragmentManager().beginTransaction().replace(R.id.flMainTickerBar, tickerBarFragment, "ticker_bar").commit();
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
     }
 
     public void UpdateClientSpinner() {
+        Intent intent = getIntent();
+        String password = intent.getStringExtra("password");
+        Toast.makeText(this, password, Toast.LENGTH_LONG).show();
         List<Exchange> exchangeList = db.getExchanges();
         ArrayList<APIClient> clientList = new ArrayList<APIClient>();
         for (Exchange e: exchangeList) {
@@ -110,6 +117,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+
         UpdateClientSpinner();
         spnClients.setSelection(sharedPreferences.getInt("clientSpinnerPosition", 0));
         UpdatePairsSpinner();
@@ -145,8 +153,14 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         else if (id == R.id.menuRefreshBalances) {
-            //fragBalanceBar.UpdateBalanceBar();
             ((APIClient) spnClients.getSelectedItem()).UpdateBalances(this);
+            return true;
+        }
+        else if (id == R.id.menuSettings) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, new SettingsFragment())
+                    .addToBackStack("settings")
+                    .commit();
             return true;
         }
 

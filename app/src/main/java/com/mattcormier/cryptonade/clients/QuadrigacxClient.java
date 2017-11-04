@@ -52,18 +52,12 @@ public class QuadrigacxClient implements APIClient {
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
+    private HashMap<String, String> tickerInfo;
     private String name;
     private String apiKey;
     private String apiSecret;
     private String apiOther;
     private static String apiUrl = "https://api.quadrigacx.com/v2";
-
-    public QuadrigacxClient() {
-        name = "";
-        apiKey = "";
-        apiSecret = "";
-        apiOther = "";
-    }
 
     public QuadrigacxClient(int exchangeId, String name, String apiKey, String apiSecret, String apiOther) {
         this.exchangeId = exchangeId;
@@ -93,7 +87,7 @@ public class QuadrigacxClient implements APIClient {
                             }
 
                         } catch (Exception e) {
-                            Log.d(TAG, "Error in request: " + cmd);
+                            Log.e(TAG, "Error in request: " + cmd);
                         }
                     }
                 },
@@ -104,7 +98,6 @@ public class QuadrigacxClient implements APIClient {
                     }
                 }
         );
-        // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
 
@@ -112,9 +105,16 @@ public class QuadrigacxClient implements APIClient {
         String url = apiUrl + endpointUri;
         Log.d(TAG, "privateRequest: url: " + url + " cmd: " + cmd);
 
-        final String nonce = new BigDecimal(generateNonce()).toString();
+        final String nonce = Long.toString(generateNonce());
         final String signature = createSignature(nonce);
-        final String body = createJsonBody(nonce, signature, params);
+
+        if (params == null) {
+            params = new HashMap<>();
+        }
+        params.put("key", apiKey);
+        params.put("nonce", nonce);
+        params.put("signature", signature);
+        final String body = createJsonBody(params);
 
         RequestQueue queue = Volley.newRequestQueue(c);
 
@@ -385,7 +385,7 @@ public class QuadrigacxClient implements APIClient {
         }
     }
 
-    private static void processUpdateTradeTickerInfo(String response, Context c) {
+    private void processUpdateTradeTickerInfo(String response, Context c) {
         Log.d(TAG, "processUpdateTradeTickerInfo: " + response);
         TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
@@ -393,11 +393,15 @@ public class QuadrigacxClient implements APIClient {
         TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
 
         try {
-            JSONObject json = new JSONObject(response);
-            tvLast.setText(json.getString("last"));
-            tvHighest.setText(json.getString("bid"));
-            tvLowest.setText(json.getString("ask"));
-            edPrice.setText(json.getString("last"));
+            JSONObject jsonTicker = new JSONObject(response);
+            tvLast.setText(jsonTicker.getString("last"));
+            tvHighest.setText(jsonTicker.getString("bid"));
+            tvLowest.setText(jsonTicker.getString("ask"));
+            edPrice.setText(jsonTicker.getString("last"));
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("last", jsonTicker.getString("last"));
+            tickerInfo.put("bid", jsonTicker.getString("bid"));
+            tickerInfo.put("ask", jsonTicker.getString("ask"));
         } catch (JSONException ex) {
             Log.d(TAG, "Error in processTradingPairs: JSONException: " + ex.toString());
         }
@@ -491,9 +495,9 @@ public class QuadrigacxClient implements APIClient {
         return null;
     }
 
-    private int generateNonce() {
+    private long generateNonce() {
         Date d = new Date();
-        return (int)d.getTime();
+        return d.getTime() * 1000;
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -507,19 +511,15 @@ public class QuadrigacxClient implements APIClient {
         return body;
     }
 
-    private String createJsonBody(String nonce, String signature, HashMap<String, String> params) {
+    private String createJsonBody(HashMap<String, String> params) {
         JSONObject jsonBody = new JSONObject();
         try{
-            if (params != null) {
-                for(Map.Entry<String, String> param: params.entrySet()) {
-                    jsonBody.put(param.getKey(), param.getValue());
-                }
+            for(Map.Entry<String, String> param: params.entrySet()) {
+                jsonBody.put(param.getKey(), param.getValue());
             }
-            jsonBody.put("key", apiKey);
-            jsonBody.put("nonce", Integer.parseInt(nonce));
-            jsonBody.put("signature", signature);
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.e(TAG, "createJsonBody: " + e.getMessage());
         }
         return jsonBody.toString();
     }
@@ -551,6 +551,10 @@ public class QuadrigacxClient implements APIClient {
 
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
+    }
+
+    public HashMap<String, String> getTickerInfo() {
+        return tickerInfo;
     }
 
     private void processAPIJSONError(JSONObject json, Context c) {

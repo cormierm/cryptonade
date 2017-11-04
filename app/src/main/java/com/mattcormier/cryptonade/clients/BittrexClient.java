@@ -49,6 +49,7 @@ public class BittrexClient implements APIClient {
     private long exchangeId;
     private HashMap<String, Double> balances;
     private HashMap<String, Double> availableBalances;
+    private HashMap<String, String> tickerInfo;
     private String name;
     private String apiKey;
     private String apiSecret;
@@ -386,7 +387,7 @@ public class BittrexClient implements APIClient {
         }
     }
 
-    private static void processUpdateTradeTickerInfo(String response, Context c) {
+    private void processUpdateTradeTickerInfo(String response, Context c) {
         TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
         TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
         TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
@@ -395,11 +396,15 @@ public class BittrexClient implements APIClient {
         try {
             JSONObject jsonReponse = new JSONObject(response);
             if (jsonReponse.getBoolean("success")) {
-                JSONObject jsonResult = jsonReponse.getJSONObject("result");
-                tvLast.setText(String.format("%.8f", jsonResult.getDouble("Last")));
-                tvHighest.setText(String.format("%.8f", jsonResult.getDouble("Bid")));
-                tvLowest.setText(String.format("%.8f", jsonResult.getDouble("Ask")));
-                edPrice.setText(String.format("%.8f", jsonResult.getDouble("Last")));
+                JSONObject jsonTicker = jsonReponse.getJSONObject("result");
+                tvLast.setText(String.format("%.8f", jsonTicker.getDouble("Last")));
+                tvHighest.setText(String.format("%.8f", jsonTicker.getDouble("Bid")));
+                tvLowest.setText(String.format("%.8f", jsonTicker.getDouble("Ask")));
+                edPrice.setText(String.format("%.8f", jsonTicker.getDouble("Last")));
+                tickerInfo = new HashMap<>();
+                tickerInfo.put("last", jsonTicker.getString("Last"));
+                tickerInfo.put("bid", jsonTicker.getString("Bid"));
+                tickerInfo.put("ask", jsonTicker.getString("Ask"));
             }
         } catch (JSONException ex) {
             Log.d(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
@@ -501,5 +506,9 @@ public class BittrexClient implements APIClient {
 
     public HashMap<String, Double> getAvailableBalances() {
         return availableBalances;
+    }
+
+    public HashMap<String, String> getTickerInfo() {
+        return tickerInfo;
     }
 }
