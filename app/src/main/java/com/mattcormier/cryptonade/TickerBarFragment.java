@@ -60,14 +60,17 @@ public class TickerBarFragment extends Fragment {
                         setTickerBarText("");
                     }
                     else {
-                        String output = "";
-                        for (Map.Entry<String, String> t: tickerInfo.entrySet()) {
-                            output += t.getKey() + ": " + t.getValue() + "    ";
-                        }
-                        output.trim();
-                        if (output.isEmpty()) {
-                            output = "";
-                        }
+//                        String output = "";
+//                        for (Map.Entry<String, String> t: tickerInfo.entrySet()) {
+//                            output += t.getKey() + ": " + t.getValue() + "    ";
+//                        }
+//                        output.trim();
+//                        if (output.isEmpty()) {
+//                            output = "";
+//                        }
+                        String output = "LAST: " + tickerInfo.get("Last") + "    " +
+                                "BID: " + tickerInfo.get("Bid") + "    " +
+                                "ASK: " + tickerInfo.get("Ask");
                         setTickerBarText(output);
                     }
                 }

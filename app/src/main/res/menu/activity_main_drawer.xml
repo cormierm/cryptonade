@@ -18,18 +18,22 @@
             android:id="@+id/nav_ticker"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Ticker" />
-        <item
-            android:id="@+id/nav_pairs"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Exchange Pairs" />
     </group>
 
     <item android:title="Settings">
         <menu>
             <item
+                android:id="@+id/nav_pairs"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Setup Exchange Pairs" />
+            <item
                 android:id="@+id/nav_api_settings"
                 android:icon="@drawable/ic_menu_manage"
                 android:title="@string/api_settings" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="@string/settings" />
         </menu>
     </item>
 

@@ -81,7 +81,9 @@ public class HitBTCClient implements APIClient {
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
-
+                            else if (cmd.equals("updateTickerInfo")) {
+                                processUpdateTickerInfo(response, c);
+                            }
                         } catch (Exception e) {
                             Log.d(TAG, "Error in request: " + cmd);
                         }
@@ -429,15 +431,29 @@ public class HitBTCClient implements APIClient {
             tvLowest.setText(jsonTicker.getString("ask"));
             edPrice.setText(jsonTicker.getString("last"));
             tickerInfo = new HashMap<>();
-            tickerInfo.put("last", jsonTicker.getString("last"));
-            tickerInfo.put("bid", jsonTicker.getString("bid"));
-            tickerInfo.put("ask", jsonTicker.getString("ask"));
+            tickerInfo.put("Last", jsonTicker.getString("last"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
         } catch (JSONException ex) {
-            Log.e(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
+            Log.e(TAG, "Error in processUpdateTradeTickerInfo: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
-            Log.e(TAG, "Error in processTradingPairs: Exception Error: " + ex.getMessage());
+            Log.e(TAG, "Error in processUpdateTradeTickerInfo: Exception Error: " + ex.getMessage());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
+    }
+
+    private void processUpdateTickerInfo(String response, Context c) {
+        try {
+            JSONObject jsonTicker = new JSONObject(response);
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("Last", jsonTicker.getString("last"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
+        } catch (JSONException ex) {
+            Log.e(TAG, "Error in processUpdateTickerInfo: JSONException Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            Log.e(TAG, "Error in processUpdateTickerInfo: Exception Error: " + ex.getMessage());
+        }
     }
 
     public void RestorePairsInDB(Context c) {
@@ -484,6 +500,11 @@ public class HitBTCClient implements APIClient {
     public void UpdateTradeTickerInfo(Context c, String pair) {
         String endpoint = "/api/2/public/ticker/" + pair;
         publicRequest(endpoint, null, c, "updateTradeTickerInfo");
+    }
+
+    public void UpdateTickerInfo(Context c, String pair) {
+        String endpoint = "/api/2/public/ticker/" + pair;
+        publicRequest(endpoint, null, c, "updateTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

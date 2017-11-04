@@ -120,6 +120,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 
     @Override
     public void onClick(View view) {
+        APIClient currentClient = (APIClient)spnClients.getSelectedItem();
         if (view.getId() == btnPlaceOrder.getId()) {
             String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
             String amount = edAmount.getText().toString();
@@ -130,7 +131,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             if (price.charAt(0) == '.') {
                 price = "0" + price;
             }
-            ((APIClient)spnClients.getSelectedItem()).PlaceOrder(context, pair, price, amount, orderType);
+            currentClient.PlaceOrder(context, pair, price, amount, orderType);
         }
         else if (view.getId() == btnBuy.getId()) {
             orderType = "buy";
@@ -152,18 +153,17 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
                     }
                 }
             } catch (Exception ex) {
-                Log.d(TAG, "onClick: Error with Max button click " + ex.getMessage());
-                Toast.makeText(context, "Error setting max amount. Check your price amount.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onClick: Error with Max button click " + ex.getMessage());
             }
         }
         else if (view.getId() == btnHighest.getId()) {
-            edPrice.setText(tvHighest.getText().toString());
+            edPrice.setText(currentClient.getTickerInfo().get("Bid"));
         }
         else if (view.getId() == btnLowest.getId()) {
-            edPrice.setText(tvLowest.getText().toString());
+            edPrice.setText(currentClient.getTickerInfo().get("Ask"));
         }
         else if (view.getId() == btnLast.getId()) {
-            edPrice.setText(tvLast.getText().toString());
+            edPrice.setText(currentClient.getTickerInfo().get("Last"));
         }
     }
 

@@ -59,12 +59,6 @@ public class PoloniexClient implements APIClient {
     private static String publicUrl = "https://poloniex.com/public?";
     private static String privateUrl = "https://poloniex.com/tradingApi";
 
-    public PoloniexClient() {
-        name = "";
-        apiKey = "";
-        apiSecret = "";
-    }
-
     public PoloniexClient(int exchangeId, String name, String apiKey, String apiSecret) {
         this.exchangeId = exchangeId;
         this.name = name;
@@ -89,6 +83,9 @@ public class PoloniexClient implements APIClient {
                             }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
+                            }
+                            else if (cmd.equals("updateTickerInfo")) {
+                                processUpdateTickerInfo(response, c);
                             }
 
                         } catch (Exception e) {
@@ -383,16 +380,39 @@ public class PoloniexClient implements APIClient {
                     tvLowest.setText(jsonTicker.getString("lowestAsk"));
                     edPrice.setText(jsonTicker.getString("last"));
                     tickerInfo = new HashMap<>();
-                    tickerInfo.put("last", jsonTicker.getString("last"));
-                    tickerInfo.put("bid", jsonTicker.getString("highestBid"));
-                    tickerInfo.put("ask", jsonTicker.getString("lowestAsk"));
+                    tickerInfo.put("Last", jsonTicker.getString("last"));
+                    tickerInfo.put("Bid", jsonTicker.getString("highestBid"));
+                    tickerInfo.put("Ask", jsonTicker.getString("lowestAsk"));
                     break;
                 }
             }
         } catch (Exception ex) {
-            Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
+            Log.d(TAG, "Error in processUpdateTradeTickerInfo: " + ex.toString());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
+    }
+
+    private void processUpdateTickerInfo(String response, Context c) {
+        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
+        String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
+
+        try {
+            JSONObject data = new JSONObject(response);
+            Iterator<String> keys = data.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.equals(pair)) {
+                    JSONObject jsonTicker = data.getJSONObject(key);
+                    tickerInfo = new HashMap<>();
+                    tickerInfo.put("Last", jsonTicker.getString("last"));
+                    tickerInfo.put("Bid", jsonTicker.getString("highestBid"));
+                    tickerInfo.put("Ask", jsonTicker.getString("lowestAsk"));
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in processUpdateTickerInfo: " + e.toString());
+        }
     }
 
     public void RestorePairsInDB(Context c) {
@@ -440,6 +460,12 @@ public class PoloniexClient implements APIClient {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
         publicRequest(params, c, "updateTradeTickerInfo");
+    }
+
+    public void UpdateTickerInfo(Context c, String pair) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("command", "returnTicker");
+        publicRequest(params, c, "updateTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

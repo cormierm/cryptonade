@@ -55,14 +55,7 @@ public class BitfinexClient implements APIClient {
     private String name;
     private String apiKey;
     private String apiSecret;
-    long prevNonce;
     private static String baseUrl = "https://api.bitfinex.com/v1";
-
-    public BitfinexClient() {
-        name = "";
-        apiKey = "";
-        apiSecret = "";
-    }
 
     public BitfinexClient(int exchangeId, String name, String apiKey, String apiSecret) {
         this.exchangeId = exchangeId;
@@ -88,6 +81,9 @@ public class BitfinexClient implements APIClient {
                             }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
+                            }
+                            else if (cmd.equals("updateTickerInfo")) {
+                                processUpdateTickerInfo(response, c);
                             }
 
                         } catch (Exception e) {
@@ -381,13 +377,25 @@ public class BitfinexClient implements APIClient {
             tvLowest.setText(jsonTicker.getString("ask"));
             edPrice.setText(jsonTicker.getString("last_price"));
             tickerInfo = new HashMap<>();
-            tickerInfo.put("last", jsonTicker.getString("last_price"));
-            tickerInfo.put("bid", jsonTicker.getString("bid"));
-            tickerInfo.put("ask", jsonTicker.getString("ask"));
+            tickerInfo.put("Last", jsonTicker.getString("last_price"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
         } catch (Exception ex) {
-            Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
+            Log.d(TAG, "Error in processUpdateTradeTickerInfo: " + ex.toString());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
+    }
+
+    private void processUpdateTickerInfo(String response, Context c) {
+        try {
+            JSONObject jsonTicker = new JSONObject(response);
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("Last", jsonTicker.getString("last_price"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
+        } catch (Exception e) {
+            Log.e(TAG, "Error in processUpdateTickerInfo: " + e.toString());
+        }
     }
 
     public void RestorePairsInDB(Context c) {
@@ -451,6 +459,12 @@ public class BitfinexClient implements APIClient {
         String endpoint = "/pubticker" + "/" + pair;
         publicRequest(endpoint, c, "updateTradeTickerInfo");
     }
+
+    public void UpdateTickerInfo(Context c, String pair) {
+        String endpoint = "/pubticker" + "/" + pair;
+        publicRequest(endpoint, c, "updateTickerInfo");
+    }
+
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
         Log.d(TAG, "PlaceOrder: ");

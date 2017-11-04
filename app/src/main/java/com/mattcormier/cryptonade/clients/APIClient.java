@@ -24,6 +24,8 @@ public interface APIClient {
 
     void UpdateTradeTickerInfo(Context c, String pair);
 
+    void UpdateTickerInfo(Context c, String pair);
+
     void PlaceOrder(Context c, String pair, String rate, String amount, String orderType);
 
     long getId();

@@ -21,7 +21,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 14;
+    public static final int     DB_VERSION = 15;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -164,8 +164,10 @@ public class CryptoDB {
             Log.d("Crypto DB", "Upgrading db from version "
                     + oldVersion + " to " + newVersion);
 
-            db.execSQL(CREATE_SETTINGS_TABLE);
-            db.execSQL("INSERT INTO settings VALUES (1, '')");
+//            db.execSQL(CREATE_SETTINGS_TABLE);
+//            db.execSQL("INSERT INTO settings VALUES (1, '')");
+//
+//            db.execSQL("ALTER TABLE exchange ADD column " + EXCHANGE_ACTIVE);
 
             db.execSQL(CryptoDB.DROP_TYPE_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);

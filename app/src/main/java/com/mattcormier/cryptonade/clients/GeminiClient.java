@@ -82,7 +82,9 @@ public class GeminiClient implements APIClient {
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
-
+                            else if (cmd.equals("updateTickerInfo")) {
+                                processUpdateTickerInfo(response, c);
+                            }
                         } catch (Exception e) {
                             Log.d(TAG, "Error in request: " + cmd);
                         }
@@ -203,7 +205,7 @@ public class GeminiClient implements APIClient {
 
     private static long generateNonce() {
         Date d = new Date();
-        return d.getTime();
+        return d.getTime() * 1000;
     }
 
     private static String createBody(HashMap<String, String> params) {
@@ -431,13 +433,25 @@ public class GeminiClient implements APIClient {
             tvLowest.setText(jsonTicker.getString("ask"));
             edPrice.setText(jsonTicker.getString("last"));
             tickerInfo = new HashMap<>();
-            tickerInfo.put("last", jsonTicker.getString("last"));
-            tickerInfo.put("bid", jsonTicker.getString("bid"));
-            tickerInfo.put("ask", jsonTicker.getString("ask"));
+            tickerInfo.put("Last", jsonTicker.getString("last"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
         } catch (Exception ex) {
-            Log.e(TAG, "Error in processTradingPairs: " + ex.toString());
+            Log.e(TAG, "Error in processUpdateTickerActivity: " + ex.toString());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
+    }
+
+    private void processUpdateTickerInfo(String response, Context c) {
+        try {
+            JSONObject jsonTicker = new JSONObject(response);
+            tickerInfo = new HashMap<>();
+            tickerInfo.put("Last", jsonTicker.getString("last"));
+            tickerInfo.put("Bid", jsonTicker.getString("bid"));
+            tickerInfo.put("Ask", jsonTicker.getString("ask"));
+        } catch (Exception ex) {
+            Log.e(TAG, "Error in processUpdateTickerActivity: " + ex.toString());
+        }
     }
 
     public void RestorePairsInDB(Context c) {
@@ -486,6 +500,11 @@ public class GeminiClient implements APIClient {
     public void UpdateTradeTickerInfo(Context c, String pair) {
         String endpoint = "/v1/pubticker/" + pair;
         publicRequest(endpoint, null, c, "updateTradeTickerInfo");
+    }
+
+    public void UpdateTickerInfo(Context c, String pair) {
+        String endpoint = "/v1/pubticker/" + pair;
+        publicRequest(endpoint, null, c, "updateTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

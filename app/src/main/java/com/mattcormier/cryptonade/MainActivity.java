@@ -86,9 +86,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void UpdateClientSpinner() {
-        Intent intent = getIntent();
-        String password = intent.getStringExtra("password");
-        Toast.makeText(this, password, Toast.LENGTH_LONG).show();
+//        Intent intent = getIntent();
+//        String password = intent.getStringExtra("password");
         List<Exchange> exchangeList = db.getExchanges();
         ArrayList<APIClient> clientList = new ArrayList<APIClient>();
         for (Exchange e: exchangeList) {
@@ -202,6 +201,11 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.content_frame, new APIFragment(), "api")
                     .addToBackStack("api")
                     .commit();
+        } else if (id == R.id.nav_settings) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, new SettingsFragment(), "settings")
+                    .addToBackStack("settings")
+                    .commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -247,5 +251,6 @@ public class MainActivity extends AppCompatActivity
             Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
         }
         selectedPair = (Pair)spnPairs.getSelectedItem();
+        ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(this, selectedPair.getExchangePair());
     }
 }

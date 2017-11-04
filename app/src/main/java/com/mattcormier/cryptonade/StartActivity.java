@@ -30,8 +30,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class StartActivity extends AppCompatActivity {
     private static final String TAG = "StartActivity";
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +47,6 @@ public class StartActivity extends AppCompatActivity {
 
         CryptoDB db = new CryptoDB(this);
         String passwordHash = db.getPasswordHash();
-        Log.d(TAG, "onResume: " + passwordHash);
         if (!passwordHash.equals("")) {
             Crypto.loginPassword(this);
         } else {

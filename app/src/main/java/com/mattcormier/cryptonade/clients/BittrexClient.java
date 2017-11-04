@@ -81,6 +81,9 @@ public class BittrexClient implements APIClient {
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
+                            else if (cmd.equals("updateTickerInfo")) {
+                                processUpdateTickerInfo(response, c);
+                            }
 
                         } catch (Exception e) {
                             Log.d(TAG, "Error in request: " + cmd);
@@ -402,16 +405,33 @@ public class BittrexClient implements APIClient {
                 tvLowest.setText(String.format("%.8f", jsonTicker.getDouble("Ask")));
                 edPrice.setText(String.format("%.8f", jsonTicker.getDouble("Last")));
                 tickerInfo = new HashMap<>();
-                tickerInfo.put("last", jsonTicker.getString("Last"));
-                tickerInfo.put("bid", jsonTicker.getString("Bid"));
-                tickerInfo.put("ask", jsonTicker.getString("Ask"));
+                tickerInfo.put("Last", jsonTicker.getString("Last"));
+                tickerInfo.put("Bid", jsonTicker.getString("Bid"));
+                tickerInfo.put("Ask", jsonTicker.getString("Ask"));
             }
         } catch (JSONException ex) {
-            Log.d(TAG, "Error in processTradingPairs: JSONException Error: " + ex.getMessage());
+            Log.d(TAG, "Error in processUpdateTradeTickerInfo: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
-            Log.d(TAG, "Error in processTradingPairs: Exception Error: " + ex.getMessage());
+            Log.d(TAG, "Error in processUpdateTradeTickerInfo: Exception Error: " + ex.getMessage());
         }
         ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
+    }
+
+    private void processUpdateTickerInfo(String response, Context c) {
+        try {
+            JSONObject jsonReponse = new JSONObject(response);
+            if (jsonReponse.getBoolean("success")) {
+                JSONObject jsonTicker = jsonReponse.getJSONObject("result");
+                tickerInfo = new HashMap<>();
+                tickerInfo.put("Last", jsonTicker.getString("Last"));
+                tickerInfo.put("Bid", jsonTicker.getString("Bid"));
+                tickerInfo.put("Ask", jsonTicker.getString("Ask"));
+            }
+        } catch (JSONException ex) {
+            Log.d(TAG, "Error in processUpdateTickerInfo: JSONException Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            Log.d(TAG, "Error in processUpdateTickerInfo: Exception Error: " + ex.getMessage());
+        }
     }
 
     public void RestorePairsInDB(Context c) {
@@ -458,6 +478,13 @@ public class BittrexClient implements APIClient {
         HashMap<String, String> params = new HashMap<>();
         params.put("market", pair);
         publicRequest(endpoint, params, c, "updateTradeTickerInfo");
+    }
+
+    public void UpdateTickerInfo(Context c, String pair) {
+        String endpoint = "/public/getticker?";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("market", pair);
+        publicRequest(endpoint, params, c, "updateTickerInfo");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
