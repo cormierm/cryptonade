@@ -76,9 +76,6 @@ public class BitfinexClient implements APIClient {
                             if (cmd.equals("restorePairsInDB")) {
                                 processRestorePairsInDB(response, c);
                             }
-                            else if (cmd.equals("updateTradeTickerInfo")) {
-                                processUpdateTradeTickerInfo(response, c);
-                            }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
@@ -364,28 +361,6 @@ public class BitfinexClient implements APIClient {
         }
     }
 
-    private void processUpdateTradeTickerInfo(String response, Context c) {
-        TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
-        TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
-        TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
-        TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-
-        try {
-            JSONObject jsonTicker = new JSONObject(response);
-            tvLast.setText(jsonTicker.getString("last_price"));
-            tvHighest.setText(jsonTicker.getString("bid"));
-            tvLowest.setText(jsonTicker.getString("ask"));
-            edPrice.setText(jsonTicker.getString("last_price"));
-            tickerInfo = new HashMap<>();
-            tickerInfo.put("Last", jsonTicker.getString("last_price"));
-            tickerInfo.put("Bid", jsonTicker.getString("bid"));
-            tickerInfo.put("Ask", jsonTicker.getString("ask"));
-        } catch (Exception ex) {
-            Log.d(TAG, "Error in processUpdateTradeTickerInfo: " + ex.toString());
-        }
-        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
-    }
-
     private void processUpdateTickerInfo(String response, Context c) {
         try {
             JSONObject jsonTicker = new JSONObject(response);
@@ -455,14 +430,13 @@ public class BitfinexClient implements APIClient {
         Toast.makeText(c, "Ticker is not supported by Bitfinex at this time.", Toast.LENGTH_LONG).show();
     }
 
-    public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpoint = "/pubticker" + "/" + pair;
-        publicRequest(endpoint, c, "updateTradeTickerInfo");
-    }
-
     public void UpdateTickerInfo(Context c, String pair) {
         String endpoint = "/pubticker" + "/" + pair;
         publicRequest(endpoint, c, "updateTickerInfo");
+    }
+
+    public void RefreshOrderBooks(Context c, String pair) {
+        // TODO
     }
 
 

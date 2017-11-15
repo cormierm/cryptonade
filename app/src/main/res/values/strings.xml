@@ -66,8 +66,10 @@
     <string name="order_successfully_cancelled">Order successfully cancelled.</string>
     <string name="order_successfully_placed">Trade placed successfully.\nOrder number:</string>
     <string name="security">Security</string>
+    <string name="bids">Bids</string>
+    <string name="asks">Asks</string>
 
-    <string name="title_activity_start">StartActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="refresh_order_books">Refresh Order Books</string>
 </resources>

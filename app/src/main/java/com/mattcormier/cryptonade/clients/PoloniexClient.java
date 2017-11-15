@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.models.Exchange;
@@ -78,14 +80,14 @@ public class PoloniexClient implements APIClient {
                             if (cmd.equals("restorePairsInDB")) {
                                 processRestorePairsInDB(response, c);
                             }
-                            else if (cmd.equals("updateTradeTickerInfo")) {
-                                processUpdateTradeTickerInfo(response, c);
-                            }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
                             else if (cmd.equals("updateTickerInfo")) {
                                 processUpdateTickerInfo(response, c);
+                            }
+                            else if (cmd.equals("refreshOrderBooks")) {
+                                processRefreshOrderBooks(response, c);
                             }
 
                         } catch (Exception e) {
@@ -360,38 +362,6 @@ public class PoloniexClient implements APIClient {
         }
     }
 
-    private void processUpdateTradeTickerInfo(String response, Context c) {
-        TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
-        TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
-        TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
-        TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-        Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
-        String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
-
-        try {
-            JSONObject data = new JSONObject(response);
-            Iterator<String> keys = data.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (key.equals(pair)) {
-                    JSONObject jsonTicker = data.getJSONObject(key);
-                    tvLast.setText(jsonTicker.getString("last"));
-                    tvHighest.setText(jsonTicker.getString("highestBid"));
-                    tvLowest.setText(jsonTicker.getString("lowestAsk"));
-                    edPrice.setText(jsonTicker.getString("last"));
-                    tickerInfo = new HashMap<>();
-                    tickerInfo.put("Last", jsonTicker.getString("last"));
-                    tickerInfo.put("Bid", jsonTicker.getString("highestBid"));
-                    tickerInfo.put("Ask", jsonTicker.getString("lowestAsk"));
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            Log.d(TAG, "Error in processUpdateTradeTickerInfo: " + ex.toString());
-        }
-        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
-    }
-
     private void processUpdateTickerInfo(String response, Context c) {
         Spinner spnPairs = ((Activity) c).findViewById(R.id.spnPairs);
         String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
@@ -412,6 +382,45 @@ public class PoloniexClient implements APIClient {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in processUpdateTickerInfo: " + e.toString());
+        }
+    }
+
+    private void processRefreshOrderBooks(String response, Context c) {
+        Log.d(TAG, "processRefreshOrderBooks: response: " + response);
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+
+            // Parse asks and update asks list
+            JSONArray jsonAsks = jsonObject.getJSONArray("asks");
+            ArrayList<HashMap<String, String>> asksList = new ArrayList<>();
+            for(int i=0; i < jsonAsks.length(); i++) {
+                JSONArray jsonAsk = jsonAsks.getJSONArray(i);
+                String price = jsonAsk.getString(0);
+                String amount = jsonAsk.getString(1);
+                HashMap<String, String> ask = new HashMap<>();
+                ask.put("price", price);
+                ask.put("amount", amount);
+                asksList.add(ask);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateAsksList(asksList);
+
+            // Parse bids and update bids list
+            JSONArray jsonBids = jsonObject.getJSONArray("bids");
+            ArrayList<HashMap<String, String>> bidsList = new ArrayList<>();
+            for(int i=0; i < jsonBids.length(); i++) {
+                JSONArray jsonBid = jsonBids.getJSONArray(i);
+                String price = jsonBid.getString(0);
+                String amount = jsonBid.getString(1);
+                HashMap<String, String> bid = new HashMap<>();
+                bid.put("price", price);
+                bid.put("amount", amount);
+                bidsList.add(bid);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateBidsList(bidsList);
+            Log.d(TAG, "processRefreshOrderBooks: arraylist " + bidsList.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(TAG, "processRefreshOrderBooks: JSONException: " + e.getMessage());
         }
     }
 
@@ -456,16 +465,18 @@ public class PoloniexClient implements APIClient {
         publicRequest(params, c, "updateTickerActivity");
     }
 
-    public void UpdateTradeTickerInfo(Context c, String pair) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("command", "returnTicker");
-        publicRequest(params, c, "updateTradeTickerInfo");
-    }
-
     public void UpdateTickerInfo(Context c, String pair) {
         HashMap<String, String> params = new HashMap<>();
         params.put("command", "returnTicker");
         publicRequest(params, c, "updateTickerInfo");
+    }
+
+    public void RefreshOrderBooks(Context c, String pair) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("command", "returnOrderBook");
+        params.put("currencyPair", pair.toUpperCase());
+        params.put("depth", "20");
+        publicRequest(params, c, "refreshOrderBooks");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

@@ -79,9 +79,6 @@ public class QuadrigacxClient implements APIClient {
                             if (cmd.equals("restorePairsInDB")) {
                                 processRestorePairsInDB(response, c);
                             }
-                            else if (cmd.equals("updateTradeTickerInfo")) {
-                                processUpdateTradeTickerInfo(response, c);
-                            }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
@@ -387,28 +384,6 @@ public class QuadrigacxClient implements APIClient {
         }
     }
 
-    private void processUpdateTradeTickerInfo(String response, Context c) {
-        TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
-        TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
-        TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
-        TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-
-        try {
-            JSONObject jsonTicker = new JSONObject(response);
-            tvLast.setText(jsonTicker.getString("last"));
-            tvHighest.setText(jsonTicker.getString("bid"));
-            tvLowest.setText(jsonTicker.getString("ask"));
-            edPrice.setText(jsonTicker.getString("last"));
-            tickerInfo = new HashMap<>();
-            tickerInfo.put("Last", jsonTicker.getString("last"));
-            tickerInfo.put("Bid", jsonTicker.getString("bid"));
-            tickerInfo.put("Ask", jsonTicker.getString("ask"));
-        } catch (JSONException ex) {
-            Log.e(TAG, "Error in processUpdateTradeTickerInfo: JSONException: " + ex.toString());
-        }
-        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
-    }
-
     private void processUpdateTickerInfo(String response, Context c) {
         try {
             JSONObject jsonTicker = new JSONObject(response);
@@ -463,18 +438,15 @@ public class QuadrigacxClient implements APIClient {
         publicRequest(params, c, endpointUri, "updateTickerActivity");
     }
 
-    public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpointUri = "/ticker?";
-        HashMap<String, String> params = new HashMap<>();
-        params.put("book", pair);
-        publicRequest(params, c, endpointUri, "updateTradeTickerInfo");
-    }
-
     public void UpdateTickerInfo(Context c, String pair) {
         String endpointUri = "/ticker?";
         HashMap<String, String> params = new HashMap<>();
         params.put("book", pair);
         publicRequest(params, c, endpointUri, "updateTickerInfo");
+    }
+
+    public void RefreshOrderBooks(Context c, String pair) {
+        // TODO
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

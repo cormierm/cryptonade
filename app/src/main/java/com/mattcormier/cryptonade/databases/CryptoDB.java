@@ -139,7 +139,7 @@ public class CryptoDB {
             db.execSQL(CREATE_SETTINGS_TABLE);
 
             //insert sample exchange
-            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '')");
+            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '', 1)");
             // insert sample pair
             db.execSQL("INSERT INTO pair VALUES (1, 1, 'BTC-ETH', 'BTC-ETH')");
 

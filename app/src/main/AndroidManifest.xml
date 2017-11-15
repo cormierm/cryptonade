@@ -3,7 +3,6 @@
     package="com.mattcormier.cryptonade">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,7 +13,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".StartActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -27,5 +26,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

@@ -78,9 +78,6 @@ public class GDAXClient implements APIClient {
                             if (cmd.equals("restorePairsInDB")) {
                                 processRestorePairsInDB(response, c);
                             }
-                            else if (cmd.equals("updateTradeTickerInfo")) {
-                                processUpdateTradeTickerInfo(response, c);
-                            }
                             else if (cmd.equals("updateTickerActivity")) {
                                 processUpdateTickerActivity(response, c);
                             }
@@ -394,30 +391,6 @@ public class GDAXClient implements APIClient {
         }
     }
 
-    private void processUpdateTradeTickerInfo(String response, Context c) {
-        TextView tvLast = ((Activity) c).findViewById(R.id.tvTradeLastTrade);
-        TextView tvHighest = ((Activity) c).findViewById(R.id.tvTradeHighestBid);
-        TextView tvLowest = ((Activity) c).findViewById(R.id.tvTradeLowestAsk);
-        TextView edPrice = ((Activity) c).findViewById(R.id.edTradePrice);
-
-        try {
-            JSONObject jsonTicker = new JSONObject(response);
-            tvLast.setText(jsonTicker.getString("price"));
-            tvHighest.setText(jsonTicker.getString("bid"));
-            tvLowest.setText(jsonTicker.getString("ask"));
-            edPrice.setText(jsonTicker.getString("price"));
-            tickerInfo = new HashMap<>();
-            tickerInfo.put("Last", jsonTicker.getString("last"));
-            tickerInfo.put("Bid", jsonTicker.getString("bid"));
-            tickerInfo.put("Ask", jsonTicker.getString("ask"));
-        } catch (JSONException ex) {
-            Log.e(TAG, "Error in processUpdateTradeTickerInfo: JSONException Error: " + ex.getMessage());
-        } catch (Exception ex) {
-            Log.e(TAG, "Error in processUpdateTradeTickerInfo: Exception Error: " + ex.getMessage());
-        }
-        ((TradeFragment)((Activity) c).getFragmentManager().findFragmentByTag("trade")).updateAvailableInfo();
-    }
-
     private void processUpdateTickerInfo(String response, Context c) {
         try {
             JSONObject jsonTicker = new JSONObject(response);
@@ -471,14 +444,13 @@ public class GDAXClient implements APIClient {
         publicRequest(endpoint, null, c, "updateTickerActivity");
     }
 
-    public void UpdateTradeTickerInfo(Context c, String pair) {
-        String endpoint = "/products/" + pair + "/ticker";
-        publicRequest(endpoint, null, c, "updateTradeTickerInfo");
-    }
-
     public void UpdateTickerInfo(Context c, String pair) {
         String endpoint = "/products/" + pair + "/ticker";
         publicRequest(endpoint, null, c, "updateTickerInfo");
+    }
+
+    public void RefreshOrderBooks(Context c, String pair) {
+        // TODO
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

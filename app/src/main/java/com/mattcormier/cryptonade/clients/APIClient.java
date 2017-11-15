@@ -22,9 +22,9 @@ public interface APIClient {
 
     void UpdateTickerActivity(Context c);
 
-    void UpdateTradeTickerInfo(Context c, String pair);
-
     void UpdateTickerInfo(Context c, String pair);
+
+    void RefreshOrderBooks(Context c, String pair);
 
     void PlaceOrder(Context c, String pair, String rate, String amount, String orderType);
 

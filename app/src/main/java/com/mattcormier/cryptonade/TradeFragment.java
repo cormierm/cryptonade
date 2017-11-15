@@ -18,24 +18,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 public class TradeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, TextView.OnEditorActionListener {
     private static final String TAG = "TradeFragment";
     TextView tvHeaderLeft;
     TextView tvHeaderRight;
-    TextView tvLast;
-    TextView tvHighest;
-    TextView tvLowest;
     EditText edPrice;
     EditText edAmount;
     EditText edTotal;
@@ -50,8 +43,8 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     MainActivity mainActivity;
     Spinner spnPairs;
     Spinner spnClients;
+    OrderBookFragment orderBooksFrag;
 
-    CryptoDB db;
     View tradeView;
     Context context;
 
@@ -64,9 +57,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 
         tvHeaderLeft = tradeView.findViewById(R.id.tvTradeHeaderLeft);
         tvHeaderRight = tradeView.findViewById(R.id.tvTradeHeaderRight);
-        tvLast = tradeView.findViewById(R.id.tvTradeLastTrade);
-        tvHighest = tradeView.findViewById(R.id.tvTradeHighestBid);
-        tvLowest = tradeView.findViewById(R.id.tvTradeLowestAsk);
         edPrice = tradeView.findViewById(R.id.edTradePrice);
         edAmount = tradeView.findViewById(R.id.edTradeAmount);
         edTotal = tradeView.findViewById(R.id.edTradeTotal);
@@ -78,12 +68,10 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         btnLowest = tradeView.findViewById(R.id.btnTradeBuyLowestAsk);
         btnPlaceOrder = tradeView.findViewById(R.id.btnTradePlaceOrder);
 
-        spnPairs = (Spinner) mainActivity.findViewById(R.id.spnPairs);
+        spnPairs = mainActivity.findViewById(R.id.spnPairs);
         spnPairs.setOnItemSelectedListener(this);
-        spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
+        spnClients = mainActivity.findViewById(R.id.spnClients);
         spnClients.setOnItemSelectedListener(this);
-
-        db = new CryptoDB(context);
 
         btnBuy.setOnClickListener(this);
         btnSell.setOnClickListener(this);
@@ -100,6 +88,11 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         updatePage();
 
         setHasOptionsMenu(true);
+
+        orderBooksFrag = new OrderBookFragment();
+        getFragmentManager().beginTransaction()
+                .replace(R.id.frame_trade_books, orderBooksFrag, "order_book")
+                .commit();
 
         return tradeView;
     }
@@ -170,7 +163,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     private void updatePage() {
         Log.d(TAG, "updatePage: start");
         Pair selectedPair = (Pair) spnPairs.getSelectedItem();
-        ((APIClient)spnClients.getSelectedItem()).UpdateTradeTickerInfo(context, selectedPair.getExchangePair());
+        ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(context, selectedPair.getExchangePair());
         String[] pair = selectedPair.toString().split("-");
         String leftHeaderText = orderType.toUpperCase() + " " + pair[1];
         btnPlaceOrder.setText(leftHeaderText);
@@ -182,6 +175,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             btnPlaceOrder.setBackgroundResource(R.color.red);
         }
         updateAvailableInfo();
+        //orderBooksFrag.refreshBooks();
     }
 
     @Override

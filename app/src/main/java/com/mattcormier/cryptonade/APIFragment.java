@@ -27,7 +27,6 @@ public class APIFragment extends Fragment {
     private static final String TAG = "APIFragment";
     ListView lvAPIList;
     CryptoDB db;
-    PoloniexClient exchange;
     View apiView;
     Context context;
 
@@ -36,9 +35,9 @@ public class APIFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         apiView = inflater.inflate(R.layout.api_layout, container, false);
         context = getActivity();
-        lvAPIList = (ListView) apiView.findViewById(R.id.lvAPIList);
+        lvAPIList = apiView.findViewById(R.id.lvAPIList);
 
-        FloatingActionButton fabAdd = (FloatingActionButton) apiView.findViewById(R.id.fabAPIAdd);
+        FloatingActionButton fabAdd = apiView.findViewById(R.id.fabAPIAdd);
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
