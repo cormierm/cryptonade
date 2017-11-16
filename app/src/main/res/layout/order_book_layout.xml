@@ -11,9 +11,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/order_books"
+        android:textAllCaps="false"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,19 +34,21 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="horizontal"
+        android:layout_margin="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOrderBookRefresh" android:baselineAligned="false">
+        app:layout_constraintTop_toBottomOf="@+id/btnOrderBookRefresh">
 
         <LinearLayout
             android:id="@+id/llOrderBooksAsks"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginEnd="1dp"
+            android:layout_marginRight="1dp"
             android:layout_weight="1"
             android:background="@drawable/my_border"
-            android:layout_marginRight="1dp"
-            android:orientation="vertical" android:layout_marginEnd="1dp">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvOrderBooksAsksHeader"
@@ -88,6 +90,7 @@
                 android:id="@+id/rvOrderBooksAsks"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="2dp"
                 android:layout_weight="1" />
         </LinearLayout>
 
@@ -95,10 +98,11 @@
             android:id="@+id/llOrderBooksBids"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/my_border"
-            android:layout_weight="1"
             android:layout_marginLeft="1dp"
-            android:orientation="vertical" android:layout_marginStart="1dp">
+            android:layout_marginStart="1dp"
+            android:layout_weight="1"
+            android:background="@drawable/my_border"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvOrderBooksBidsHeader"
@@ -140,6 +144,7 @@
                 android:id="@+id/rvOrderBooksBids"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="2dp"
                 android:layout_weight="1" />
         </LinearLayout>
     </LinearLayout>

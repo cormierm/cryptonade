@@ -227,6 +227,7 @@ public class MainActivity extends AppCompatActivity
     public void onNothingSelected(AdapterView<?> parent) {}
 
     public void UpdatePairsSpinner() {
+        Log.d(TAG, "UpdatePairsSpinner: ");
         List<Pair> pairsList = db.getPairs((int)((APIClient)spnClients.getSelectedItem()).getId());
         Pair tmpPair = (Pair)spnPairs.getSelectedItem();
         String currentPair = "";
@@ -251,6 +252,8 @@ public class MainActivity extends AppCompatActivity
             Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
         }
         selectedPair = (Pair)spnPairs.getSelectedItem();
-        ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(this, selectedPair.getExchangePair());
+        if (selectedPair != null) {
+            ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(this, selectedPair.getExchangePair());
+        }
     }
 }

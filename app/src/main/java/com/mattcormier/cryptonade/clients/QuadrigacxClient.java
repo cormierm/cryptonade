@@ -17,6 +17,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.mattcormier.cryptonade.BalanceBarFragment;
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.OrdersFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
@@ -84,6 +85,9 @@ public class QuadrigacxClient implements APIClient {
                             }
                             else if (cmd.equals("updateTickerInfo")) {
                                 processUpdateTickerInfo(response, c);
+                            }
+                            else if (cmd.equals("refreshOrderBooks")) {
+                                processRefreshOrderBooks(response, c);
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Error in request: " + cmd);
@@ -396,6 +400,45 @@ public class QuadrigacxClient implements APIClient {
         }
     }
 
+    private void processRefreshOrderBooks(String response, Context c) {
+        Log.d(TAG, "processRefreshOrderBooks: response: " + response);
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+
+            // Parse asks and update asks list
+            JSONArray jsonAsks = jsonObject.getJSONArray("asks");
+            ArrayList<HashMap<String, String>> asksList = new ArrayList<>();
+            for(int i=0; i < jsonAsks.length(); i++) {
+                JSONArray jsonAsk = jsonAsks.getJSONArray(i);
+                String price = jsonAsk.getString(0);
+                String amount = jsonAsk.getString(1);
+                HashMap<String, String> ask = new HashMap<>();
+                ask.put("price", price);
+                ask.put("amount", amount);
+                asksList.add(ask);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateAsksList(asksList);
+
+            // Parse bids and update bids list
+            JSONArray jsonBids = jsonObject.getJSONArray("bids");
+            ArrayList<HashMap<String, String>> bidsList = new ArrayList<>();
+            for(int i=0; i < jsonBids.length(); i++) {
+                JSONArray jsonBid = jsonBids.getJSONArray(i);
+                String price = jsonBid.getString(0);
+                String amount = jsonBid.getString(1);
+                HashMap<String, String> bid = new HashMap<>();
+                bid.put("price", price);
+                bid.put("amount", amount);
+                bidsList.add(bid);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateBidsList(bidsList);
+            Log.d(TAG, "processRefreshOrderBooks: arraylist " + bidsList.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(TAG, "processRefreshOrderBooks: JSONException: " + e.getMessage());
+        }
+    }
+
     public void UpdateBalances(Context c) {
         String endpointUri = "/balance";
         privateRequest(null, c, endpointUri, "updateBalances");
@@ -446,7 +489,10 @@ public class QuadrigacxClient implements APIClient {
     }
 
     public void RefreshOrderBooks(Context c, String pair) {
-        // TODO
+        String endpointUri = "/order_book?";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("book", pair);
+        publicRequest(params, c, endpointUri, "refreshOrderBooks");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

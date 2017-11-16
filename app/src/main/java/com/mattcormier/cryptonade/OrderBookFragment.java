@@ -8,6 +8,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -57,7 +60,22 @@ public class OrderBookFragment extends Fragment implements View.OnClickListener{
         mBidsRecyclerViewAdapter = new BookRecyclerViewAdapter(mContext, new ArrayList<HashMap<String, String>>());
         rvBids.setAdapter(mBidsRecyclerViewAdapter);
 
+        setHasOptionsMenu(true);
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.order_book_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuRefreshOrderBooks) {
+            refreshBooks();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -74,18 +92,27 @@ public class OrderBookFragment extends Fragment implements View.OnClickListener{
     }
 
     public void refreshBooks() {
-        APIClient client = (APIClient) spnClients.getSelectedItem();
-        String pair = ((Pair)spnPairs.getSelectedItem()).getExchangePair();
-        client.RefreshOrderBooks(mContext, pair);
+        APIClient client = null;
+        if (spnClients != null) {
+            client = (APIClient) spnClients.getSelectedItem();
+        }
+        String pair = null;
+        if (spnPairs != null) {
+            pair = ((Pair)spnPairs.getSelectedItem()).getExchangePair();
+        }
+
+
+        if (client != null && pair != null) {
+            client.RefreshOrderBooks(mContext, pair);
+        }
+
     }
 
     public void updateAsksList(List<HashMap<String, String>> asksList) {
-        Log.d(TAG, "updateAsksList: starts" + asksList.toString());
         mAsksRecyclerViewAdapter.loadNewData(asksList);
     }
 
     public void updateBidsList(List<HashMap<String, String>> bidsList) {
-        Log.d(TAG, "updateBidsList: starts" + bidsList.toString());
         mBidsRecyclerViewAdapter.loadNewData(bidsList);
     }
 }

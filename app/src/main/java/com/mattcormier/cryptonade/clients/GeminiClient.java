@@ -17,6 +17,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -82,6 +83,10 @@ public class GeminiClient implements APIClient {
                             else if (cmd.equals("updateTickerInfo")) {
                                 processUpdateTickerInfo(response, c);
                             }
+                            else if (cmd.equals("refreshOrderBooks")) {
+                                processRefreshOrderBooks(response, c);
+                            }
+
                         } catch (Exception e) {
                             Log.d(TAG, "Error in request: " + cmd);
                         }
@@ -429,6 +434,45 @@ public class GeminiClient implements APIClient {
         }
     }
 
+    private void processRefreshOrderBooks(String response, Context c) {
+        Log.d(TAG, "refreshOrderBooks: starts");
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+
+            // Parse asks and update asks list
+            JSONArray jsonAsks = jsonObject.getJSONArray("asks");
+            ArrayList<HashMap<String, String>> asksList = new ArrayList<>();
+            for(int i=0; i < jsonAsks.length(); i++) {
+                JSONObject jsonAsk = jsonAsks.getJSONObject(i);
+                String price = jsonAsk.getString("price");
+                String amount = jsonAsk.getString("amount");
+                HashMap<String, String> ask = new HashMap<>();
+                ask.put("price", price);
+                ask.put("amount", amount);
+                asksList.add(ask);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateAsksList(asksList);
+
+            // Parse bids and update bids list
+            JSONArray jsonBids = jsonObject.getJSONArray("bids");
+            ArrayList<HashMap<String, String>> bidsList = new ArrayList<>();
+            for(int i=0; i < jsonBids.length(); i++) {
+                JSONObject jsonBid = jsonBids.getJSONObject(i);
+                String price = jsonBid.getString("price");
+                String amount = jsonBid.getString("amount");
+                HashMap<String, String> bid = new HashMap<>();
+                bid.put("price", price);
+                bid.put("amount", amount);
+                bidsList.add(bid);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateBidsList(bidsList);
+            Log.d(TAG, "processRefreshOrderBooks: arraylist " + bidsList.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(TAG, "processRefreshOrderBooks: JSONException: " + e.getMessage());
+        }
+    }
+
     public void RestorePairsInDB(Context c) {
         String endpoint = "/v1/symbols";
         publicRequest(endpoint, null, c, "restorePairsInDB");
@@ -478,7 +522,8 @@ public class GeminiClient implements APIClient {
     }
 
     public void RefreshOrderBooks(Context c, String pair) {
-        // TODO
+        String endpoint = "/v1/book/" + pair;
+        publicRequest(endpoint, null, c, "refreshOrderBooks");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {

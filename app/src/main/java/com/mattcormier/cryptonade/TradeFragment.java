@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.models.Pair;
@@ -85,7 +87,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         edPrice.setOnEditorActionListener(this);
 
         orderType = "buy";
-        updatePage();
 
         setHasOptionsMenu(true);
 
@@ -93,6 +94,8 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         getFragmentManager().beginTransaction()
                 .replace(R.id.frame_trade_books, orderBooksFrag, "order_book")
                 .commit();
+
+        updatePage();
 
         return tradeView;
     }
@@ -117,14 +120,19 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         if (view.getId() == btnPlaceOrder.getId()) {
             String pair = ((Pair) spnPairs.getSelectedItem()).getExchangePair();
             String amount = edAmount.getText().toString();
-            if (amount.charAt(0) == '.') {
-                amount = "0" + amount;
-            }
             String price = edPrice.getText().toString();
-            if (price.charAt(0) == '.') {
-                price = "0" + price;
+            if (amount.length() > 0 && price.length() > 0) {
+                if (amount.charAt(0) == '.') {
+                    amount = "0" + amount;
+                }
+                if (price.charAt(0) == '.') {
+                    price = "0" + price;
+                }
+                currentClient.PlaceOrder(context, pair, price, amount, orderType);
+            } else {
+                Toast.makeText(context, "Required field missing information.", Toast.LENGTH_SHORT).show();
             }
-            currentClient.PlaceOrder(context, pair, price, amount, orderType);
+
         }
         else if (view.getId() == btnBuy.getId()) {
             orderType = "buy";
@@ -175,7 +183,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             btnPlaceOrder.setBackgroundResource(R.color.red);
         }
         updateAvailableInfo();
-        //orderBooksFrag.refreshBooks();
+        orderBooksFrag.refreshBooks();
     }
 
     @Override

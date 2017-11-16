@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -80,6 +81,9 @@ public class BittrexClient implements APIClient {
                             }
                             else if (cmd.equals("updateTickerInfo")) {
                                 processUpdateTickerInfo(response, c);
+                            }
+                            else if (cmd.equals("refreshOrderBooks")) {
+                                processRefreshOrderBooks(response, c);
                             }
 
                         } catch (Exception e) {
@@ -393,14 +397,59 @@ public class BittrexClient implements APIClient {
             if (jsonReponse.getBoolean("success")) {
                 JSONObject jsonTicker = jsonReponse.getJSONObject("result");
                 tickerInfo = new HashMap<>();
-                tickerInfo.put("Last", jsonTicker.getString("Last"));
-                tickerInfo.put("Bid", jsonTicker.getString("Bid"));
-                tickerInfo.put("Ask", jsonTicker.getString("Ask"));
+                tickerInfo.put("Last", String.format("%.8f", jsonTicker.getDouble("Last")));
+                tickerInfo.put("Bid", String.format("%.8f", jsonTicker.getDouble("Bid")));
+                tickerInfo.put("Ask", String.format("%.8f", jsonTicker.getDouble("Ask")));
             }
         } catch (JSONException ex) {
             Log.d(TAG, "Error in processUpdateTickerInfo: JSONException Error: " + ex.getMessage());
         } catch (Exception ex) {
             Log.d(TAG, "Error in processUpdateTickerInfo: Exception Error: " + ex.getMessage());
+        }
+    }
+
+    private void processRefreshOrderBooks(String response, Context c) {
+        Log.d(TAG, "refreshOrderBooks: response " + response);
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if (!jsonObject.has("success")) {
+                Log.e(TAG, "processRefreshOrderBooks: Error in processRefreshOrderBooks: No success response.");
+                return;
+            }
+
+            JSONObject jsonResult = jsonObject.getJSONObject("result");
+
+            // Parse asks and update asks list
+            JSONArray jsonAsks = jsonResult.getJSONArray("sell");
+            ArrayList<HashMap<String, String>> asksList = new ArrayList<>();
+            for(int i=0; i < jsonAsks.length(); i++) {
+                JSONObject jsonAsk = jsonAsks.getJSONObject(i);
+                String price = String.format("%.8f", jsonAsk.getDouble("Rate"));
+                String amount = String.format("%.8f", jsonAsk.getDouble("Quantity"));
+                HashMap<String, String> ask = new HashMap<>();
+                ask.put("price", price);
+                ask.put("amount", amount);
+                asksList.add(ask);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateAsksList(asksList);
+
+            // Parse bids and update bids list
+            JSONArray jsonBids = jsonResult.getJSONArray("buy");
+            ArrayList<HashMap<String, String>> bidsList = new ArrayList<>();
+            for(int i=0; i < jsonBids.length(); i++) {
+                JSONObject jsonBid = jsonBids.getJSONObject(i);
+                String price = String.format("%.8f", jsonBid.getDouble("Rate"));
+                String amount = String.format("%.8f", jsonBid.getDouble("Quantity"));
+                HashMap<String, String> bid = new HashMap<>();
+                bid.put("price", price);
+                bid.put("amount", amount);
+                bidsList.add(bid);
+            }
+            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateBidsList(bidsList);
+            Log.d(TAG, "processRefreshOrderBooks: arraylist " + bidsList.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(TAG, "processRefreshOrderBooks: JSONException: " + e.getMessage());
         }
     }
 
@@ -451,7 +500,11 @@ public class BittrexClient implements APIClient {
     }
 
     public void RefreshOrderBooks(Context c, String pair) {
-        // TODO
+        String endpoint = "/public/getorderbook?";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("market", pair);
+        params.put("type", "both");
+        publicRequest(endpoint, params, c, "refreshOrderBooks");
     }
 
     public void PlaceOrder(Context c, String pair, String rate, String amount, String orderType) {
