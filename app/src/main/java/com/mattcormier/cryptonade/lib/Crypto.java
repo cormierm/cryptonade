@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.clients.BinanceClient;
 import com.mattcormier.cryptonade.clients.BitfinexClient;
 import com.mattcormier.cryptonade.clients.BittrexClient;
 import com.mattcormier.cryptonade.clients.CexioClient;
@@ -84,6 +85,9 @@ public class Crypto {
         }
         else if (exchange.getTypeId() == 8) {
             return new HitBTCClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret());
+        }
+        else if (exchange.getTypeId() == 9) {
+            return new BinanceClient((int)exchange.getId(), exchange.getName(), exchange.getAPIKey(), exchange.getAPISecret());
         }
         return null;
     }

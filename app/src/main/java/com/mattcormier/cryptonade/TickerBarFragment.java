@@ -6,12 +6,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +32,7 @@ public class TickerBarFragment extends Fragment {
     HashMap<String, Double> currentBalances;
     View view;
     Spinner spnClients;
+    Spinner spnPairs;
     APIClient client;
     Context context;
 
@@ -35,12 +40,30 @@ public class TickerBarFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         spnClients = ((MainActivity)getActivity()).findViewById(R.id.spnClients);
+        spnPairs = ((MainActivity)getActivity()).findViewById(R.id.spnPairs);
         view = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
         tvTickerBar = view.findViewById(R.id.tvBalanceBar);
 
+        setHasOptionsMenu(true);
+
         return view;
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_ticker_info_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menuRefreshTickerInfo) {
+            refreshTickerBar();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     public void onResume() {
@@ -60,17 +83,9 @@ public class TickerBarFragment extends Fragment {
                         setTickerBarText("");
                     }
                     else {
-//                        String output = "";
-//                        for (Map.Entry<String, String> t: tickerInfo.entrySet()) {
-//                            output += t.getKey() + ": " + t.getValue() + "    ";
-//                        }
-//                        output.trim();
-//                        if (output.isEmpty()) {
-//                            output = "";
-//                        }
                         String output = "LAST: " + tickerInfo.get("Last") + "    " +
-                                "BID: " + tickerInfo.get("Bid") + "    " +
-                                "ASK: " + tickerInfo.get("Ask");
+                                "ASK: " + tickerInfo.get("Ask") + "    " +
+                                "BID: " + tickerInfo.get("Bid");
                         setTickerBarText(output);
                     }
                 }
@@ -87,5 +102,10 @@ public class TickerBarFragment extends Fragment {
                 tvTickerBar.setText(text);
             }
         });
+    }
+
+    public void refreshTickerBar(){
+        String pair = ((Pair)(spnPairs.getSelectedItem())).getExchangePair();
+        ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(context, pair);
     }
 }

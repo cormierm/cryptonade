@@ -21,7 +21,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 15;
+    public static final int     DB_VERSION = 16;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -151,6 +151,7 @@ public class CryptoDB {
             db.execSQL("INSERT INTO type VALUES (6, 'GDAX', 'Passphrase')");
             db.execSQL("INSERT INTO type VALUES (7, 'Gemini', '')");
             db.execSQL("INSERT INTO type VALUES (8, 'HitBTC', '')");
+            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
 
             // set password blank
             db.execSQL("INSERT INTO settings VALUES (1, '')");
@@ -179,6 +180,7 @@ public class CryptoDB {
             db.execSQL("INSERT INTO type VALUES (6, 'GDAX', 'Passphrase')");
             db.execSQL("INSERT INTO type VALUES (7, 'Gemini', '')");
             db.execSQL("INSERT INTO type VALUES (8, 'HitBTC', '')");
+            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
 
             Log.d(TAG, "onUpgrade: done.");
         }

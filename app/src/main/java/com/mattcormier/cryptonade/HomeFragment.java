@@ -79,8 +79,8 @@ public class HomeFragment extends Fragment implements OnClickListener {
         }
         else if (v.getId() == R.id.btnHomeApiSettings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new OrderBookFragment(), "order_book")
-                    .addToBackStack("order_book")
+                    .replace(R.id.content_frame, new APIFragment(), "api_settings")
+                    .addToBackStack("api_settings")
                     .commit();
         }
     }
