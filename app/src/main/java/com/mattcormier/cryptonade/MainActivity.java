@@ -84,10 +84,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void UpdateClientSpinner() {
-//        Intent intent = getIntent();
-//        String password = intent.getStringExtra("password");
         List<Exchange> exchangeList = db.getExchanges();
-        ArrayList<APIClient> clientList = new ArrayList<APIClient>();
+        if(exchangeList.isEmpty()) {
+            Exchange exchange = new Exchange(1, 1, "Poloniex Demo", "", "", "", 1);
+            long rowId = db.insertExchange(exchange);
+            Exchange newEx = db.getExchange((int)rowId);
+            APIClient newClient = Crypto.getAPIClient(newEx);
+            newClient.RestorePairsInDB(this);
+            UpdateClientSpinner();
+        }
+        ArrayList<APIClient> clientList = new ArrayList<>();
         for (Exchange e: exchangeList) {
             clientList.add(Crypto.getAPIClient(e));
         }
@@ -226,7 +232,12 @@ public class MainActivity extends AppCompatActivity
 
     public void UpdatePairsSpinner() {
         Log.d(TAG, "UpdatePairsSpinner: ");
-        List<Pair> pairsList = db.getPairs((int)((APIClient)spnClients.getSelectedItem()).getId());
+        APIClient client = (APIClient)spnClients.getSelectedItem();
+        if(client == null) {
+            return;
+        }
+
+        List<Pair> pairsList = db.getPairs((int)(client).getId());
         Pair tmpPair = (Pair)spnPairs.getSelectedItem();
         String currentPair = "";
         if (tmpPair != null) {
@@ -251,7 +262,7 @@ public class MainActivity extends AppCompatActivity
         }
         selectedPair = (Pair)spnPairs.getSelectedItem();
         if (selectedPair != null) {
-            ((APIClient)spnClients.getSelectedItem()).UpdateTickerInfo(this, selectedPair.getExchangePair());
+            client.UpdateTickerInfo(this, selectedPair.getExchangePair());
         }
     }
 }

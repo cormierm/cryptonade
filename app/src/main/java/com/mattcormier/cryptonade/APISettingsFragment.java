@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -99,7 +100,6 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             btnSave.setText(getString(R.string.update));
             setHasOptionsMenu(true);
         }
-
 
         return apiView;
     }

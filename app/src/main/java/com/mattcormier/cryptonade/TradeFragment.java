@@ -97,6 +97,9 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 
         updatePage();
 
+        mainActivity.getSupportActionBar().setTitle("Trade");
+
+
         return tradeView;
     }
 

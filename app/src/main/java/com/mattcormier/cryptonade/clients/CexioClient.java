@@ -131,6 +131,15 @@ public class CexioClient implements APIClient {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(response);
+                            if (jsonResponse.has("error")) {
+                                Toast.makeText(c, jsonResponse.getString("error"), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "onResponse: JSONException: " + e.getMessage());
+                        }
                         Log.d(TAG, "onResponse: response: " + response);
                         if (cmd.equals("updateBalances")) {
                             processUpdateBalances(response, c);

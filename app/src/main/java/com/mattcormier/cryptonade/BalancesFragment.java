@@ -38,6 +38,7 @@ public class BalancesFragment extends Fragment {
     TextView tvTotals;
     Context context;
     MainActivity mainActivity;
+    Timer balanceTimer;
 
     @Nullable
     @Override
@@ -56,7 +57,6 @@ public class BalancesFragment extends Fragment {
 
         updateBalancesList();
         updateTotals();
-
         setHasOptionsMenu(true);
 
         Log.d(TAG, "onCreateView: done.");
@@ -67,6 +67,12 @@ public class BalancesFragment extends Fragment {
     public void onResume() {
         startRefreshBalancesTimer();
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        balanceTimer.cancel();
+        super.onPause();
     }
 
     @Override
@@ -92,8 +98,8 @@ public class BalancesFragment extends Fragment {
                 updateTotals();
             }
         };
-        Timer timer = new Timer(true);
-        timer.schedule(task, 0, 2000);
+        balanceTimer = new Timer(true);
+        balanceTimer.schedule(task, 0, 2000);
     }
 
     public void updateBalancesList() {
