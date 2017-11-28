@@ -3,7 +3,6 @@ package com.mattcormier.cryptonade;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,9 +17,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Pair;
-
-import java.util.Timer;
 
 public class OrdersFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "OrdersFragment";
@@ -40,7 +38,7 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: ");
+        Log.d(TAG, "onCreateView: start");
 
         mainActivity = (MainActivity) getActivity();
         ordersView = inflater.inflate(R.layout.orders_layout, container, false);
@@ -99,4 +97,12 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {}
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.orders));
+        Crypto.saveCurrentScreen(context, TAG);
+    }
 }

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context="com.mattcormier.cryptonade.TradeFragment"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+    <requestFocus /> >
+
+    <FrameLayout
+        android:id="@+id/frame_trade_books"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/frame_new_order"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/llTradeBuySellButtons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                android:id="@+id/btnTradeBuy"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:background="@android:color/holo_green_dark"
+                android:text="@string/buy"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btnTradeSell"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:background="@android:color/holo_red_light"
+                android:text="@string/sell"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/clTradePlaceOrder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/my_border"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llTradeBuySellButtons"
+            app:layout_constraintVertical_bias="0.0">
+
+            <LinearLayout
+                android:id="@+id/llTradePlaceOrderHeader"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/header_border"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tvTradeHeaderLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:text="BUY ETH"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTradeHeaderRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="12.32132 BTC Available"
+                    android:textAlignment="textEnd"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/lblTradeAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/amount"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/llTradePlaceOrderHeader" />
+
+            <EditText
+                android:id="@+id/edTradeAmount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:ems="10"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:text=""
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/lblTradeAmount"
+                app:layout_constraintLeft_toRightOf="@+id/lblTradeAmount"
+                app:layout_constraintRight_toLeftOf="@+id/btnTradeMax"
+                app:layout_constraintTop_toTopOf="@+id/lblTradeAmount" />
+
+            <Button
+                android:id="@+id/btnTradeMax"
+                android:layout_width="88dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="@string/max"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:theme="@style/DarkBlueButton"
+                app:layout_constraintBottom_toBottomOf="@+id/edTradeAmount"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/edTradeAmount" />
+
+            <TextView
+                android:id="@+id/lblTradePrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/price"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="@+id/lblTradeAmount"
+                app:layout_constraintTop_toBottomOf="@+id/lblTradeAmount" />
+
+            <EditText
+                android:id="@+id/edTradePrice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:ems="10"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:text=""
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/lblTradePrice"
+                app:layout_constraintLeft_toLeftOf="@+id/edTradeAmount"
+                app:layout_constraintRight_toRightOf="@+id/edTradeAmount"
+                app:layout_constraintTop_toTopOf="@+id/lblTradePrice"
+                app:layout_constraintVertical_bias="0.476" />
+
+            <LinearLayout
+                android:id="@+id/llTradePriceButtons"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintLeft_toLeftOf="@id/edTradePrice"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edTradePrice">
+
+                <Button
+                    android:id="@+id/btnTradeBuyHighestBid"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/highest_bid"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    android:theme="@style/GreenButton" />
+
+                <Button
+                    android:id="@+id/btnTradeBuyLowestAsk"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/lowest_ask"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    android:theme="@style/RedButton" />
+
+                <Button
+                    android:id="@+id/btnTradeLast"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/last_trade"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    android:theme="@style/DarkBlueButton" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/lblTradeTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/total"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/edTradeTotal"
+                app:layout_constraintLeft_toLeftOf="@+id/lblTradePrice"
+                app:layout_constraintTop_toTopOf="@+id/edTradeTotal" />
+
+            <EditText
+                android:id="@+id/edTradeTotal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:ems="10"
+                android:enabled="false"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:text=""
+                android:textSize="14sp"
+                app:layout_constraintLeft_toLeftOf="@+id/edTradePrice"
+                app:layout_constraintRight_toRightOf="@+id/edTradePrice"
+                app:layout_constraintTop_toBottomOf="@+id/llTradePriceButtons" />
+
+            <Button
+                android:id="@+id/btnTradePlaceOrder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:text="Buy ETH"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:theme="@style/GreenButton"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edTradeTotal" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+
+
+
+</LinearLayout>

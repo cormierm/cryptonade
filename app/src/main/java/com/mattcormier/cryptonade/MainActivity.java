@@ -1,6 +1,6 @@
 package com.mattcormier.cryptonade;
 
-import android.content.Intent;
+import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -16,17 +16,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
-import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Pair;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +38,13 @@ public class MainActivity extends AppCompatActivity
     TickerBarFragment tickerBarFragment;
     CryptoDB db;
     SharedPreferences sharedPreferences;
+    Fragment fragmentAPI;
+    Fragment fragmentBalances;
+    Fragment fragmentTicker;
+    Fragment fragmentPairs;
+    Fragment fragmentOrders;
+    Fragment fragmentSettings;
+    Fragment fragmentTrade;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +75,14 @@ public class MainActivity extends AppCompatActivity
         selectedClient = (APIClient) spnClients.getSelectedItem();
         UpdatePairsSpinner();
 
-        Log.d(TAG, "onCreate: init balance bar");
         // initialize balance bar
         fragBalanceBar = new BalanceBarFragment();
+        // initialize ticker bar
         tickerBarFragment = new TickerBarFragment();
 
         Log.d(TAG, "onCreate: implementing frags");
         getFragmentManager().beginTransaction().replace(R.id.flMainBalanceBar, fragBalanceBar, "balance_bar").commit();
         getFragmentManager().beginTransaction().replace(R.id.flMainTickerBar, tickerBarFragment, "ticker_bar").commit();
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
     }
 
     public void UpdateClientSpinner() {
@@ -125,6 +127,30 @@ public class MainActivity extends AppCompatActivity
         spnClients.setSelection(sharedPreferences.getInt("clientSpinnerPosition", 0));
         UpdatePairsSpinner();
         spnPairs.setSelection(sharedPreferences.getInt("pairsSpinnerPosition", 0));
+
+        switch (sharedPreferences.getString("currentScreen", "TradeFragment")) {
+            case "APIFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("api_keys"), "api_keys").commit();
+                break;
+            case "BalancesFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("balances"), "balances").commit();
+                break;
+            case "TickerFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("ticker"), "ticker").commit();
+                break;
+            case "PairsFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("pairs"), "pairs").commit();
+                break;
+            case "OrdersFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("orders"), "orders").commit();
+                break;
+            case "SettingsFragment":
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("settings"), "settings").commit();
+                break;
+            default:
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("trade"), "trade").commit();
+                break;
+        }
     }
 
     @Override
@@ -139,7 +165,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -150,8 +175,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.menuAPISettings) {
             getFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
-                    .addToBackStack("api_settings")
+                    .replace(R.id.content_frame, getFragment("api_keys"), "api_keys")
+                    .addToBackStack("api_keys")
                     .commit();
             return true;
         }
@@ -161,7 +186,7 @@ public class MainActivity extends AppCompatActivity
         }
         else if (id == R.id.menuSettings) {
             getFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame, new SettingsFragment())
+                    .replace(R.id.content_frame, getFragment("settings"), "settings")
                     .addToBackStack("settings")
                     .commit();
             return true;
@@ -177,37 +202,37 @@ public class MainActivity extends AppCompatActivity
         android.app.FragmentManager fragmentManager = getFragmentManager();
         if (id == R.id.nav_trade) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TradeFragment(), "trade")
+                    .replace(R.id.content_frame, getFragment("trade"), "trade")
                     .addToBackStack("trade")
                     .commit();
         } else if (id == R.id.nav_orders) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new OrdersFragment(), "orders")
+                    .replace(R.id.content_frame, getFragment("orders"), "orders")
                     .addToBackStack("orders")
                     .commit();
         } else if (id == R.id.nav_balances) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new BalancesFragment(), "balances")
+                    .replace(R.id.content_frame, getFragment("balances"), "balances")
                     .addToBackStack("balances")
                     .commit();
         } else if (id == R.id.nav_ticker) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new TickerFragment(), "ticker")
+                    .replace(R.id.content_frame, getFragment("ticker"), "ticker")
                     .addToBackStack("ticker")
                     .commit();
         } else if (id == R.id.nav_pairs) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new PairsFragment(), "pairs")
+                    .replace(R.id.content_frame, getFragment("pairs"), "pairs")
                     .addToBackStack("pairs")
                     .commit();
         } else if (id == R.id.nav_api_settings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment(), "api")
-                    .addToBackStack("api")
+                    .replace(R.id.content_frame, getFragment("api_keys"), "api_keys")
+                    .addToBackStack("api_keys")
                     .commit();
         } else if (id == R.id.nav_settings) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new SettingsFragment(), "settings")
+                    .replace(R.id.content_frame, getFragment("settings"), "settings")
                     .addToBackStack("settings")
                     .commit();
         }
@@ -232,13 +257,13 @@ public class MainActivity extends AppCompatActivity
 
     public void UpdatePairsSpinner() {
         Log.d(TAG, "UpdatePairsSpinner: ");
-        APIClient client = (APIClient)spnClients.getSelectedItem();
-        if(client == null) {
+        APIClient client = (APIClient) spnClients.getSelectedItem();
+        if (client == null) {
             return;
         }
 
-        List<Pair> pairsList = db.getPairs((int)(client).getId());
-        Pair tmpPair = (Pair)spnPairs.getSelectedItem();
+        List<Pair> pairsList = db.getPairs((int) (client).getId());
+        Pair tmpPair = (Pair) spnPairs.getSelectedItem();
         String currentPair = "";
         if (tmpPair != null) {
             currentPair = tmpPair.getTradingPair();
@@ -250,8 +275,8 @@ public class MainActivity extends AppCompatActivity
             spnPairs.setAdapter(dataAdapter);
 
             // set pair to current pair of previous client
-            for(int i=0; i < dataAdapter.getCount(); i++) {
-                String tradePair = ((Pair)spnPairs.getItemAtPosition(i)).getTradingPair();
+            for (int i = 0; i < dataAdapter.getCount(); i++) {
+                String tradePair = ((Pair) spnPairs.getItemAtPosition(i)).getTradingPair();
                 if (tradePair.equalsIgnoreCase(currentPair)) {
                     spnPairs.setSelection(i);
                     break;
@@ -260,9 +285,51 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception ex) {
             Log.d("Crypto", "Error in UpdatePairsSpinner: " + ex.toString());
         }
-        selectedPair = (Pair)spnPairs.getSelectedItem();
+        selectedPair = (Pair) spnPairs.getSelectedItem();
         if (selectedPair != null) {
             client.UpdateTickerInfo(this, selectedPair.getExchangePair());
+        }
+    }
+    private Fragment getFragment(String fragName) {
+        Log.d(TAG, "getFragment: fragName: " + fragName);
+        switch (fragName) {
+            case "api_keys":
+                if (fragmentAPI == null) {
+                    fragmentAPI = new APIFragment();
+                }
+                return fragmentAPI;
+            case "balances":
+                if (fragmentBalances == null) {
+                    fragmentBalances = new BalancesFragment();
+                }
+                return fragmentBalances;
+            case "ticker":
+                if (fragmentTicker == null) {
+                    fragmentTicker = new TickerFragment();
+                }
+                return fragmentTicker;
+            case "pairs":
+                if (fragmentPairs == null) {
+                    fragmentPairs = new PairsFragment();
+                }
+                return fragmentPairs;
+            case "orders":
+                if (fragmentOrders == null) {
+                    fragmentOrders = new OrdersFragment();
+                }
+                return fragmentOrders;
+            case "settings":
+                if (fragmentSettings == null) {
+                    fragmentSettings = new SettingsFragment();
+                }
+                return fragmentSettings;
+            case "trade":
+                if (fragmentTrade == null) {
+                    fragmentTrade = new TradeFragment();
+                }
+                return fragmentTrade;
+            default:
+                return null;
         }
     }
 }

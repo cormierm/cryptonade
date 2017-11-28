@@ -16,7 +16,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.BalancesFragment;
 import com.mattcormier.cryptonade.OrderBookFragment;
+import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -258,7 +260,7 @@ public class HitBTCClient implements APIClient {
 
             OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
             lvOrderTransactions.setAdapter(orderTransactionsAdapter);
-            UpdateOpenOrders(c);
+
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateOrderTransactions: JSONException Error: " + e.getMessage());
         } catch (Exception e) {
@@ -290,6 +292,10 @@ public class HitBTCClient implements APIClient {
         } catch (Exception e) {
             Log.e(TAG, "processUpdateBalances: " + e.getMessage());
         }
+        BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
+        if (balFrag != null) {
+            balFrag.refreshBalances();
+        }
     }
 
     private void processRestorePairsInDB(String response, Context c) {
@@ -305,8 +311,13 @@ public class HitBTCClient implements APIClient {
 
                 Pair pair = new Pair(0, (int)exchangeId, exchangePair, tradingPair);
                 pairsList.add(pair);
+
             }
             db.insertPairs(pairsList);
+            PairsFragment pairsFrag = (PairsFragment)((Activity)c).getFragmentManager().findFragmentByTag("pairs");
+            if (pairsFrag != null) {
+                pairsFrag.updatePairsListView();
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
@@ -504,6 +515,7 @@ public class HitBTCClient implements APIClient {
         HashMap<String, String> params = new HashMap<>();
         params.put("max_results", "50");
         params.put("symbols", pair);
+        UpdateOpenOrders(c);
         privateRequest(endpoint, params, Request.Method.GET, c, "updateOrderTransactions");
     }
 

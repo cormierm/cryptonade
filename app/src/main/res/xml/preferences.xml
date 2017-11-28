@@ -1,25 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:title="Set Master Password"
+        android:key="pref_set_master_password" />
 
-    <PreferenceCategory
-        android:title="@string/security"
-        android:key="pref_security_category">
-
-        <SwitchPreference
-            android:defaultValue="false"
-            android:title="Set Master Password"
-            android:key="pref_set_master_password" />
-
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_password_on_start"
-            android:title="Password Required on Start" />
-
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_encrypt_database"
-            android:title="Encrypt database" />
-
-    </PreferenceCategory>
 </PreferenceScreen>

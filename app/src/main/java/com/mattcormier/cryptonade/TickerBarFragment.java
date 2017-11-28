@@ -18,7 +18,6 @@ import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,6 +38,7 @@ public class TickerBarFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: start");
         spnClients = ((MainActivity)getActivity()).findViewById(R.id.spnClients);
         spnPairs = ((MainActivity)getActivity()).findViewById(R.id.spnPairs);
         view = inflater.inflate(R.layout.balance_bar_layout, container, false);

@@ -274,7 +274,7 @@ public class CryptoDB {
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
         cv.put(EXCHANGE_API_OTHER, exchange.getAPIOther());
-        cv.put(EXCHANGE_ACTIVE, exchange.getAPIOther());
+        cv.put(EXCHANGE_ACTIVE, exchange.getActive());
 
         this.openWriteableDB();
         long rowID = db.insert(EXCHANGE_TABLE, null, cv);
@@ -290,7 +290,7 @@ public class CryptoDB {
         cv.put(EXCHANGE_API_KEY, exchange.getAPIKey());
         cv.put(EXCHANGE_API_SECRET, exchange.getAPISecret());
         cv.put(EXCHANGE_API_OTHER, exchange.getAPIOther());
-        cv.put(EXCHANGE_ACTIVE, exchange.getAPIOther());
+        cv.put(EXCHANGE_ACTIVE, exchange.getActive());
 
         String where = EXCHANGE_ID + "= ?";
         String[] whereArgs = { String.valueOf(exchange.getId()) };

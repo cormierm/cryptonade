@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!--<item-->
-        <!--android:id="@+id/menuRefresh"-->
-        <!--android:title="@string/refresh"-->
-        <!--android:icon="@drawable/ic_refresh_white_24dp"-->
-        <!--app:showAsAction="ifRoom"-->
-        <!--/>-->
     <item
         android:id="@+id/menuRefreshBalances"
         android:title="@string/refresh_balances"
         app:showAsAction="never"
         />
-    <item
-        android:id="@+id/menuAPISettings"
-        android:orderInCategory="100"
-        android:title="@string/api_settings"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/menuSettings"
-        android:orderInCategory="101"
-        android:title="@string/settings"
-        app:showAsAction="never" />
+
+    <group
+        android:id="@+id/menuGroupSettings">
+        <item
+            android:id="@+id/menuAPISettings"
+            android:orderInCategory="100"
+            android:title="@string/api_keys"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/menuSettings"
+            android:orderInCategory="101"
+            android:title="@string/settings"
+            app:showAsAction="never" />
+    </group>
 </menu>

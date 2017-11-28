@@ -34,12 +34,10 @@ public class BalanceBarFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        spnClients = (Spinner)((MainActivity)getActivity()).findViewById(R.id.spnClients);
+        spnClients = getActivity().findViewById(R.id.spnClients);
         balanceView = inflater.inflate(R.layout.balance_bar_layout, container, false);
         context = getActivity();
         tvBalanceBar = balanceView.findViewById(R.id.tvBalanceBar);
-        Log.d(TAG, "onCreateView: client: " + client);
-
 
         return balanceView;
     }
@@ -66,7 +64,7 @@ public class BalanceBarFragment extends Fragment {
                         for (Map.Entry<String, Double> b: availableBalances.entrySet()) {
                             output += b.getKey() + ": " + String.format("%.8f", b.getValue()) + "        ";
                         }
-                        output.trim();
+                        output = output.trim();
                         if (output.isEmpty()) {
                             output = "No Balance Information.";
                         }

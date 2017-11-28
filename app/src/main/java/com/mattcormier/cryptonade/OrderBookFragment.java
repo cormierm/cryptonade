@@ -41,6 +41,7 @@ public class OrderBookFragment extends Fragment implements View.OnClickListener{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: start");
         view = inflater.inflate(R.layout.order_book_layout, container, false);
         btnRefresh = view.findViewById(R.id.btnOrderBookRefresh);
         btnRefresh.setOnClickListener(this);

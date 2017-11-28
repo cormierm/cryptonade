@@ -2,6 +2,7 @@ package com.mattcormier.cryptonade;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -14,7 +15,7 @@ import android.widget.ListView;
 
 import com.mattcormier.cryptonade.adapters.APIAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 
 import java.util.ArrayList;
@@ -27,48 +28,56 @@ public class APIFragment extends Fragment {
     private static final String TAG = "APIFragment";
     ListView lvAPIList;
     CryptoDB db;
-    View apiView;
+    View view;
     Context context;
+    MainActivity mainActivity;
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        apiView = inflater.inflate(R.layout.api_layout, container, false);
+        Log.d(TAG, "onCreateView: start");
+        mainActivity = (MainActivity)getActivity();
         context = getActivity();
-        lvAPIList = apiView.findViewById(R.id.lvAPIList);
+        view = inflater.inflate(R.layout.api_layout, container, false);
 
-        FloatingActionButton fabAdd = apiView.findViewById(R.id.fabAPIAdd);
-        fabAdd.setOnClickListener(new View.OnClickListener() {
+        lvAPIList = view.findViewById(R.id.lvAPIList);
+
+        FloatingActionButton fabAddAPIKey = view.findViewById(R.id.fabAPIAdd);
+        fabAddAPIKey.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                APISettingsFragment frag = new APISettingsFragment();
-                frag.setExchangeId(0);
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.content_frame, frag)
-                        .addToBackStack("api_settings")
-                        .commit();
+                Intent intent = new Intent(context, APISettingsActivity.class);
+                intent.putExtra("ExchangeId", 0);
+                startActivity(intent);
             }
         });
+
         lvAPIList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "onItemClick: ");
                 Exchange ex = (Exchange) parent.getAdapter().getItem(position);
                 Log.d(TAG, "onItemClick: " + ex.getId());
-                APISettingsFragment frag = new APISettingsFragment();
-                frag.setExchangeId((int)ex.getId());
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.content_frame, frag)
-                        .addToBackStack("api_settings")
-                        .commit();
+
+                Intent intent = new Intent(context, APISettingsActivity.class);
+                intent.putExtra("ExchangeId", (int)ex.getId());
+                startActivity(intent);
             }
         });
 
         db = new CryptoDB(context);
-        ArrayList<Exchange> exchangeList = db.getExchanges();
 
-        APIAdapter tickerAdapter = new APIAdapter(context, R.layout.listitem_exchange, exchangeList);
-        lvAPIList.setAdapter(tickerAdapter);
-        return apiView;
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.api_keys));
+        Crypto.saveCurrentScreen(context, TAG);
+
+        ArrayList<Exchange> exchangeList = db.getExchanges();
+        APIAdapter apiAdapter = new APIAdapter(context, R.layout.listitem_exchange, exchangeList);
+        lvAPIList.setAdapter(apiAdapter);
     }
 }

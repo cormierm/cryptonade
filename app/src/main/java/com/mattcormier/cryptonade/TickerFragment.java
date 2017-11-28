@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Spinner;
 import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 
@@ -32,12 +34,13 @@ public class TickerFragment extends Fragment implements AdapterView.OnItemSelect
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: start");
         mainActivity = (MainActivity) getActivity();
-        spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
+        spnClients = mainActivity.findViewById(R.id.spnClients);
         spnClients.setOnItemSelectedListener(this);
         tickerView = inflater.inflate(R.layout.ticker_layout, container, false);
         context = getActivity();
-        lvTickers = (ListView) tickerView.findViewById(R.id.lvTickerList);
+        lvTickers = tickerView.findViewById(R.id.lvTickerList);
 
         db = new CryptoDB(context);
 
@@ -62,5 +65,13 @@ public class TickerFragment extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.market_summary));
+        Crypto.saveCurrentScreen(context, TAG);
     }
 }

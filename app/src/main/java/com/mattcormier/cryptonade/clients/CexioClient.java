@@ -16,7 +16,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.BalancesFragment;
 import com.mattcormier.cryptonade.OrderBookFragment;
+import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -289,6 +291,10 @@ public class CexioClient implements APIClient {
         } catch (Exception e) {
             Log.e(TAG, "processUpdateBalances: " + e.getMessage());
         }
+        BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
+        if (balFrag != null) {
+            balFrag.refreshBalances();
+        }
     }
 
     private void processRestorePairsInDB(String response, Context c) {
@@ -312,6 +318,10 @@ public class CexioClient implements APIClient {
                 pairsList.add(pair);
             }
             db.insertPairs(pairsList);
+            PairsFragment pairsFrag = (PairsFragment)((Activity)c).getFragmentManager().findFragmentByTag("pairs");
+            if (pairsFrag != null) {
+                pairsFrag.updatePairsListView();
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }

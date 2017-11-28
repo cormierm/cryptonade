@@ -11,39 +11,20 @@
         android:id="@+id/lvTradingPairsList"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTradingPairsRefresh"></ListView>
-
-    <Button
-        android:id="@+id/btnTradingPairsRefresh"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/refresh_pairs_list"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginBottom="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTradingPairsRestore"
-        app:layout_constraintHorizontal_bias="0.0" />
+        app:layout_constraintBottom_toTopOf="@id/btnTradingPairsRestore" />
 
     <Button
         android:id="@+id/btnTradingPairsRestore"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_margin="8dp"
         android:text="@string/restore_pairs_list_from_exchange"
+        android:theme="@style/PrimaryButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
-
 
 </android.support.constraint.ConstraintLayout>

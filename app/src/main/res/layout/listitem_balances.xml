@@ -16,7 +16,7 @@
         android:textSize="12sp"
         android:padding="2dp"
         android:textColor="@android:color/white"
-        android:background="@android:color/darker_gray"
+        android:background="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,6 +28,7 @@
         android:layout_marginStart="2dp"
         android:layout_marginLeft="2dp"
         android:text="ETH: 0.2312321\nBTC: 0.123123"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/btnLiBalancesRefresh"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,7 +40,8 @@
         android:layout_height="37dp"
         android:contentDescription="@string/refresh_balances"
         app:layout_constraintEnd_toEndOf="parent"
+        android:theme="@style/AccentButton"
         app:layout_constraintTop_toBottomOf="@+id/tvLiBalancesHeader"
-        app:srcCompat="@drawable/ic_refresh_black_24dp" />
+        app:srcCompat="@drawable/ic_refresh_white_24dp" />
 
 </android.support.constraint.ConstraintLayout>

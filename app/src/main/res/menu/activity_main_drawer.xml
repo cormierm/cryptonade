@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_trade"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Trade" />
-        <item
-            android:id="@+id/nav_orders"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Orders" />
-        <item
-            android:id="@+id/nav_balances"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Balances" />
-        <item
-            android:id="@+id/nav_ticker"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Ticker" />
+    <group
+        android:checkableBehavior="single">
+        <item android:title="@string/exchange">
+            <menu>
+                <item
+                    android:id="@+id/nav_trade"
+                    android:title="@string/trade" />
+                <item
+                    android:id="@+id/nav_orders"
+                    android:title="@string/orders" />
+                <item
+                    android:id="@+id/nav_balances"
+                    android:title="@string/balances" />
+                <item
+                    android:id="@+id/nav_ticker"
+                    android:title="@string/market_summary" />
+                <item
+                    android:id="@+id/nav_pairs"
+                    android:title="@string/exchange_pairs" />
+            </menu>
+        </item>
     </group>
 
     <item android:title="Settings">
         <menu>
             <item
-                android:id="@+id/nav_pairs"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="Setup Exchange Pairs" />
-            <item
                 android:id="@+id/nav_api_settings"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="@string/api_settings" />
+                android:title="@string/api_keys" />
             <item
                 android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_menu_manage"
                 android:title="@string/settings" />
         </menu>
     </item>

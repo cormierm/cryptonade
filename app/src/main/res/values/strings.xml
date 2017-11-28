@@ -69,8 +69,11 @@
     <string name="bids">Bids</string>
     <string name="asks">Asks</string>
     <string name="refresh_ticker_info">Refresh Ticker Info</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="refresh_order_books">Refresh Order Books</string>
+    <string name="create_api_key">Create API Key</string>
+    <string name="api_key_settings">API Key Settings</string>
+    <string name="api_keys">API Keys</string>
+    <string name="market_summary">Market Summary</string>
+    <string name="exchange">Exchange</string>
+    <string name="enabled">Enabled</string>
 </resources>

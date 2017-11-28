@@ -17,7 +17,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mattcormier.cryptonade.BalancesFragment;
 import com.mattcormier.cryptonade.OrderBookFragment;
+import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
@@ -212,7 +214,7 @@ public class BitfinexClient implements APIClient {
         HashMap<String, Double> balances = new HashMap<>();
         try {
             JSONArray jsonArray = new JSONArray(response);
-            for(int i=0; i < jsonArray.length(); i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 if (jsonObject.getString("type").equalsIgnoreCase("exchange") &&
                         !jsonObject.getString("amount").equals("0.0")) {
@@ -232,6 +234,10 @@ public class BitfinexClient implements APIClient {
         } catch (JSONException e) {
             Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
         }
+        BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
+        if (balFrag != null) {
+            balFrag.refreshBalances();
+        }
     }
 
     private void processRestorePairsInDB(String response, Context c) {
@@ -249,6 +255,10 @@ public class BitfinexClient implements APIClient {
                 pairsList.add(pair);
             }
             db.insertPairs(pairsList);
+            PairsFragment pairsFrag = (PairsFragment)((Activity)c).getFragmentManager().findFragmentByTag("pairs");
+            if (pairsFrag != null) {
+                pairsFrag.updatePairsListView();
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }
@@ -520,7 +530,7 @@ public class BitfinexClient implements APIClient {
 
     private static long generateNonce() {
         Date d = new Date();
-        return d.getTime() * 1000;
+        return d.getTime();
     }
 
     private static String createBody(HashMap<String, String> params) {

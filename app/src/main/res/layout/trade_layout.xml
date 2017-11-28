@@ -5,7 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mattcormier.cryptonade.TradeFragment">
+    tools:context="com.mattcormier.cryptonade.TradeFragment"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+    <requestFocus /> >
 
     <LinearLayout
         android:id="@+id/llTradeBuySellButtons"
@@ -23,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_weight="1"
-            android:background="@android:color/holo_green_dark"
+            android:background="@color/green"
             android:text="@string/buy"
             android:textColor="@android:color/white" />
 
@@ -42,7 +45,6 @@
         android:id="@+id/clTradePlaceOrder"
         android:layout_width="0dp"
         android:layout_height="250dp"
-        android:layout_marginTop="4dp"
         android:background="@drawable/my_border"
         android:paddingBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -67,6 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:layout_weight="1"
+                android:textColor="@color/white"
                 android:text="BUY ETH"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -81,6 +84,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="12.32132 BTC Available"
+                android:textColor="@color/white"
                 android:textAlignment="textEnd"
                 android:textSize="12sp"
                 android:textStyle="bold"

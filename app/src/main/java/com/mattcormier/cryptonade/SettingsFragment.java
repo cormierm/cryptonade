@@ -7,6 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.mattcormier.cryptonade.lib.Crypto;
 
@@ -15,15 +16,15 @@ import com.mattcormier.cryptonade.lib.Crypto;
  */
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener , Preference.OnPreferenceClickListener{
+    private static final String TAG = "SettingsFragment";
 
     private SharedPreferences prefs;
-    private boolean loginRequired;
-    private boolean encryptionEnabled;
     private boolean masterPasswordEnable;
     private Preference prefMasterPass;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: start");
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
@@ -36,9 +37,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onResume() {
         super.onResume();
+
+        Crypto.saveCurrentScreen(getActivity(), TAG);
+
         masterPasswordEnable = prefs.getBoolean("pref_set_master_password", false);
-        loginRequired = prefs.getBoolean("pref_login_required", false);
-        encryptionEnabled = prefs.getBoolean("pref_encryption_enabled", false);
         prefs.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -57,14 +59,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
     }
 
-    private void setDefaultEncryptionPreference(boolean masterPasswordEnable) {
-        Preference defaultEncryption = findPreference("pref_encrypt_database");
-        if (masterPasswordEnable) {
-            defaultEncryption.setEnabled(true);
-        } else {
-            defaultEncryption.setEnabled(false);
-        }
-    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -72,7 +66,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             masterPasswordEnable = prefs.getBoolean(key, false);
         }
         this.setDefaultLoginPreference(masterPasswordEnable);
-        this.setDefaultEncryptionPreference(masterPasswordEnable);
     }
 
     @Override

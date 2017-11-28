@@ -1,19 +1,14 @@
 package com.mattcormier.cryptonade;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,16 +17,14 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 
 import java.util.List;
 
-public class APISettingsFragment extends Fragment implements OnClickListener, AdapterView.OnItemSelectedListener {
-    private static final String TAG = "APISettingsFragment";
+public class APISettingsActivity extends AppCompatActivity implements OnClickListener, AdapterView.OnItemSelectedListener {
+    private static final String TAG = "APISettingsActivity";
     public int exchangeId = 0;
     EditText edProfileName;
     EditText edAPIKey;
@@ -39,46 +32,48 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
     TextView tvAPIOther;
     EditText edAPIOther;
     Button btnSave;
-    Button btnCancel;
-    Switch swActive;
+    Switch swEnabled;
     CryptoDB db;
     Exchange ex;
-    View apiView;
     Spinner spnType;
-    Context context;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: exchangeId =" + exchangeId);
-        apiView = inflater.inflate(R.layout.apisettings_layout, container, false);
-        context = getActivity();
-        edProfileName = apiView.findViewById(R.id.edAPISettingsProfileName);
-        edAPIKey = apiView.findViewById(R.id.edAPISettingsAPIKey);
-        edAPISecret = apiView.findViewById(R.id.edAPISettingsAPISecret);
-        tvAPIOther = apiView.findViewById(R.id.lblAPISettingsAPIOther);
-        edAPIOther = apiView.findViewById(R.id.edAPISettingsAPIOther);
-        btnSave = apiView.findViewById(R.id.btnAPISettingsSave);
-        btnCancel = apiView.findViewById(R.id.btnAPISettingsCancel);
-        swActive = apiView.findViewById(R.id.swAPISettingsActive);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_apisettings);
+        Log.d(TAG, "onCreate: exchangeId =" + exchangeId);
+
+        edProfileName = findViewById(R.id.edAPISettingsProfileName);
+        edAPIKey = findViewById(R.id.edAPISettingsAPIKey);
+        edAPISecret = findViewById(R.id.edAPISettingsAPISecret);
+        tvAPIOther = findViewById(R.id.lblAPISettingsAPIOther);
+        edAPIOther = findViewById(R.id.edAPISettingsAPIOther);
+        btnSave = findViewById(R.id.btnAPISettingsSave);
+        swEnabled = findViewById(R.id.swAPISettingsActive);
         btnSave.setOnClickListener(this);
-        btnCancel.setOnClickListener(this);
 
+        db = new CryptoDB(this);
 
-        db = new CryptoDB(getActivity());
+        this.exchangeId = getIntent().getIntExtra("ExchangeId", 0);
 
         // setup exchange type spinner
-        spnType = apiView.findViewById(R.id.spnAPISettingsExchangeType);
+        spnType = findViewById(R.id.spnAPISettingsExchangeType);
         spnType.setOnItemSelectedListener(this);
         List<ExchangeType> typesList = db.getTypes();
         try {
-            ArrayAdapter<ExchangeType> dataAdapter = new ArrayAdapter<>(context,
+            ArrayAdapter<ExchangeType> dataAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_spinner_item, typesList);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnType.setAdapter(dataAdapter);
         } catch (Exception ex) {
-            Log.d(TAG, "onCreateView: " + ex.getMessage());
+            Log.e(TAG, "onCreate: " + ex.getMessage());
         }
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         if (exchangeId == 0) {
             edProfileName.setText(spnType.getSelectedItem().toString());
@@ -86,7 +81,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             edAPISecret.setText("");
             edAPIOther.setText("");
             btnSave.setText(getString(R.string.create));
-            setHasOptionsMenu(false);
+            actionBar.setTitle("Create API Key");
         } else {
             Log.d(TAG, "onCreateView: setting existing exchange info");
             ex = db.getExchange(exchangeId);
@@ -97,34 +92,39 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
             edAPIKey.setText(ex.getAPIKey());
             edAPISecret.setText(ex.getAPISecret());
             edAPIOther.setText(ex.getAPIOther());
+            Log.d(TAG, "onCreate: active: " + ex.getActive());
+            if (ex.getActive() == 1) {
+                swEnabled.setChecked(true);
+            } else {
+                swEnabled.setChecked(false);
+            }
+
             btnSave.setText(getString(R.string.update));
-            setHasOptionsMenu(true);
+            actionBar.setTitle("Edit API Key");
         }
 
-        return apiView;
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menuDelete) {
             db.deleteExchange(exchangeId);
-            ((MainActivity) getActivity()).UpdateClientSpinner();
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
-                    .commit();
-            return true;
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.apisettings_menu, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if(exchangeId > 0) {
+            getMenuInflater().inflate(R.menu.apisettings_menu, menu);
+        }
+        return true;
     }
 
     @Override
     public void onClick(View v) {
-        FragmentManager fragmentManager = getFragmentManager();
         if (v.getId() == btnSave.getId()) {
             if (exchangeId == 0) {
                 Exchange exchange = new Exchange();
@@ -132,7 +132,7 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                 exchange.setName(edProfileName.getText().toString());
                 exchange.setAPIKey(edAPIKey.getText().toString());
                 exchange.setAPISecret(edAPISecret.getText().toString());
-                if (swActive.isChecked()) {
+                if (swEnabled.isChecked()) {
                     exchange.setActive(1);
                 } else {
                     exchange.setActive(0);
@@ -141,20 +141,13 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                     exchange.setAPIOther(edAPIOther.getText().toString());
                 }
                 long rowId = db.insertExchange(exchange);
-                Exchange newEx = db.getExchange((int)rowId);
-                APIClient newClient = Crypto.getAPIClient(newEx);
-                newClient.RestorePairsInDB(getActivity());
-                ((MainActivity) getActivity()).UpdateClientSpinner();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, new APIFragment())
-                        .addToBackStack("api_settings")
-                        .commit();
+                onBackPressed();
             } else {
                 ex.setTypeId(((ExchangeType)spnType.getSelectedItem()).getTypeId());
                 ex.setName(edProfileName.getText().toString());
                 ex.setAPIKey(edAPIKey.getText().toString());
                 ex.setAPISecret(edAPISecret.getText().toString());
-                if (swActive.isChecked()) {
+                if (swEnabled.isChecked()) {
                     ex.setActive(1);
                 } else {
                     ex.setActive(0);
@@ -163,18 +156,8 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
                     ex.setAPIOther(edAPIOther.getText().toString());
                 }
                 db.updateExchange(ex);
-                ((MainActivity) getActivity()).UpdateClientSpinner();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, new APIFragment())
-                        .addToBackStack("api_settings")
-                        .commit();
+                onBackPressed();
             }
-
-        }
-        else if (v.getId() == btnCancel.getId()) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new APIFragment())
-                    .commit();
         }
     }
 
@@ -189,10 +172,6 @@ public class APISettingsFragment extends Fragment implements OnClickListener, Ad
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
-    }
-
-    public void setExchangeId(int exchangeId){
-        this.exchangeId = exchangeId;
     }
 
     private int getIndex(Spinner spinner, long typeId){

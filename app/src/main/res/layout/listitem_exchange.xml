@@ -28,6 +28,7 @@
         android:layout_height="wrap_content"
         android:text="Poloniex"
         android:layout_marginTop="0dp"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintTop_toBottomOf="@+id/tvLiExchangeProfileName"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="@+id/tvLiExchangeProfileName"

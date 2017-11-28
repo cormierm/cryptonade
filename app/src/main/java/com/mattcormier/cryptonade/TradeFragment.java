@@ -19,9 +19,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.HashMap;
@@ -53,6 +53,7 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: start");
         tradeView = inflater.inflate(R.layout.trade_layout, container, false);
         context = getActivity();
         mainActivity = (MainActivity)getActivity();
@@ -97,9 +98,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
 
         updatePage();
 
-        mainActivity.getSupportActionBar().setTitle("Trade");
-
-
         return tradeView;
     }
 
@@ -115,6 +113,13 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mainActivity.getSupportActionBar().setTitle("Trade");
+        Crypto.saveCurrentScreen(context, TAG);
     }
 
     @Override
@@ -245,6 +250,5 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         else {
             tvHeaderRight.setText("");
         }
-
     }
 }

@@ -54,6 +54,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by matt on 10/18/2017.
  */
@@ -265,5 +267,12 @@ public class Crypto {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void saveCurrentScreen(Context c, String screenTag) {
+        SharedPreferences sharedPreferences = c.getSharedPreferences("main", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("currentScreen", screenTag);
+        editor.commit();
     }
 }

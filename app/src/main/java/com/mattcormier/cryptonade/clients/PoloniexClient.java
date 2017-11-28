@@ -33,8 +33,10 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.mattcormier.cryptonade.BalancesFragment;
 import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.OrderBookFragment;
+import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.models.Exchange;
@@ -233,6 +235,10 @@ public class PoloniexClient implements APIClient {
         } catch (JSONException e) {
             Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
         }
+        BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
+        if (balFrag != null) {
+            balFrag.refreshBalances();
+        }
     }
 
     private void processRestorePairsInDB(String response, Context c) {
@@ -250,6 +256,10 @@ public class PoloniexClient implements APIClient {
             }
 
             db.insertPairs(pairsList);
+            PairsFragment pairsFrag = (PairsFragment)((Activity)c).getFragmentManager().findFragmentByTag("pairs");
+            if (pairsFrag != null) {
+                pairsFrag.updatePairsListView();
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Error in processTradingPairs: " + ex.toString());
         }

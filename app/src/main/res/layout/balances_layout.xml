@@ -10,8 +10,8 @@
         android:id="@+id/tvBalancesTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        android:background="#dadada"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"
         android:padding="3dp"
         android:text="@string/balances"
         android:textSize="14sp"
@@ -28,7 +28,7 @@
         android:textSize="12sp"
         android:padding="2dp"
         android:textColor="@android:color/white"
-        android:background="@android:color/darker_gray"
+        android:background="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBalancesTitle" />
@@ -41,6 +41,7 @@
         android:layout_marginLeft="2dp"
         android:text=""
         android:textSize="12sp"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBalancesTotalHeader" />

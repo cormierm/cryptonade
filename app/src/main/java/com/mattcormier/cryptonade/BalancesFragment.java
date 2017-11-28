@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,12 +17,10 @@ import android.widget.TextView;
 
 import com.mattcormier.cryptonade.adapters.BalancesAdapter;
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.lib.Crypto;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by matt on 10/30/2017.
@@ -38,7 +35,6 @@ public class BalancesFragment extends Fragment {
     TextView tvTotals;
     Context context;
     MainActivity mainActivity;
-    Timer balanceTimer;
 
     @Nullable
     @Override
@@ -65,13 +61,14 @@ public class BalancesFragment extends Fragment {
 
     @Override
     public void onResume() {
-        startRefreshBalancesTimer();
         super.onResume();
+        mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.balances));
+        Crypto.saveCurrentScreen(context, TAG);
+        refreshBalances();
     }
 
     @Override
     public void onPause() {
-        balanceTimer.cancel();
         super.onPause();
     }
 
@@ -89,17 +86,9 @@ public class BalancesFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startRefreshBalancesTimer() {
-        Log.d(TAG, "startRefreshBalancesTimer: start");
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                updateBalancesList();
-                updateTotals();
-            }
-        };
-        balanceTimer = new Timer(true);
-        balanceTimer.schedule(task, 0, 2000);
+    public void refreshBalances() {
+        updateBalancesList();
+        updateTotals();
     }
 
     public void updateBalancesList() {
