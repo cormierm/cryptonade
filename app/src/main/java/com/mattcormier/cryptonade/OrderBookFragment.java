@@ -93,20 +93,14 @@ public class OrderBookFragment extends Fragment implements View.OnClickListener{
     }
 
     public void refreshBooks() {
-        APIClient client = null;
-        if (spnClients != null) {
-            client = (APIClient) spnClients.getSelectedItem();
-        }
-        String pair = null;
-        if (spnPairs != null) {
-            pair = ((Pair)spnPairs.getSelectedItem()).getExchangePair();
-        }
+        if (spnClients != null && spnPairs != null) {
+            APIClient client = (APIClient)spnClients.getSelectedItem();
+            Pair pair = (Pair)spnPairs.getSelectedItem();
 
-
-        if (client != null && pair != null) {
-            client.RefreshOrderBooks(mContext, pair);
+            if (client != null && pair != null) {
+                client.RefreshOrderBooks(mContext, pair.getExchangePair());
+            }
         }
-
     }
 
     public void updateAsksList(List<HashMap<String, String>> asksList) {

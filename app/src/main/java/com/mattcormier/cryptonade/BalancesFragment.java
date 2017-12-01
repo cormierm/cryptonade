@@ -19,6 +19,7 @@ import com.mattcormier.cryptonade.adapters.BalancesAdapter;
 import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.lib.Crypto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,6 @@ import java.util.Map;
 
 public class BalancesFragment extends Fragment {
     private static final String TAG = "BalancesFragment";
-    HashMap<String, Double> currentBalances;
     View view;
     ListView lvBalances;
     Spinner spnClients;
@@ -41,7 +41,7 @@ public class BalancesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: start.");
 
-        spnClients = (Spinner) ((MainActivity) getActivity()).findViewById(R.id.spnClients);
+        spnClients = ((MainActivity) getActivity()).findViewById(R.id.spnClients);
         view = inflater.inflate(R.layout.balances_layout, container, false);
         lvBalances = view.findViewById(R.id.lvBalancesList);
         tvTotals = view.findViewById(R.id.tvBalancesTotals);
@@ -92,9 +92,12 @@ public class BalancesFragment extends Fragment {
     }
 
     public void updateBalancesList() {
-        Log.d(TAG, "refreshBalancesList: ");
-        BalancesAdapter balancesAdapter = new BalancesAdapter(context, R.layout.listitem_balances, mainActivity.apiClientArrayList);
-        updateBalancesListView(balancesAdapter);
+        Log.d(TAG, "updateBalancesList: start");
+        ArrayList<APIClient> clientList = mainActivity.apiClientArrayList;
+        if (clientList != null) {
+            BalancesAdapter balancesAdapter = new BalancesAdapter(context, R.layout.listitem_balances, clientList);
+            updateBalancesListView(balancesAdapter);
+        }
     }
 
     public void updateBalancesListView(final BalancesAdapter balancesAdapter) {
@@ -156,5 +159,4 @@ public class BalancesFragment extends Fragment {
             client.UpdateBalances(context);
         }
     }
-
 }

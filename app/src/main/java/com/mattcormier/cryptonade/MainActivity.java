@@ -95,14 +95,10 @@ public class MainActivity extends AppCompatActivity
             newClient.RestorePairsInDB(this);
             UpdateClientSpinner();
         }
-        ArrayList<APIClient> clientList = new ArrayList<>();
-        for (Exchange e: exchangeList) {
-            clientList.add(Crypto.getAPIClient(e));
-        }
-        apiClientArrayList = clientList;
+        apiClientArrayList = getAPIClientList();
         try {
             ArrayAdapter<APIClient> dataAdapter = new ArrayAdapter<>(this,
-                    R.layout.spinner_exchange_layout, clientList);
+                    R.layout.spinner_exchange_layout, apiClientArrayList);
             dataAdapter.setDropDownViewResource(R.layout.spinner_exchange_layout);
             spnClients.setAdapter(dataAdapter);
         } catch (Exception ex) {
@@ -124,9 +120,15 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         UpdateClientSpinner();
-        spnClients.setSelection(sharedPreferences.getInt("clientSpinnerPosition", 0));
+        int clientSpinnerPosition = sharedPreferences.getInt("clientSpinnerPosition", 0);
+        int pairsSpinnerPosition = sharedPreferences.getInt("pairsSpinnerPosition", 0);
+        if(clientSpinnerPosition < spnClients.getCount()) {
+            spnClients.setSelection(clientSpinnerPosition);
+        }
         UpdatePairsSpinner();
-        spnPairs.setSelection(sharedPreferences.getInt("pairsSpinnerPosition", 0));
+        if(pairsSpinnerPosition < spnPairs.getCount()) {
+            spnPairs.setSelection(pairsSpinnerPosition);
+        }
 
         switch (sharedPreferences.getString("currentScreen", "TradeFragment")) {
             case "APIFragment":
@@ -237,7 +239,7 @@ public class MainActivity extends AppCompatActivity
                     .commit();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -248,7 +250,7 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onItemSelected: selectedClient:" + selectedClient);
         if (selectedClient != null) {
             UpdatePairsSpinner();
-            ((APIClient) spnClients.getSelectedItem()).UpdateBalances(this);
+            selectedClient.UpdateBalances(this);
         }
     }
 
@@ -258,11 +260,11 @@ public class MainActivity extends AppCompatActivity
     public void UpdatePairsSpinner() {
         Log.d(TAG, "UpdatePairsSpinner: ");
         APIClient client = (APIClient) spnClients.getSelectedItem();
-        if (client == null) {
+        if (client == null || spnPairs == null) {
             return;
         }
 
-        List<Pair> pairsList = db.getPairs((int) (client).getId());
+        List<Pair> pairsList = db.getPairs((int)client.getId());
         Pair tmpPair = (Pair) spnPairs.getSelectedItem();
         String currentPair = "";
         if (tmpPair != null) {
@@ -275,11 +277,13 @@ public class MainActivity extends AppCompatActivity
             spnPairs.setAdapter(dataAdapter);
 
             // set pair to current pair of previous client
-            for (int i = 0; i < dataAdapter.getCount(); i++) {
-                String tradePair = ((Pair) spnPairs.getItemAtPosition(i)).getTradingPair();
-                if (tradePair.equalsIgnoreCase(currentPair)) {
-                    spnPairs.setSelection(i);
-                    break;
+            if(!currentPair.isEmpty()) {
+                for (int i = 0; i < dataAdapter.getCount(); i++) {
+                    String tradePair = ((Pair) spnPairs.getItemAtPosition(i)).getTradingPair();
+                    if (tradePair.equalsIgnoreCase(currentPair)) {
+                        spnPairs.setSelection(i);
+                        break;
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -331,5 +335,13 @@ public class MainActivity extends AppCompatActivity
             default:
                 return null;
         }
+    }
+
+    public ArrayList<APIClient> getAPIClientList() {
+        ArrayList<APIClient> clientList = new ArrayList<>();
+        for (Exchange e: db.getExchanges()) {
+            clientList.add(Crypto.getAPIClient(e));
+        }
+        return clientList;
     }
 }

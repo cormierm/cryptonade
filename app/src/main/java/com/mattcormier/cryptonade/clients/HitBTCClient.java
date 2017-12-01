@@ -116,6 +116,10 @@ public class HitBTCClient implements APIClient {
 
     private void privateRequest(String endpoint, HashMap<String, String> params, int method, final Context c, final String cmd) {
         Log.d(TAG, "privateRequest: " + cmd);
+        if(apiKey.isEmpty() || apiSecret.isEmpty()) {
+            Toast.makeText(c, c.getResources().getString(R.string.invalid_api_msg), Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (params == null) {
             params = new HashMap<>();
         }
@@ -293,7 +297,7 @@ public class HitBTCClient implements APIClient {
             Log.e(TAG, "processUpdateBalances: " + e.getMessage());
         }
         BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
-        if (balFrag != null) {
+        if (balFrag != null && balFrag.isVisible()) {
             balFrag.refreshBalances();
         }
     }

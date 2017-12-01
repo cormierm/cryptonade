@@ -17,7 +17,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 
@@ -141,6 +143,11 @@ public class APISettingsActivity extends AppCompatActivity implements OnClickLis
                     exchange.setAPIOther(edAPIOther.getText().toString());
                 }
                 long rowId = db.insertExchange(exchange);
+                Exchange newEx = db.getExchange((int)rowId);
+                APIClient client = Crypto.getAPIClient(newEx);
+                if(client != null) {
+                    client.RestorePairsInDB(this);
+                }
                 onBackPressed();
             } else {
                 ex.setTypeId(((ExchangeType)spnType.getSelectedItem()).getTypeId());

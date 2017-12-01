@@ -44,7 +44,7 @@ public class BalanceBarFragment extends Fragment {
 
     @Override
     public void onResume() {
-       startBalanceBarTimer();
+        startBalanceBarTimer();
         super.onResume();
     }
 

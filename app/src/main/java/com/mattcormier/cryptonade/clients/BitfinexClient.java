@@ -105,6 +105,10 @@ public class BitfinexClient implements APIClient {
 
     private void privateRequest(JSONObject jsonPayload, String endpoint, final Context c, final String cmd) {
         Log.d(TAG, "privateRequest: " + cmd);
+        if(apiKey.isEmpty() || apiSecret.isEmpty()) {
+            Toast.makeText(c, c.getResources().getString(R.string.invalid_api_msg), Toast.LENGTH_SHORT).show();
+            return;
+        }
         String url = baseUrl + endpoint;
         String nonce = Long.toString(generateNonce());
 
@@ -152,11 +156,11 @@ public class BitfinexClient implements APIClient {
                             try {
                                 JSONObject jsonObject = new JSONObject(jsonError);
                                 Toast.makeText(c, jsonObject.getString("message"), Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "onErrorResponse: " + jsonObject.getString("message"));
                             } catch (JSONException e) {
-                                Log.d(TAG, "onErrorResponse: " + e.getMessage());
+                                Log.e(TAG, "onErrorResponse: " + e.getMessage());
                                 e.printStackTrace();
                             }
-                            Log.e(TAG, "onErrorResponse: " + jsonError);
                         }
                     }
                 }
@@ -235,7 +239,7 @@ public class BitfinexClient implements APIClient {
             Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
         }
         BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
-        if (balFrag != null) {
+        if (balFrag != null && balFrag.isVisible()) {
             balFrag.refreshBalances();
         }
     }

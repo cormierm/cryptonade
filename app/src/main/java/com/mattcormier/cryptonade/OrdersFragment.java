@@ -28,12 +28,9 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
     Spinner spnClients;
     TextView tvRightHeader;
     TextView tvOrderTransactionsRightHeader;
-
     MainActivity mainActivity;
     View ordersView;
     Context context;
-
-    APIClient client;
 
     @Nullable
     @Override
@@ -45,14 +42,14 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
         tvRightHeader = ordersView.findViewById(R.id.tvOrdersHeaderRight);
         tvOrderTransactionsRightHeader = ordersView.findViewById(R.id.tvOrdertransactionsHeaderRight);
-        spnPairs = (Spinner) mainActivity.findViewById(R.id.spnPairs);
+        spnPairs = mainActivity.findViewById(R.id.spnPairs);
         spnPairs.setOnItemSelectedListener(this);
-        spnClients = (Spinner) mainActivity.findViewById(R.id.spnClients);
+        spnClients = mainActivity.findViewById(R.id.spnClients);
         spnClients.setOnItemSelectedListener(this);
 
         context = getActivity();
-        lvOpenOrders = (ListView) ordersView.findViewById(R.id.lvOpenOrders);
-        lvOrderTransactions = (ListView) ordersView.findViewById(R.id.lvOrdertransactions);
+        lvOpenOrders = ordersView.findViewById(R.id.lvOpenOrders);
+        lvOrderTransactions = ordersView.findViewById(R.id.lvOrdertransactions);
 
         setHasOptionsMenu(true);
 
@@ -62,11 +59,17 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
     public void updateOrdersFrag() {
         Log.d(TAG, "updateOrdersFrag: ");
-        Pair pair = (Pair)((Spinner)spnPairs).getSelectedItem();
-        tvRightHeader.setText(pair.toString());
-        tvOrderTransactionsRightHeader.setText(((Spinner)spnPairs).getSelectedItem().toString());
-        APIClient client = (APIClient) spnClients.getSelectedItem();
-        client.UpdateOrderTransactions(context, pair.getExchangePair());
+        if (spnPairs != null) {
+            Pair pair = (Pair)(spnPairs).getSelectedItem();
+            if (pair != null) {
+                tvRightHeader.setText(pair.toString());
+                tvOrderTransactionsRightHeader.setText(pair.toString());
+                APIClient client = (APIClient) spnClients.getSelectedItem();
+                if (client != null) {
+                    client.UpdateOrderTransactions(context, pair.getExchangePair());
+                }
+            }
+        }
     }
 
     @Override
@@ -104,5 +107,10 @@ public class OrdersFragment extends Fragment implements AdapterView.OnItemSelect
 
         mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.orders));
         Crypto.saveCurrentScreen(context, TAG);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 }

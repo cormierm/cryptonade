@@ -3,7 +3,7 @@
 
     <SwitchPreference
         android:defaultValue="false"
-        android:title="Set Master Password"
+        android:title="Password Required on Start"
         android:key="pref_set_master_password" />
 
 </PreferenceScreen>

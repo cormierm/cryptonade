@@ -50,22 +50,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         super.onPause();
     }
 
-    private void setDefaultLoginPreference(boolean masterPasswordEnable) {
-        Preference defaultLogin = findPreference("pref_password_on_start");
-        if (masterPasswordEnable) {
-            defaultLogin.setEnabled(true);
-        } else {
-            defaultLogin.setEnabled(false);
-        }
-    }
-
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (key.equals("pref_set_master_password")) {
-            masterPasswordEnable = prefs.getBoolean(key, false);
-        }
-        this.setDefaultLoginPreference(masterPasswordEnable);
+        masterPasswordEnable = prefs.getBoolean(key, false);
     }
 
     @Override

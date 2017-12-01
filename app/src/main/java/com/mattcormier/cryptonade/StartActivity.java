@@ -17,8 +17,14 @@ public class StartActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         CryptoDB db = new CryptoDB(this);
+
         String passwordHash = db.getPasswordHash();
         if (!passwordHash.equals("")) {
             Crypto.loginPassword(this);

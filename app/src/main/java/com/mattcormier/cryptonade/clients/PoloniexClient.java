@@ -110,6 +110,10 @@ public class PoloniexClient implements APIClient {
 
     private void privateRequest(final HashMap<String, String> params, final Context c, final String cmd) {
         Log.d(TAG, "privateRequest: " + cmd);
+        if(apiKey.isEmpty() || apiSecret.isEmpty()) {
+            Toast.makeText(c, c.getResources().getString(R.string.invalid_api_msg), Toast.LENGTH_SHORT).show();
+            return;
+        }
         final String nonce = new BigDecimal(generateNonce()).toString();
         params.put("nonce", nonce);
         final String body = createBody(params);
@@ -236,7 +240,7 @@ public class PoloniexClient implements APIClient {
             Log.d(TAG, "processUpdateBalances: Exception error with json." + e.getMessage());
         }
         BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
-        if (balFrag != null) {
+        if (balFrag != null && balFrag.isVisible()) {
             balFrag.refreshBalances();
         }
     }

@@ -109,6 +109,10 @@ public class QuadrigacxClient implements APIClient {
     private void privateRequest(HashMap<String, String> params, final Context c, String endpointUri, final String cmd) {
         String url = apiUrl + endpointUri;
         Log.d(TAG, "privateRequest: url: " + url + " cmd: " + cmd);
+        if(apiKey.isEmpty() || apiSecret.isEmpty() || apiOther.isEmpty()) {
+            Toast.makeText(c, c.getResources().getString(R.string.invalid_api_msg), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         final String nonce = Long.toString(generateNonce());
         final String signature = createSignature(nonce);
@@ -260,7 +264,7 @@ public class QuadrigacxClient implements APIClient {
             Log.d(TAG, "processUpdateBalances: JSONException: " + e.getMessage());
         }
         BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
-        if (balFrag != null) {
+        if (balFrag != null && balFrag.isVisible()) {
             balFrag.refreshBalances();
         }
     }
