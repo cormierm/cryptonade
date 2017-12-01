@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -15,19 +14,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.mattcormier.cryptonade.BalanceBarFragment;
 import com.mattcormier.cryptonade.BalancesFragment;
-import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.OrderBookFragment;
-import com.mattcormier.cryptonade.OrdersFragment;
 import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
-import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
 import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Pair;
@@ -39,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,6 +41,12 @@ import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+/**
+ * Filename: QuadrigacxClient.java
+ * Description: API Client for QuadrigaCX exchange API requests.
+ * Created by Matt Cormier on 10/29/2017.
+ **/
 
 public class QuadrigacxClient implements APIClient {
     private static final String TAG = "QuadrigacxClient";

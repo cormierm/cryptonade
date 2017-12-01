@@ -1,7 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
 /**
- * Created by matt on 10/18/2017.
+ * Filename: OpenOrder.java
+ * Description: Model for open orders
+ * Created by Matt Cormier on 10/18/2017.
  */
 
 public class OpenOrder {

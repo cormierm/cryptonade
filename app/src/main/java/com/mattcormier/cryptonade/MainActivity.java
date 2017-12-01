@@ -26,6 +26,12 @@ import com.mattcormier.cryptonade.models.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Filename: MainActivity.java
+ * Description: Main Activity that contains all the main views and functions.
+ * Created by Matt Cormier on 10/24/2017.
+ */
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
     private static final String TAG = "MainActivity";
@@ -86,7 +92,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void UpdateClientSpinner() {
-        List<Exchange> exchangeList = db.getExchanges();
+        List<Exchange> exchangeList = db.getActiveExchanges();
         if(exchangeList.isEmpty()) {
             Exchange exchange = new Exchange(1, 1, "Poloniex Demo", "", "", "", 1);
             long rowId = db.insertExchange(exchange);
@@ -339,7 +345,7 @@ public class MainActivity extends AppCompatActivity
 
     public ArrayList<APIClient> getAPIClientList() {
         ArrayList<APIClient> clientList = new ArrayList<>();
-        for (Exchange e: db.getExchanges()) {
+        for (Exchange e: db.getActiveExchanges()) {
             clientList.add(Crypto.getAPIClient(e));
         }
         return clientList;

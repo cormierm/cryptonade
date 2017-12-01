@@ -11,10 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.mattcormier.cryptonade.R;
-import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.Ticker;
 
 import java.util.Collections;
@@ -22,7 +18,9 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by matt on 10/21/2017.
+ * Filename: TickerAdapter.java
+ * Description: Adapter for handling market summary ListView
+ * Created by Matt Cormier on 10/21/2017.
  */
 
 public class TickerAdapter extends ArrayAdapter {

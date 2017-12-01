@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by matt on 11/15/2017.
+ * Filename: BookRecyclerViewAdapter.java
+ * Description: Adapter for handling order books RecyclerView
+ * Created by Matt Cormier on 11/15/2017.
  */
 
 public class BookRecyclerViewAdapter extends RecyclerView.Adapter<BookRecyclerViewAdapter.BookViewHolder>{

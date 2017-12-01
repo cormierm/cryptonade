@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -27,19 +26,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.mattcormier.cryptonade.BalancesFragment;
-import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.PairsFragment;
-import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
-import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Ticker;
 import com.mattcormier.cryptonade.databases.CryptoDB;
@@ -49,6 +44,12 @@ import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 
 import com.mattcormier.cryptonade.models.OpenOrder;
+
+/**
+ * Filename: PoloniexClient.java
+ * Description: API Client for Binance exchange API requests.
+ * Created by Matt Cormier on 10/29/2017.
+ **/
 
 public class PoloniexClient implements APIClient {
     private static final String TAG = "PoloniexClient";

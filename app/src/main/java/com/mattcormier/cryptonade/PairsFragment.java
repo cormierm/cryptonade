@@ -18,6 +18,12 @@ import com.mattcormier.cryptonade.models.Pair;
 
 import java.util.List;
 
+/**
+ * Filename: PairsFragment.java
+ * Description: Fragment that displays trading pairs for exchange.
+ * Created by Matt Cormier on 10/24/2017.
+ */
+
 public class PairsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "PairsFragment";
     Button btnUpdate;

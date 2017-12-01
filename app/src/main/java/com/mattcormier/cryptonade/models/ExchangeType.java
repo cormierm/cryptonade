@@ -1,7 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
 /**
- * Created by matt on 10/24/2017.
+ * Filename: ExchangeType.java
+ * Description: Model for Exchange types
+ * Created by Matt Cormier on 10/24/2017.
  */
 
 public class ExchangeType {

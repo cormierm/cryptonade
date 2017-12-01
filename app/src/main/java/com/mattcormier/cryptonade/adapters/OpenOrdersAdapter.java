@@ -15,15 +15,14 @@ import android.widget.TextView;
 import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.databases.CryptoDB;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
-import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.List;
 
 /**
- * Created by matt on 10/21/2017.
+ * Filename: OpenOrdersAdapter.java
+ * Description: Adapter for open orders ListView
+ * Created by Matt Cormier on 10/21/2017.
  */
 
 public class OpenOrdersAdapter extends ArrayAdapter {

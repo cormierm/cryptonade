@@ -24,6 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Filename: OrderBookFragment.java
+ * Description: Fragment that displays order book information.
+ * Created by Matt Cormier on 10/24/2017.
+ */
 
 public class OrderBookFragment extends Fragment implements View.OnClickListener{
     private static final String TAG = "OrderBookFragment";

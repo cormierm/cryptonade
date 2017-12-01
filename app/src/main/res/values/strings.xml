@@ -76,4 +76,5 @@
     <string name="market_summary">Market Summary</string>
     <string name="exchange">Exchange</string>
     <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
 </resources>

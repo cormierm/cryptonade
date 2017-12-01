@@ -9,23 +9,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.mattcormier.cryptonade.MainActivity;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by matt on 10/30/2017.
+ * Filename: BalancesAdapter.java
+ * Description: Adapter for Balances ListView
+ * Created by Matt Cormier on 10/30/2017.
  */
 
 public class BalancesAdapter extends ArrayAdapter {

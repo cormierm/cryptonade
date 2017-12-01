@@ -16,7 +16,9 @@ import com.mattcormier.cryptonade.models.OrderTransaction;
 import java.util.List;
 
 /**
- * Created by matt on 10/21/2017.
+ * Filename: OrderTransactionsAdapter.java
+ * Description: Adapter for order transactions ListView
+ * Created by Matt Cormier on 10/21/2017.
  */
 
 public class OrderTransactionsAdapter extends ArrayAdapter {

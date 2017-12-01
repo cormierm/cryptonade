@@ -1,9 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
-import android.content.Context;
-
 /**
- * Created by matt on 10/17/2017.
+ * Filename: Exchange.java
+ * Description: Model for Exchanges
+ * Created by Matt Cormier on 10/17/2017.
  */
 
 public class Exchange {

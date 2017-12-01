@@ -5,7 +5,9 @@ import android.content.Context;
 import java.util.HashMap;
 
 /**
- * Created by matt on 10/17/2017.
+ * Filename: APIClient.java
+ * Description: Interface for API Clients
+ * Created by Matt Cormier on 10/17/2017.
  */
 
 public interface APIClient {

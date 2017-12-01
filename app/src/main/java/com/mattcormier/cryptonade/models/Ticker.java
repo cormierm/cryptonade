@@ -1,7 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
 /**
- * Created by matt on 10/23/2017.
+ * Filename: Ticker.java
+ * Description: Model for ticker information
+ * Created by Matt Cormier on 10/23/2017.
  */
 
 public class Ticker {

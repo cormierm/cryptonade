@@ -14,7 +14,9 @@ import com.mattcormier.cryptonade.models.Pair;
 import java.util.ArrayList;
 
 /**
- * Created by matt on 10/17/2017.
+ * Filename: CryptoDb.java
+ * Description: Code for handling SQLite database for Cryptonade
+ * Created by Matt Cormier on 10/17/2017.
  */
 
 public class CryptoDB {
@@ -139,19 +141,19 @@ public class CryptoDB {
             db.execSQL(CREATE_SETTINGS_TABLE);
 
             //insert sample exchange
-            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex', 'key', 'secret', '', 1)");
+            db.execSQL("INSERT INTO exchange VALUES (1, 1, 'Poloniex Demo', 'key', 'secret', '', 1)");
             // insert sample pair
-            db.execSQL("INSERT INTO pair VALUES (1, 1, 'BTC-ETH', 'BTC-ETH')");
+            db.execSQL("INSERT INTO pair VALUES (1, 1, 'BTC_ETH', 'BTC-ETH')");
 
-            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
-            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
+            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
             db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
             db.execSQL("INSERT INTO type VALUES (4, 'Bittrex', '')");
             db.execSQL("INSERT INTO type VALUES (5, 'CEX.IO', 'Username')");
             db.execSQL("INSERT INTO type VALUES (6, 'GDAX', 'Passphrase')");
             db.execSQL("INSERT INTO type VALUES (7, 'Gemini', '')");
             db.execSQL("INSERT INTO type VALUES (8, 'HitBTC', '')");
-            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
+            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
+            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
 
             // set password blank
             db.execSQL("INSERT INTO settings VALUES (1, '')");
@@ -172,15 +174,15 @@ public class CryptoDB {
 
             db.execSQL(CryptoDB.DROP_TYPE_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
-            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
-            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
+            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
             db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
             db.execSQL("INSERT INTO type VALUES (4, 'Bittrex', '')");
             db.execSQL("INSERT INTO type VALUES (5, 'CEX.IO', 'Username')");
             db.execSQL("INSERT INTO type VALUES (6, 'GDAX', 'Passphrase')");
             db.execSQL("INSERT INTO type VALUES (7, 'Gemini', '')");
             db.execSQL("INSERT INTO type VALUES (8, 'HitBTC', '')");
-            db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
+            db.execSQL("INSERT INTO type VALUES (1, 'Poloniex', '')");
+            db.execSQL("INSERT INTO type VALUES (2, 'QuadrigaCX', 'Client Id')");
 
             Log.d(TAG, "onUpgrade: done.");
         }
@@ -219,6 +221,33 @@ public class CryptoDB {
             ex.setAPIKey(cur.getString(EXCHANGE_API_KEY_COL));
             ex.setAPISecret(cur.getString(EXCHANGE_API_SECRET_COL));
             ex.setAPIOther(cur.getString(EXCHANGE_API_OTHER_COL));
+            ex.setActive(cur.getInt(EXCHANGE_ACTIVE_COL));
+
+            exchanges.add(ex);
+        }
+        if(cur != null)
+            cur.close();
+        closeDB();
+
+        return exchanges;
+    }
+
+    public ArrayList<Exchange> getActiveExchanges() {
+        ArrayList<Exchange> exchanges = new ArrayList<>();
+        String where = EXCHANGE_ACTIVE + " = ?";
+        String[] whereArgs = { "1" };
+        openReadableDB();
+        Cursor cur = db.query(EXCHANGE_TABLE,
+                null, where, whereArgs, null, null, null);
+        while (cur.moveToNext()) {
+            Exchange ex = new Exchange();
+            ex.setId(cur.getInt(EXCHANGE_ID_COL));
+            ex.setTypeId(cur.getInt(EXCHANGE_TYPE_ID_COL));
+            ex.setName(cur.getString(EXCHANGE_NAME_COL));
+            ex.setAPIKey(cur.getString(EXCHANGE_API_KEY_COL));
+            ex.setAPISecret(cur.getString(EXCHANGE_API_SECRET_COL));
+            ex.setAPIOther(cur.getString(EXCHANGE_API_OTHER_COL));
+            ex.setActive(cur.getInt(EXCHANGE_ACTIVE_COL));
 
             exchanges.add(ex);
         }
@@ -230,7 +259,7 @@ public class CryptoDB {
     }
 
     public Exchange getExchange(int id) {
-        String where = EXCHANGE_ID + "= ?";
+        String where = EXCHANGE_ID + " = ?";
         String[] whereArgs = { Integer.toString(id) };
 
         this.openReadableDB();

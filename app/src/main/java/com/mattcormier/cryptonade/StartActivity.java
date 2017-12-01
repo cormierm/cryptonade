@@ -8,6 +8,12 @@ import android.util.Log;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.lib.Crypto;
 
+/**
+ * Filename: StartActivity.java
+ * Description: Activity that loads on app start which checks for app start password
+ *   and displays splash screen.
+ * Created by Matt Cormier on 10/24/2017.
+ */
 
 public class StartActivity extends AppCompatActivity {
     private static final String TAG = "StartActivity";

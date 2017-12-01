@@ -1,7 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
 /**
- * Created by matt on 10/29/2017.
+ * Filename: OrderTransaction.java
+ * Description: Model for order transactions
+ * Created by Matt Cormier on 10/29/2017.
  */
 
 public class OrderTransaction {

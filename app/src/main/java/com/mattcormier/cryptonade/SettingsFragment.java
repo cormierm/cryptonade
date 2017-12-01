@@ -12,7 +12,9 @@ import android.util.Log;
 import com.mattcormier.cryptonade.lib.Crypto;
 
 /**
- * Created by matt on 11/3/2017.
+ * Filename: SettingsFragment
+ * Description: Fragment that handles settings for the application.
+ * Created by Matt Cormier on 11/3/2017.
  */
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener , Preference.OnPreferenceClickListener{

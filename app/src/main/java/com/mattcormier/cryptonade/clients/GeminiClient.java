@@ -6,7 +6,6 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -21,7 +20,6 @@ import com.mattcormier.cryptonade.BalancesFragment;
 import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
-import com.mattcormier.cryptonade.TradeFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
@@ -37,15 +35,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+/**
+ * Filename: GeminiClient.java
+ * Description: API Client for Gemini exchange API requests.
+ * Created by Matt Cormier on 10/29/2017.
+ **/
 
 public class GeminiClient implements APIClient {
     private static final String TAG = "GeminiClient";

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,11 +13,14 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.mattcormier.cryptonade.clients.APIClient;
-import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.lib.Crypto;
-import com.mattcormier.cryptonade.models.Exchange;
-import com.mattcormier.cryptonade.clients.QuadrigacxClient;
+
+/**
+ * Filename: TickerFragment.java
+ * Description: Fragment that displays ticker information for market summary.
+ * Created by Matt Cormier on 10/24/2017.
+ */
 
 public class TickerFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "TickerFragment";

@@ -21,7 +21,9 @@ import com.mattcormier.cryptonade.models.Exchange;
 import java.util.ArrayList;
 
 /**
- * Created by matt on 10/24/2017.
+ * Filename: APIFragment.java
+ * Description: Fragment for API Keys
+ * Created by Matt Cormier on 10/24/2017.
  */
 
 public class APIFragment extends Fragment {

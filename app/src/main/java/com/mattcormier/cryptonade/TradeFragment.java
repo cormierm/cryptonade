@@ -27,6 +27,12 @@ import com.mattcormier.cryptonade.models.Pair;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Filename: Trade.java
+ * Description: Fragment that displays trade information and allows new trades to be placed.
+ * Created by Matt Cormier on 10/24/2017.
+ */
+
 public class TradeFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, TextView.OnEditorActionListener {
     private static final String TAG = "TradeFragment";
     TextView tvHeaderLeft;

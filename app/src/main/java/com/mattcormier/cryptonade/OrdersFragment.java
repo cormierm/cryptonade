@@ -20,6 +20,12 @@ import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.Pair;
 
+/**
+ * Filename: OrdersFragement.java
+ * Description: Fragment that displays open order and transaction information.
+ * Created by Matt Cormier on 10/24/2017.
+ */
+
 public class OrdersFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "OrdersFragment";
     ListView lvOpenOrders;

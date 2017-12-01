@@ -5,13 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.text.InputType;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.mattcormier.cryptonade.MainActivity;
@@ -27,7 +23,6 @@ import com.mattcormier.cryptonade.clients.PoloniexClient;
 import com.mattcormier.cryptonade.clients.QuadrigacxClient;
 import com.mattcormier.cryptonade.databases.CryptoDB;
 import com.mattcormier.cryptonade.models.Exchange;
-import com.mattcormier.cryptonade.models.Pair;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -42,7 +37,6 @@ import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -57,7 +51,9 @@ import javax.crypto.spec.SecretKeySpec;
 import static android.content.Context.MODE_PRIVATE;
 
 /**
- * Created by matt on 10/18/2017.
+ * Filename: Crypto.java
+ * Description: Class that contains misc functions and tools.
+ * Created by Matt Cormier on 10/18/2017.
  */
 
 public class Crypto {

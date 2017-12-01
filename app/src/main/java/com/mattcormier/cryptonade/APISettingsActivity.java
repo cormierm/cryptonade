@@ -25,6 +25,12 @@ import com.mattcormier.cryptonade.models.ExchangeType;
 
 import java.util.List;
 
+/**
+ * Filename: APISettingsActivity.java
+ * Description: Activity for API Keys CRUD
+ * Created by Matt Cormier on 10/24/2017.
+ */
+
 public class APISettingsActivity extends AppCompatActivity implements OnClickListener, AdapterView.OnItemSelectedListener {
     private static final String TAG = "APISettingsActivity";
     public int exchangeId = 0;

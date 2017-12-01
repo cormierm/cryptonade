@@ -1,7 +1,9 @@
 package com.mattcormier.cryptonade.models;
 
 /**
- * Created by matt on 10/17/2017.
+ * Filename: Pair.java
+ * Description: Model for Exchange pairs
+ * Created by Matt Cormier on 10/17/2017.
  */
 
 public class Pair {

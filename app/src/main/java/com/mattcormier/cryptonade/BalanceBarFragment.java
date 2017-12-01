@@ -19,7 +19,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by matt on 10/24/2017.
+ * Filename: BalanceBarFragment.java
+ * Description: Fragment for balance bar on main activity
+ * Created by Matt Cormier on 10/24/2017.
  */
 
 public class BalanceBarFragment extends Fragment {

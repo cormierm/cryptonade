@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +20,9 @@ import com.mattcormier.cryptonade.models.ExchangeType;
 import java.util.List;
 
 /**
- * Created by matt on 10/21/2017.
+ * Filename: APIAdapter.java
+ * Description: Adapter for API Key ListView
+ * Created by Matt Cormier on 10/21/2017.
  */
 
 public class APIAdapter extends ArrayAdapter {
@@ -75,6 +79,14 @@ public class APIAdapter extends ArrayAdapter {
             viewHolder.lblLiExchangeAPIOther.setText(exType.getApiOther());
             viewHolder.tvLiExchangeAPIOther.setText(currentExchange.getAPIOther());
         }
+        Log.d(TAG, "getView: active: " + currentExchange.getActive());
+        if(currentExchange.getActive() == 0) {
+            viewHolder.clLiApiKey.setBackgroundColor(getContext().getResources().getColor(R.color.colorLightGray));
+            viewHolder.tvLiExchangeDisabled.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.clLiApiKey.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+            viewHolder.tvLiExchangeDisabled.setVisibility(View.GONE);
+        }
 
         return convertView;
     }
@@ -86,6 +98,8 @@ public class APIAdapter extends ArrayAdapter {
         final TextView tvLiExchangeAPISecret;
         final TextView lblLiExchangeAPIOther;
         final TextView tvLiExchangeAPIOther;
+        final TextView tvLiExchangeDisabled;
+        final ConstraintLayout clLiApiKey;
 
         ViewHolder(View v) {
             this.tvLiExchangeProfileName = v.findViewById(R.id.tvLiExchangeProfileName);
@@ -94,6 +108,8 @@ public class APIAdapter extends ArrayAdapter {
             this.tvLiExchangeAPISecret = v.findViewById(R.id.tvLiExchangeAPISecret);
             this.lblLiExchangeAPIOther = v.findViewById(R.id.lblLiExchangeAPIOther);
             this.tvLiExchangeAPIOther = v.findViewById(R.id.tvLiExchangeAPIOther);
+            this.tvLiExchangeDisabled = v.findViewById(R.id.tvLiExchangeDisabled);
+            this.clLiApiKey = v.findViewById(R.id.clListItemAPIKey);
         }
     }
 }

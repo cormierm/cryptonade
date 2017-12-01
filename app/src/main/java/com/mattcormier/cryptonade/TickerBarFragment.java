@@ -22,7 +22,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by matt on 10/24/2017.
+ * Filename: TickerBarFragment.java
+ * Description: Fragment that displays ticker information on Main Activity.
+ * Created by Matt Cormier on 10/24/2017.
  */
 
 public class TickerBarFragment extends Fragment {

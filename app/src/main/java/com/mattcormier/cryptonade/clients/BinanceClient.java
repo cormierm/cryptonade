@@ -2,7 +2,6 @@ package com.mattcormier.cryptonade.clients;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -31,7 +30,6 @@ import com.mattcormier.cryptonade.models.Pair;
 import com.mattcormier.cryptonade.models.Ticker;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.Crypt;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +42,12 @@ import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+/**
+ * Filename: BinanceClient.java
+ * Description: API Client for Binance exchange API requests.
+ * Created by Matt Cormier on 10/29/2017.
+**/
 
 public class BinanceClient implements APIClient {
     private static final String TAG = "BinanceClient";

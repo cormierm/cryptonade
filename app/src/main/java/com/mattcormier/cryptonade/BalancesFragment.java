@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by matt on 10/30/2017.
+ * Filename: BalancesFragment.java
+ * Description: Fragment for displaying balances on exchanges
+ * Created by Matt Cormier on 10/30/2017.
  */
 
 public class BalancesFragment extends Fragment {
