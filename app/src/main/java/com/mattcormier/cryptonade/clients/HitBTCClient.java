@@ -16,9 +16,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.mattcormier.cryptonade.BalancesFragment;
+import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.OpenOrdersFragment;
 import com.mattcormier.cryptonade.OrderBookFragment;
 import com.mattcormier.cryptonade.PairsFragment;
 import com.mattcormier.cryptonade.R;
+import com.mattcormier.cryptonade.TransactionsFragment;
 import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
@@ -246,7 +249,6 @@ public class HitBTCClient implements APIClient {
 
     private void processUpdateOrderTransactions(String response, Context c) {
         Log.d(TAG, "processUpdateOrderTransactions: response: " + response);
-        ListView lvOrderTransactions = ((Activity) c).findViewById(R.id.lvOrdertransactions);
         try {
             ArrayList<OrderTransaction> orderTransactionsList = new ArrayList<>();
             JSONObject jsonResponse = new JSONObject(response);
@@ -264,10 +266,7 @@ public class HitBTCClient implements APIClient {
                 Log.d(TAG, "processUpdateOrderTransactions: added: " + order.toString());
                 orderTransactionsList.add(order);
             }
-
-            OrderTransactionsAdapter orderTransactionsAdapter = new OrderTransactionsAdapter(c, R.layout.listitem_order_transaction, orderTransactionsList);
-            lvOrderTransactions.setAdapter(orderTransactionsAdapter);
-
+            ((TransactionsFragment)((MainActivity) c).getFragment("transactions")).updateTransactionsList(orderTransactionsList);
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateOrderTransactions: JSONException Error: " + e.getMessage());
         } catch (Exception e) {
@@ -299,7 +298,7 @@ public class HitBTCClient implements APIClient {
         } catch (Exception e) {
             Log.e(TAG, "processUpdateBalances: " + e.getMessage());
         }
-        BalancesFragment balFrag = (BalancesFragment)((Activity) c).getFragmentManager().findFragmentByTag("balances");
+        BalancesFragment balFrag = (BalancesFragment)((MainActivity)c).getSupportFragmentManager().findFragmentByTag("balances");
         if (balFrag != null && balFrag.isVisible()) {
             balFrag.refreshBalances();
         }
@@ -321,8 +320,8 @@ public class HitBTCClient implements APIClient {
 
             }
             db.insertPairs(pairsList);
-            PairsFragment pairsFrag = (PairsFragment)((Activity)c).getFragmentManager().findFragmentByTag("pairs");
-            if (pairsFrag != null) {
+            PairsFragment pairsFrag = (PairsFragment)((MainActivity)c).getSupportFragmentManager().findFragmentByTag("pairs");
+            if (pairsFrag != null && pairsFrag.isVisible()) {
                 pairsFrag.updatePairsListView();
             }
         } catch (Exception ex) {
@@ -375,7 +374,6 @@ public class HitBTCClient implements APIClient {
 
     private void processUpdateOpenOrders(String response, Context c) {
         Log.d(TAG, "processUpdateOpenOrders: ");
-        ListView lvOpenOrders = ((Activity) c).findViewById(R.id.lvOpenOrders);
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONArray jsonResult = jsonResponse.getJSONArray("orders");
@@ -393,8 +391,7 @@ public class HitBTCClient implements APIClient {
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
-            OpenOrdersAdapter openOrdersAdapter = new OpenOrdersAdapter(c, R.layout.listitem_openorder, openOrdersList);
-            lvOpenOrders.setAdapter(openOrdersAdapter);
+            ((OpenOrdersFragment)((MainActivity) c).getFragment("open_orders")).updateOpenOrdersList(openOrdersList);
 
         } catch (JSONException e) {
             Log.e(TAG, "processUpdateOpenOrders: JSONException Error: " + e.getMessage());
@@ -468,7 +465,6 @@ public class HitBTCClient implements APIClient {
                 ask.put("amount", amount);
                 asksList.add(ask);
             }
-            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateAsksList(asksList);
 
             // Parse bids and update bids list
             JSONArray jsonBids = jsonObject.getJSONArray("bid");
@@ -482,8 +478,13 @@ public class HitBTCClient implements APIClient {
                 bid.put("amount", amount);
                 bidsList.add(bid);
             }
-            ((OrderBookFragment)((Activity)c).getFragmentManager().findFragmentByTag("order_book")).updateBidsList(bidsList);
-            Log.d(TAG, "processRefreshOrderBooks: arraylist " + bidsList.toString());
+
+            // Update order book list views
+            OrderBookFragment orderBookFragment = (OrderBookFragment)((MainActivity)c).getSupportFragmentManager().findFragmentByTag("order_book");
+            if(orderBookFragment != null && orderBookFragment.isVisible()) {
+                orderBookFragment.updateAsksList(asksList);
+                orderBookFragment.updateBidsList(bidsList);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(TAG, "processRefreshOrderBooks: JSONException: " + e.getMessage());
@@ -522,7 +523,6 @@ public class HitBTCClient implements APIClient {
         HashMap<String, String> params = new HashMap<>();
         params.put("max_results", "50");
         params.put("symbols", pair);
-        UpdateOpenOrders(c);
         privateRequest(endpoint, params, Request.Method.GET, c, "updateOrderTransactions");
     }
 

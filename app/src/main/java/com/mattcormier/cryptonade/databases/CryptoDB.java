@@ -210,9 +210,10 @@ public class CryptoDB {
 
     public ArrayList<Exchange> getExchanges() {
         ArrayList<Exchange> exchanges = new ArrayList<>();
+        String orderBy = EXCHANGE_ACTIVE + " DESC";
         openReadableDB();
         Cursor cur = db.query(EXCHANGE_TABLE,
-                null, null, null, null, null, null);
+                null, null, null, null, null, orderBy);
         while (cur.moveToNext()) {
             Exchange ex = new Exchange();
             ex.setId(cur.getInt(EXCHANGE_ID_COL));
@@ -236,9 +237,10 @@ public class CryptoDB {
         ArrayList<Exchange> exchanges = new ArrayList<>();
         String where = EXCHANGE_ACTIVE + " = ?";
         String[] whereArgs = { "1" };
+        String orderBy = EXCHANGE_NAME;
         openReadableDB();
         Cursor cur = db.query(EXCHANGE_TABLE,
-                null, where, whereArgs, null, null, null);
+                null, where, whereArgs, null, null, orderBy);
         while (cur.moveToNext()) {
             Exchange ex = new Exchange();
             ex.setId(cur.getInt(EXCHANGE_ID_COL));
@@ -461,9 +463,10 @@ public class CryptoDB {
 
     public ArrayList<ExchangeType> getTypes() {
         ArrayList<ExchangeType> types = new ArrayList<>();
+        String orderBy = TYPE_NAME;
         openReadableDB();
         Cursor cur = db.query(TYPE_TABLE,
-                null, null, null, null, null, null);
+                null, null, null, null, null, orderBy);
         while (cur.moveToNext()) {
             ExchangeType type = new ExchangeType();
             type.setTypeId(cur.getInt(TYPE_ID_COL));

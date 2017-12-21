@@ -9,8 +9,11 @@
                     android:id="@+id/nav_trade"
                     android:title="@string/trade" />
                 <item
-                    android:id="@+id/nav_orders"
-                    android:title="@string/orders" />
+                    android:id="@+id/nav_open_orders"
+                    android:title="@string/open_orders" />
+                <item
+                    android:id="@+id/nav_transactions"
+                    android:title="@string/transactions" />
                 <item
                     android:id="@+id/nav_balances"
                     android:title="@string/balances" />

@@ -3,6 +3,7 @@ package com.mattcormier.cryptonade;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
