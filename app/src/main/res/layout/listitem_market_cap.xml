@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="4dp" >
+
+
+    <TextView
+        android:id="@+id/tvLiMarketCapRank"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="1."
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="Bitcoin"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/tvLiMarketCapRank"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lblLiMarketCapRate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Rate:"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCapRank" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapRate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="1.0"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/lblLiMarketCapVolume"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCapName" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:text="$12312"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/tvLiMarketCap24H"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCap1H"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="4dp"
+        android:text="1.20%"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCap24H" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCap24H"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:text="34.2%"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCap7D"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3.6%"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/tvLiMarketCap1H"
+        app:layout_constraintTop_toTopOf="@+id/lblLiMarketCapRate7D" />
+
+    <TextView
+        android:id="@+id/lblLiMarketCap1H"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="50dp"
+        android:text="1h:"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tvLiMarketCap1H" />
+
+    <TextView
+        android:id="@+id/lblLiMarketCapRate7D"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="7d:"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblLiMarketCap1H"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiMarketCap1H" />
+
+    <TextView
+        android:id="@+id/lblLiMarketCapVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Volume:"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiMarketCapRate" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12321321"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/tvLiMarketCapRate"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCapRate" />
+
+    <TextView
+        android:id="@+id/lblLiMarketCapCap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Cap:"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblLiMarketCapVolume" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapCap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="7849237423"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/tvLiMarketCapVolume"
+        app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCapVolume" />
+
+    <TextView
+        android:id="@+id/tvLiMarketCapSymbol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="(BTC)"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvLiMarketCapName"
+        app:layout_constraintStart_toEndOf="@+id/tvLiMarketCapName"
+        app:layout_constraintTop_toTopOf="@+id/tvLiMarketCapName" />
+</android.support.constraint.ConstraintLayout>

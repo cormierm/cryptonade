@@ -125,7 +125,6 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
     public void onResume() {
         super.onResume();
         mainActivity.getSupportActionBar().setTitle("Trade");
-        Crypto.saveCurrentScreen(context, TAG);
     }
 
     @Override
@@ -258,6 +257,14 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         }
         else {
             tvHeaderRight.setText("");
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            getFragmentManager().beginTransaction().detach(this).attach(this).commit();
         }
     }
 }

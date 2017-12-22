@@ -110,7 +110,6 @@ public class OpenOrdersFragment extends Fragment implements AdapterView.OnItemSe
         super.onResume();
 
         mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.open_orders));
-        Crypto.saveCurrentScreen(context, TAG);
         updateOpenOrdersFrag();
     }
 
@@ -130,6 +129,13 @@ public class OpenOrdersFragment extends Fragment implements AdapterView.OnItemSe
         lvOpenOrders.setAdapter(openOrdersAdapter);
 
         mSwipeRefreshLayout.setRefreshing(false);
+    }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            getFragmentManager().beginTransaction().detach(this).attach(this).commit();
+        }
     }
 }

@@ -28,9 +28,9 @@ import com.mattcormier.cryptonade.models.Pair;
 import java.util.ArrayList;
 
 /**
- * Filename: OrdersFragement.java
+ * Filename: TransactionsFragment.java
  * Description: Fragment that displays open order and transaction information.
- * Created by Matt Cormier on 10/24/2017.
+ * Created by Matt Cormier on 12/20/2017.
  */
 
 public class TransactionsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
@@ -110,7 +110,6 @@ public class TransactionsFragment extends Fragment implements AdapterView.OnItem
         super.onResume();
 
         mainActivity.getSupportActionBar().setTitle(getResources().getString(R.string.transactions));
-        Crypto.saveCurrentScreen(context, TAG);
         updateTransationsFrag();
     }
 
@@ -130,5 +129,13 @@ public class TransactionsFragment extends Fragment implements AdapterView.OnItem
         lvOrderTransactions.setAdapter(orderTransactionsAdapter);
 
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            getFragmentManager().beginTransaction().detach(this).attach(this).commit();
+        }
     }
 }

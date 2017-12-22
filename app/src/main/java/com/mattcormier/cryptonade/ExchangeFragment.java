@@ -1,5 +1,6 @@
 package com.mattcormier.cryptonade;
 
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,10 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mattcormier.cryptonade.lib.Crypto;
+
+import static android.content.Context.MODE_PRIVATE;
+
 /**
- * Filename: Trade.java
+ * Filename: Exchange.java
  * Description: Fragment that displays trade information and allows new trades to be placed.
- * Created by Matt Cormier on 10/24/2017.
+ * Created by Matt Cormier on 12/20/2017.
  */
 
 public class ExchangeFragment extends Fragment {
@@ -23,6 +28,7 @@ public class ExchangeFragment extends Fragment {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private SharedPreferences mSharedPreferences;
 
     private MainActivity mainActivity;
 
@@ -31,6 +37,8 @@ public class ExchangeFragment extends Fragment {
         Log.d(TAG, "onCreateView: starts");
         View view = inflater.inflate(R.layout.exchange_layout, container, false);
         mainActivity = (MainActivity) getActivity();
+
+        mSharedPreferences = mainActivity.getSharedPreferences("main", MODE_PRIVATE);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(mainActivity.getSupportFragmentManager());
 
@@ -41,18 +49,19 @@ public class ExchangeFragment extends Fragment {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
         return view;
     }
 
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
+            Log.d(TAG, "getItem: " + position);
             switch (position) {
                 case 0:
                     return mainActivity.getFragment("trade");
@@ -60,9 +69,8 @@ public class ExchangeFragment extends Fragment {
                     return mainActivity.getFragment("open_orders");
                 case 2:
                     return mainActivity.getFragment("transactions");
-                default:
-                    return null;
             }
+            return null;
         }
 
         @Override
@@ -81,5 +89,19 @@ public class ExchangeFragment extends Fragment {
             }
             return null;
         }
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(TAG, "onResume: starts");
+        Crypto.saveCurrentScreen(getContext(), TAG);
+        super.onResume();
+
+        int currentTab = mSharedPreferences.getInt("currentExchangeTab", 0);
+        mViewPager.setCurrentItem(currentTab);
+    }
+
+    public void changeTab(int tabNumber) {
+        mViewPager.setCurrentItem(tabNumber);
     }
 }

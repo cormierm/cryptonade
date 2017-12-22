@@ -1,9 +1,11 @@
 package com.mattcormier.cryptonade;
 
+import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,14 +32,17 @@ import java.util.Map;
  * Created by Matt Cormier on 10/30/2017.
  */
 
-public class BalancesFragment extends Fragment {
+public class BalancesFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "BalancesFragment";
     View view;
     ListView lvBalances;
     Spinner spnClients;
     TextView tvTotals;
     Context context;
+    ImageView ivTotalArrow;
     MainActivity mainActivity;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    SwipeRefreshLayout swipeRefreshBalancesTotals;
 
     @Nullable
     @Override
@@ -45,8 +51,28 @@ public class BalancesFragment extends Fragment {
 
         spnClients = ((MainActivity) getActivity()).findViewById(R.id.spnClients);
         view = inflater.inflate(R.layout.balances_layout, container, false);
+
+        mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshBalances);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshAllClientBalances();
+                refreshBalances();
+            }
+        });
+        swipeRefreshBalancesTotals = view.findViewById(R.id.swipeRefreshBalancesTotals);
+        swipeRefreshBalancesTotals.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshAllClientBalances();
+                refreshBalances();
+            }
+        });
+
         lvBalances = view.findViewById(R.id.lvBalancesList);
         tvTotals = view.findViewById(R.id.tvBalancesTotals);
+        ivTotalArrow = view.findViewById(R.id.ivBalancesTotalArrow);
+        ivTotalArrow.setOnClickListener(this);
 
         context = getActivity();
         mainActivity = (MainActivity) getActivity();
@@ -55,7 +81,6 @@ public class BalancesFragment extends Fragment {
 
         updateBalancesList();
         updateTotals();
-        setHasOptionsMenu(true);
 
         Log.d(TAG, "onCreateView: done.");
         return view;
@@ -72,20 +97,6 @@ public class BalancesFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.refresh_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menuRefresh) {
-            refreshAllClientBalances();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     public void refreshBalances() {
@@ -154,11 +165,26 @@ public class BalancesFragment extends Fragment {
             totalOutput = "No Balance Information.";
         }
         updateTotalsTextView(totalOutput);
+        mSwipeRefreshLayout.setRefreshing(false);
+        swipeRefreshBalancesTotals.setRefreshing(false);
     }
 
     public void refreshAllClientBalances() {
         for(APIClient client: mainActivity.apiClientArrayList) {
             client.UpdateBalances(context);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == ivTotalArrow.getId()) {
+            if (swipeRefreshBalancesTotals.getVisibility() == View.GONE) {
+                ivTotalArrow.setImageResource(R.drawable.ic_arrow_down);
+                swipeRefreshBalancesTotals.setVisibility(View.VISIBLE);
+            } else {
+                ivTotalArrow.setImageResource(R.drawable.ic_arrow_up);
+                swipeRefreshBalancesTotals.setVisibility(View.GONE);
+            }
         }
     }
 }

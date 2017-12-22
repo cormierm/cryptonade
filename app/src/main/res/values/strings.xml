@@ -14,7 +14,6 @@
     <string name="refresh_pairs_list">Refresh Pairs List</string>
     <string name="exchange_pairs">Exchange Pairs</string>
     <string name="title_activity_trading_pairs">Trading Pairs</string>
-    <string name="update_pairs">Update Pairs in Database from Exchange</string>
     <string name="buy">Buy</string>
     <string name="sell">Sell</string>
     <string name="placeOrder">Place Order</string>
@@ -53,7 +52,7 @@
     <string name="ticker_information">Ticker Information</string>
     <string name="create">Create</string>
     <string name="update">Update</string>
-    <string name="restore_pairs_list_from_exchange">Restore Pairs List From Exchange</string>
+    <string name="restore_pairs_list_from_exchange">Update Market Pairs From Exchange</string>
     <string name="refresh_balances">Refresh Balances</string>
     <string name="order_transactions">Order Transactions</string>
     <string name="timestamp">Timestamp</string>
@@ -80,4 +79,5 @@
     <string name="transactions">Transactions</string>
     <string name="no_open_orders">No open orders.</string>
     <string name="no_transactions_to_display">No transactions to display</string>
+    <string name="coin_market_cap">Coin Market Cap</string>
 </resources>

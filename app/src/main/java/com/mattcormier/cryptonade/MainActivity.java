@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     Fragment fragmentTrade;
     Fragment fragmentExchange;
     Fragment fragmentTransactions;
+    Fragment fragmentMarketCap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,12 +153,13 @@ public class MainActivity extends AppCompatActivity
             case "PairsFragment":
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("pairs"), "pairs").commit();
                 break;
-//            case "OpenOrdersFragment":
-//                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("open_orders"), "open_orders").commit();
-//                break;
+            case "MarketCapFragment":
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("market_cap"), "market_cap").commit();
+                break;
 //            case "SettingsFragment":
 //                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("settings"), "settings").commit();
 //                break;
+            case "ExchangeFragment":
             default:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, getFragment("exchange"), "exchange").commit();
                 break;
@@ -212,20 +214,35 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.nav_trade) {
+            sharedPreferences.edit().putInt("currentExchangeTab", 0).apply();
+            if (fragmentExchange != null && fragmentExchange.isVisible()) {
+                ((ExchangeFragment)fragmentExchange).changeTab(0);
+            } else {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, getFragment("exchange"), "exchange")
+                        .addToBackStack("exchange")
+                        .commit();
+            }
+        } else if (id == R.id.nav_open_orders) {
+            sharedPreferences.edit().putInt("currentExchangeTab", 1).apply();
+            if (fragmentExchange != null && fragmentExchange.isVisible()) {
+                ((ExchangeFragment)fragmentExchange).changeTab(1);
+            } else {
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, getFragment("exchange"), "exchange")
                     .addToBackStack("exchange")
                     .commit();
-        } else if (id == R.id.nav_open_orders) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, getFragment("open_orders"), "open_orders")
-                    .addToBackStack("open_orders")
-                    .commit();
+        }
         } else if (id == R.id.nav_transactions) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, getFragment("transactions"), "transactions")
-                    .addToBackStack("transactions")
-                    .commit();
+            sharedPreferences.edit().putInt("currentExchangeTab", 2).apply();
+            if (fragmentExchange != null && fragmentExchange.isVisible()) {
+                ((ExchangeFragment)fragmentExchange).changeTab(2);
+            } else {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, getFragment("exchange"), "exchange")
+                        .addToBackStack("exchange")
+                        .commit();
+            }
         } else if (id == R.id.nav_balances) {
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, getFragment("balances"), "balances")
@@ -246,10 +263,15 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.content_frame, getFragment("api_keys"), "api_keys")
                     .addToBackStack("api_keys")
                     .commit();
-        } else if (id == R.id.nav_settings) {
+//        } else if (id == R.id.nav_settings) {
+//            fragmentManager.beginTransaction()
+//                    .replace(R.id.content_frame, getFragment("settings"), "settings")
+//                    .addToBackStack("settings")
+//                    .commit();
+        } else if (id == R.id.nav_market_cap) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, getFragment("settings"), "settings")
-                    .addToBackStack("settings")
+                    .replace(R.id.content_frame, getFragment("market_cap"), "market_cap")
+                    .addToBackStack("market_cap")
                     .commit();
         }
 
@@ -356,6 +378,11 @@ public class MainActivity extends AppCompatActivity
                     fragmentTransactions = new TransactionsFragment();
                 }
                 return fragmentTransactions;
+            case "market_cap":
+                if (fragmentMarketCap == null) {
+                    fragmentMarketCap = new MarketCapFragment();
+                }
+                return fragmentMarketCap;
             default:
                 return null;
         }
