@@ -1,16 +1,20 @@
 package com.mattcormier.cryptonade.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.models.Coin;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -41,12 +45,23 @@ public class MarketCapRecyclerViewAdapter extends RecyclerView.Adapter<MarketCap
     @Override
     public void onBindViewHolder(CoinViewHolder holder, int position) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        Coin coin = mCoinsList.get(position);
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00##");
+        final Coin coin = mCoinsList.get(position);
+
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uriUrl = Uri.parse(
+                        "https://coinmarketcap.com/currencies/" + coin.getName().replaceAll("\\s", "-") + "/");
+                v.getContext().startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
+            }
+        });
+
         holder.name.setText(coin.getName());
         holder.symbol.setText("(" + coin.getSymbol() + ")");
         holder.rank.setText(coin.getRank() + ".");
-        holder.priceBTC.setText(String.format("%.8f", coin.getPriceBTC()));
-        holder.priceUSD.setText("$" + numberFormat.format(coin.getPriceUSD()));
+        holder.priceBTC.setText(String.format("%.8f", coin.getPriceBTC()) + " BTC");
+        holder.priceUSD.setText("$" + decimalFormat.format(coin.getPriceUSD()));
         holder.cap.setText("$" + numberFormat.format(coin.getCap()));
         holder.volume.setText("$" + numberFormat.format(coin.getVolume()));
 
@@ -55,7 +70,7 @@ public class MarketCapRecyclerViewAdapter extends RecyclerView.Adapter<MarketCap
         } else {
             holder.oneHour.setTextColor(mContext.getResources().getColor(R.color.green));
         }
-        holder.oneHour.setText(numberFormat.format(coin.getOneHour()));
+        holder.oneHour.setText(numberFormat.format(coin.getOneHour()) + "%");
 
         if (coin.getTwentyFourHour() < 0) {
             holder.twentyFourHour.setTextColor(mContext.getResources().getColor(R.color.red));
@@ -69,7 +84,7 @@ public class MarketCapRecyclerViewAdapter extends RecyclerView.Adapter<MarketCap
         } else {
             holder.sevenDay.setTextColor(mContext.getResources().getColor(R.color.green));
         }
-        holder.sevenDay.setText(numberFormat.format(coin.getSevenDay()));
+        holder.sevenDay.setText(numberFormat.format(coin.getSevenDay()) + "%");
     }
 
     public int getItemCount() {
@@ -87,6 +102,7 @@ public class MarketCapRecyclerViewAdapter extends RecyclerView.Adapter<MarketCap
     }
 
     static class CoinViewHolder extends RecyclerView.ViewHolder {
+        View view = null;
         TextView name = null;
         TextView symbol = null;
         TextView rank = null;
@@ -100,6 +116,7 @@ public class MarketCapRecyclerViewAdapter extends RecyclerView.Adapter<MarketCap
 
         public CoinViewHolder(View itemView) {
             super(itemView);
+            this.view = itemView;
             this.name = itemView.findViewById(R.id.tvLiMarketCapName);
             this.symbol = itemView.findViewById(R.id.tvLiMarketCapSymbol);
             this.rank = itemView.findViewById(R.id.tvLiMarketCapRank);

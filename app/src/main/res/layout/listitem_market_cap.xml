@@ -15,7 +15,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="4dp"
-        android:text="1."
+        android:text="555."
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -26,25 +26,23 @@
         android:id="@+id/tvLiMarketCapName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginLeft="40dp"
         android:layout_marginTop="4dp"
         android:text="Bitcoin"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/tvLiMarketCapRank"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/lblLiMarketCapRate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:text="Rate:"
         android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tvLiMarketCapName"
         app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCapRank" />
 
     <TextView
@@ -76,13 +74,13 @@
         android:id="@+id/tvLiMarketCap1H"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="4dp"
         android:text="1.20%"
         android:textSize="12sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lblLiMarketCap1H"
         app:layout_constraintTop_toBottomOf="@+id/tvLiMarketCap24H" />
 
     <TextView
@@ -102,18 +100,20 @@
         android:id="@+id/tvLiMarketCap7D"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:text="3.6%"
         android:textSize="12sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/tvLiMarketCap1H"
+        app:layout_constraintStart_toEndOf="@+id/lblLiMarketCapRate7D"
         app:layout_constraintTop_toTopOf="@+id/lblLiMarketCapRate7D" />
 
     <TextView
         android:id="@+id/lblLiMarketCap1H"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="50dp"
-        android:layout_marginRight="50dp"
+        android:layout_marginEnd="65dp"
+        android:layout_marginRight="65dp"
         android:text="1h:"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -132,11 +132,9 @@
         android:id="@+id/lblLiMarketCapVolume"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:text="Volume:"
         android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/lblLiMarketCapRate"
         app:layout_constraintTop_toBottomOf="@+id/lblLiMarketCapRate" />
 
     <TextView
@@ -152,11 +150,9 @@
         android:id="@+id/lblLiMarketCapCap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:text="Cap:"
         android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/lblLiMarketCapVolume"
         app:layout_constraintTop_toBottomOf="@+id/lblLiMarketCapVolume" />
 
     <TextView
