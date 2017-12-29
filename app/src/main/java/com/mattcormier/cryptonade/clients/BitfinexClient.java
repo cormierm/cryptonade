@@ -149,6 +149,9 @@ public class BitfinexClient implements APIClient {
                         else if (cmd.equals("updateOrderTransactions")) {
                             processUpdateOrderTransactions(response, c);
                         }
+                        else if (cmd.equals("checkOpenOrder")) {
+                            processCheckOpenOrder(response, c);
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -308,6 +311,22 @@ public class BitfinexClient implements APIClient {
         UpdateOpenOrders(c);
     }
 
+    private void processCheckOpenOrder(String response, Context c) {
+        Log.d(TAG, "processCheckOpenOrder: " + response);
+        JSONObject jsonResp;
+        try {
+            jsonResp = new JSONObject(response);
+            if (!jsonResp.getBoolean("is_live")) {
+                Crypto.openOrderClosed(c, jsonResp.getString("id"), this.getName(),
+                        jsonResp.getString("original_amount"), jsonResp.getString("price"),
+                        jsonResp.getString("symbol"));
+            }
+        } catch (JSONException e) {
+            Toast.makeText(c, "Error happened!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "JSONException error in processPlacedOrder: " + e.toString());
+        }
+    }
+
     private void processUpdateOpenOrders(String response, Context c) {
         try {
             String currentExchangePair = ((Pair)((Spinner)((Activity) c).findViewById(R.id.spnPairs)).getSelectedItem()).getExchangePair();
@@ -323,7 +342,7 @@ public class BitfinexClient implements APIClient {
                     String orderStartingAmount = json.getString("original_amount");
                     String orderRemainingAmount = json.getString("remaining_amount");
                     String orderDate = Crypto.formatDate(json.getString("timestamp"));
-                    OpenOrder order = new OpenOrder(orderNumber, createTradePair(orderPair), orderType.toUpperCase(),
+                    OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, createTradePair(orderPair), orderType.toUpperCase(),
                             orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                     openOrdersList.add(order);
                 }
@@ -515,6 +534,19 @@ public class BitfinexClient implements APIClient {
             privateRequest(jsonPayload, endpoint, c, "placeOrder");
         } catch (JSONException e) {
             Log.e(TAG, "PlaceOrder: JSON Exception Error: " +e.getMessage());
+        }
+    }
+
+    public void CheckOpenOrder(Context c, String orderNumber, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: " + orderNumber);
+        String endpoint = "/order/status";
+        JSONObject jsonPayload = new JSONObject();
+        try {
+            jsonPayload.put("order_id", Long.parseLong(orderNumber));
+            jsonPayload.put("request", "/v1/order/status");
+            privateRequest(jsonPayload, endpoint, c, "checkOpenOrder");
+        } catch (JSONException e) {
+            Log.e(TAG, "CancelOrder: JSON Exception Error: " +e.getMessage());
         }
     }
 

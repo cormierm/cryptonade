@@ -338,7 +338,7 @@ public class QuadrigacxClient implements APIClient {
                 String orderStartingAmount = "undef";
                 String orderRemainingAmount = jsonOrder.getString("amount");
                 String orderDate = jsonOrder.getString("datetime");
-                OpenOrder order = new OpenOrder(orderNumber, "not set", orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, "not set", orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -523,6 +523,13 @@ public class QuadrigacxClient implements APIClient {
         params.put("amount", amount);
         privateRequest(params, c, endpointUri, "placeOrder");
     }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: not implemented");
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
+    }
+
 
     private static String createTradePair(String pair) {
         String[] parts = pair.split("_");

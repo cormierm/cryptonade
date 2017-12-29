@@ -379,7 +379,7 @@ public class CexioClient implements APIClient {
                 String orderStartingAmount = json.getString("amount");
                 String orderRemainingAmount = json.getString("pending");
                 String orderDate = Crypto.formatDate(Long.toString(Long.parseLong(json.getString("time"))/1000));
-                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, orderPair, orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -547,6 +547,13 @@ public class CexioClient implements APIClient {
         params.put("price", rate);
         privateRequest(endpoint, params, c, "placeOrder");
     }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: not implemented");
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
+    }
+
 
     private static String createTradePair(String pair) {
         String[] parts = pair.split("/");

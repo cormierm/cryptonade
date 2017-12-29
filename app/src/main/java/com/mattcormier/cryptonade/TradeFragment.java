@@ -157,13 +157,17 @@ public class TradeFragment extends Fragment implements View.OnClickListener, Ada
         }
         else if (view.getId() == btnMax.getId()) {
             try{
-                float price = Float.parseFloat(edPrice.getText().toString());
-                float available = Float.parseFloat(tvHeaderRight.getText().toString().split(" ")[0]);
-                if (available > 0) {
-                    if(orderType.equals("buy")) {
-                        edAmount.setText(String.format("%.8f", (available / price)));
-                    } else {
-                        edAmount.setText(String.format("%.8f", (available)));
+                if (orderType.equalsIgnoreCase("sell")) {
+                    edAmount.setText(tvHeaderRight.getText().toString().split(" ")[0]);
+                } else {
+                    float price = Float.parseFloat(edPrice.getText().toString());
+                    float available = Float.parseFloat(tvHeaderRight.getText().toString().split(" ")[0]);
+                    if (available > 0) {
+                        if(orderType.equals("buy")) {
+                            edAmount.setText(String.format("%.8f", (available / price)));
+                        } else {
+                            edAmount.setText(String.format("%.8f", (available)));
+                        }
                     }
                 }
             } catch (Exception ex) {

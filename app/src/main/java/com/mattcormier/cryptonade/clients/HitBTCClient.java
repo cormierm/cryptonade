@@ -387,7 +387,7 @@ public class HitBTCClient implements APIClient {
                 String orderStartingAmount = String.format("%.8f", Double.parseDouble(json.getString("orderQuantity")) / 1000);
                 String orderRemainingAmount = String.format("%.8f", Double.parseDouble(json.getString("quantityLeaves")) / 1000);
                 String orderDate = Crypto.formatDate(Long.toString(Long.parseLong(json.getString("lastTimestamp"))/1000));
-                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, orderPair, orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -556,6 +556,13 @@ public class HitBTCClient implements APIClient {
         params.put("type", "limit");
         privateRequest(endpoint, params, method, c, "placeOrder");
     }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: not implemented");
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
+    }
+
 
     private static String createTradePair(String pair) {
         if (pair.substring(3).equalsIgnoreCase("BTC")){

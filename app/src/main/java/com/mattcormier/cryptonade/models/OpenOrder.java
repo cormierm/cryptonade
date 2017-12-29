@@ -7,6 +7,7 @@ package com.mattcormier.cryptonade.models;
  */
 
 public class OpenOrder {
+    private int exchangeId;
     private String orderNumber;
     private String tradePair;
     private String type;
@@ -16,6 +17,7 @@ public class OpenOrder {
     private String date;
 
     public OpenOrder() {
+        exchangeId = 0;
         orderNumber = "";
         tradePair = "";
         type = "";
@@ -25,8 +27,9 @@ public class OpenOrder {
         date = "";
     }
 
-    public OpenOrder(String orderNumber, String tradePair, String type, String rate,
+    public OpenOrder(int exchangeId, String orderNumber, String tradePair, String type, String rate,
                      String startAmount, String remainingAmount, String date) {
+        this.exchangeId = exchangeId;
         this.orderNumber = orderNumber;
         this.tradePair = tradePair;
         this.type = type;
@@ -34,6 +37,14 @@ public class OpenOrder {
         this.startAmount = startAmount;
         this.remainingAmount = remainingAmount;
         this.date = date;
+    }
+
+    public int getExchangeId() {
+        return exchangeId;
+    }
+
+    public void setExchangeId(int exchangeId) {
+        this.exchangeId = exchangeId;
     }
 
     public String getOrderNumber() {

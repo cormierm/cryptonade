@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.mattcormier.cryptonade.models.AlertOrder;
 import com.mattcormier.cryptonade.models.Exchange;
 import com.mattcormier.cryptonade.models.ExchangeType;
 import com.mattcormier.cryptonade.models.Pair;
@@ -23,7 +24,7 @@ public class CryptoDB {
     private static final String TAG = "CryptoDB";
     // DB Settings
     public static final String  DB_NAME = "crypto.db";
-    public static final int     DB_VERSION = 16;
+    public static final int     DB_VERSION = 18;
 
     // Exchange table
     public static final String  EXCHANGE_TABLE = "exchange";
@@ -76,6 +77,21 @@ public class CryptoDB {
     public static final String  TYPE_API_OTHER = "api_other";
     public static final int     TYPE_API_OTHER_COL = 2;
 
+    // Alert Order table
+    public static final String  ALERT_ORDER_TABLE = "alert_order";
+
+    public static final String  ALERT_ORDER_ID = "_id";
+    public static final int     ALERT_ORDER_ID_COL = 0;
+
+    public static final String  ALERT_ORDER_ORDER_ID = "order_id";
+    public static final int     ALERT_ORDER_ORDER_ID_COL = 1;
+
+    public static final String  ALERT_ORDER_EXCHANGE_ID = "exchange_id";
+    public static final int     ALERT_ORDER_EXCHANGE_ID_COL = 2;
+
+    public static final String  ALERT_ORDER_SYMBOL = "symbol";
+    public static final int     ALERT_ORDER_SYMBOL_COL = 3;
+
     // Setting Table
     public static final String  SETTINGS_TABLE = "settings";
 
@@ -109,6 +125,13 @@ public class CryptoDB {
                     TYPE_NAME + " TEXT NOT NULL, " +
                     TYPE_API_OTHER + " TEXT);";
 
+    public static final String CREATE_ALERT_ORDER_TABLE =
+            "CREATE TABLE " + ALERT_ORDER_TABLE + " (" +
+                    ALERT_ORDER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ALERT_ORDER_ORDER_ID + " TEXT, " +
+                    ALERT_ORDER_EXCHANGE_ID + " INTEGER, " +
+                    ALERT_ORDER_SYMBOL + " TEXT);";
+
     public static final String CREATE_SETTINGS_TABLE =
             "CREATE TABLE " + SETTINGS_TABLE + " (" +
                     SETTINGS_ID + " INTEGER PRIMARY KEY, " +
@@ -122,6 +145,9 @@ public class CryptoDB {
 
     public static final String DROP_TYPE_TABLE =
             "DROP TABLE IF EXISTS " + TYPE_TABLE;
+
+    public static final String DROP_ALERT_ORDER_TABLE =
+            "DROP TABLE IF EXISTS " + ALERT_ORDER_TABLE;
 
     public static final String DROP_SETTINGS_TABLE =
             "DROP TABLE IF EXISTS " + SETTINGS_TABLE;
@@ -138,6 +164,7 @@ public class CryptoDB {
             db.execSQL(CREATE_EXCHANGE_TABLE);
             db.execSQL(CREATE_PAIR_TABLE);
             db.execSQL(CREATE_TYPE_TABLE);
+            db.execSQL(CREATE_ALERT_ORDER_TABLE);
             db.execSQL(CREATE_SETTINGS_TABLE);
 
             //insert sample exchange
@@ -172,8 +199,12 @@ public class CryptoDB {
 //
 //            db.execSQL("ALTER TABLE exchange ADD column " + EXCHANGE_ACTIVE);
 
-            db.execSQL(CryptoDB.DROP_TYPE_TABLE);
+            db.execSQL(DROP_TYPE_TABLE);
+            db.execSQL(DROP_ALERT_ORDER_TABLE);
+
             db.execSQL(CREATE_TYPE_TABLE);
+            db.execSQL(CREATE_ALERT_ORDER_TABLE);
+
             db.execSQL("INSERT INTO type VALUES (9, 'Binance', '')");
             db.execSQL("INSERT INTO type VALUES (3, 'Bitfinex', '')");
             db.execSQL("INSERT INTO type VALUES (4, 'Bittrex', '')");
@@ -554,5 +585,49 @@ public class CryptoDB {
                 return null;
             }
         }
+    }
+
+    public ArrayList<AlertOrder> getAlertOrders() {
+        ArrayList<AlertOrder> orders = new ArrayList<>();
+        openReadableDB();
+        Cursor cur = db.query(ALERT_ORDER_TABLE,
+                null, null, null, null, null, null);
+        while (cur.moveToNext()) {
+            AlertOrder order = new AlertOrder();
+            order.setOrderId(cur.getString(ALERT_ORDER_ORDER_ID_COL));
+            order.setExchangeId(cur.getInt(ALERT_ORDER_EXCHANGE_ID_COL));
+            order.setSymbol(cur.getString(ALERT_ORDER_SYMBOL_COL));
+
+            orders.add(order);
+        }
+        if(cur != null)
+            cur.close();
+        closeDB();
+
+        return orders;
+    }
+
+    public long insertAlertOrder(AlertOrder order) {
+        ContentValues cv = new ContentValues();
+        cv.put(ALERT_ORDER_ORDER_ID, order.getOrderId());
+        cv.put(ALERT_ORDER_EXCHANGE_ID, order.getExchangeId());
+        cv.put(ALERT_ORDER_SYMBOL, order.getSymbol());
+
+        this.openWriteableDB();
+        long rowID = db.insert(ALERT_ORDER_TABLE, null, cv);
+        this.closeDB();
+
+        return rowID;
+    }
+
+    public int deleteAlertOrder(String orderId) {
+        String where = ALERT_ORDER_ORDER_ID + "= ?";
+        String[] whereArgs = { orderId };
+
+        this.openWriteableDB();
+        int rowCount = db.delete(ALERT_ORDER_TABLE, where, whereArgs);
+        this.closeDB();
+
+        return rowCount;
     }
 }

@@ -26,6 +26,8 @@ public interface APIClient {
 
     void UpdateTickerInfo(Context c, String pair);
 
+    void CheckOpenOrder(Context c, String orderId, String symbol);
+
     void RefreshOrderBooks(Context c, String pair);
 
     void PlaceOrder(Context c, String pair, String rate, String amount, String orderType);

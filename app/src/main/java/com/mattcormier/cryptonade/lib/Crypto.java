@@ -1,6 +1,9 @@
 package com.mattcormier.cryptonade.lib;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.clients.APIClient;
 import com.mattcormier.cryptonade.clients.BinanceClient;
 import com.mattcormier.cryptonade.clients.BitfinexClient;
@@ -49,6 +53,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * Filename: Crypto.java
@@ -271,4 +276,38 @@ public class Crypto {
         editor.putString("currentScreen", screenTag);
         editor.commit();
     }
+
+    public static void sendNotification(Context c, String text) {
+        Intent intent = new Intent(c, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pendingIntent = PendingIntent.getActivity(c, 0, intent, flags);
+
+        int icon = R.drawable.ic_menu_gallery;
+
+        CharSequence title = c.getText(R.string.app_name);
+
+        Notification not = new Notification.Builder(c)
+                .setSmallIcon(icon)
+                .setTicker(text)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager man = (NotificationManager) c.getSystemService(NOTIFICATION_SERVICE);
+        man.notify(1, not);
+    }
+
+    public static void openOrderClosed(Context c, String orderId, String exchangeName, String quantity, String rate, String pair) {
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
+        Crypto.sendNotification(c, "Order closed. " +
+                exchangeName + ": " + pair +
+                " Amount: " + quantity +
+                " Rate: " + rate);
+    }
+
 }

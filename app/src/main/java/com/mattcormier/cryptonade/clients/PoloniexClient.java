@@ -320,7 +320,7 @@ public class PoloniexClient implements APIClient {
                 String orderStartingAmount = json.getString("startingAmount");
                 String orderRemainingAmount = json.getString("amount");
                 String orderDate = json.getString("date");
-                OpenOrder order = new OpenOrder(orderNumber, "asdf", orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, "asdf", orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -501,6 +501,12 @@ public class PoloniexClient implements APIClient {
         params.put("rate", rate);
         params.put("amount", amount);
         privateRequest(params, c, "placeOrder");
+    }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: not implemented");
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
     }
 
     private static String createTradePair(String pair) {

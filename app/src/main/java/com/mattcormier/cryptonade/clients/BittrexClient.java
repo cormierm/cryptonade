@@ -26,6 +26,7 @@ import com.mattcormier.cryptonade.adapters.OpenOrdersAdapter;
 import com.mattcormier.cryptonade.adapters.OrderTransactionsAdapter;
 import com.mattcormier.cryptonade.adapters.TickerAdapter;
 import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
 import com.mattcormier.cryptonade.models.OpenOrder;
 import com.mattcormier.cryptonade.models.OrderTransaction;
 import com.mattcormier.cryptonade.models.Pair;
@@ -157,6 +158,9 @@ public class BittrexClient implements APIClient {
                         }
                         else if (cmd.equals("updateOrderTransactions")) {
                             processUpdateOrderTransactions(response, c);
+                        }
+                        else if (cmd.equals("checkOpenOrder")) {
+                            processCheckOpenOrder(response, c);
                         }
                     }
                 },
@@ -341,6 +345,29 @@ public class BittrexClient implements APIClient {
         UpdateOpenOrders(c);
     }
 
+    private void processCheckOpenOrder(String response, Context c) {
+        Log.d(TAG, "processCheckOpenOrder: ");
+        JSONObject jsonResp;
+        try {
+            jsonResp = new JSONObject(response);
+            if (jsonResp.getBoolean("success")) {
+                JSONObject jsonResult = jsonResp.getJSONObject("result");
+                if(!jsonResult.getBoolean("IsOpen")) {
+                    Crypto.openOrderClosed(c, jsonResult.getString("OrderUuid"), this.getName(),
+                            jsonResult.getString("Quantity"), jsonResult.getString("Price"),
+                            jsonResult.getString("Exchange"));
+                }
+            } else {
+                String jsonMsg = jsonResp.getString("message");
+                Log.e(TAG, "processCheckOpenOrder: " + jsonMsg);
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "processCheckOpenOrder: JSONException Error: " + e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "processCheckOpenOrder: Exception: " + e.getMessage());
+        }
+    }
+
     private void processUpdateOpenOrders(String response, Context c) {
         Log.d(TAG, "processUpdateOpenOrders: ");
         try {
@@ -362,7 +389,7 @@ public class BittrexClient implements APIClient {
                     String orderStartingAmount = String.format("%.8f", json.getDouble("Quantity"));
                     String orderRemainingAmount = String.format("%.8f", json.getDouble("QuantityRemaining"));
                     String orderDate = json.getString("Opened");
-                    OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                    OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, orderPair, orderType.toUpperCase(),
                             orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                     openOrdersList.add(order);
                 }
@@ -547,6 +574,15 @@ public class BittrexClient implements APIClient {
         params.put("quantity", amount);
         privateRequest(endpoint, params, c, "placeOrder");
     }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: " + orderId);
+        String endpoint = "/account/getorder";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("uuid", orderId);
+        privateRequest(endpoint, params, c, "checkOpenOrder");
+    }
+
 
     private static String createTradePair(String pair) {
         String[] parts = pair.split("_");

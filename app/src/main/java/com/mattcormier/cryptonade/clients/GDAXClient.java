@@ -367,7 +367,7 @@ public class GDAXClient implements APIClient {
                 String orderStartingAmount = json.getString("size");
                 String orderRemainingAmount = String.format("%.8f", Double.parseDouble(json.getString("size")) - Double.parseDouble(json.getString("filled_size")));
                 String orderDate = json.getString("created_at");
-                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, orderPair, orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -522,6 +522,13 @@ public class GDAXClient implements APIClient {
         params.put("product_id", pair);
         privateRequest(endpoint, params, method, c, "placeOrder");
     }
+
+    public void CheckOpenOrder(Context c, String orderId, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: not implemented");
+        CryptoDB db = new CryptoDB(c);
+        db.deleteAlertOrder(orderId);
+    }
+
 
     private static String createTradePair(String pair) {
         String[] parts = pair.split("-");

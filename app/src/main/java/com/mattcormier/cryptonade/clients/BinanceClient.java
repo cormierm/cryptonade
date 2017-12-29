@@ -179,6 +179,9 @@ public class BinanceClient implements APIClient {
                         else if (cmd.equals("updateOrderTransactions")) {
                             processUpdateOrderTransactions(response, c);
                         }
+                        else if (cmd.equals("checkOpenOrder")) {
+                            processCheckOpenOrder(response, c);
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -361,6 +364,21 @@ public class BinanceClient implements APIClient {
         UpdateOpenOrders(c);
     }
 
+    private void processCheckOpenOrder(String response, Context c) {
+        Log.d(TAG, "processCancelOrder: response" + response);
+        try {
+            JSONObject jsonResponse = new JSONObject(response);
+            String status = jsonResponse.getString("status");
+            if (!status.equalsIgnoreCase("NEW") && !status.equalsIgnoreCase("PARTIALLY_FILLED")) {
+                Crypto.openOrderClosed(c, jsonResponse.getString("orderId"), this.getName(),
+                        jsonResponse.getString("origQty"), jsonResponse.getString("price"),
+                        jsonResponse.getString("symbol"));
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "processCheckOpenOrder: " + e.getMessage());
+        }
+    }
+
     private void processUpdateOpenOrders(String response, Context c) {
         Log.d(TAG, "processUpdateOpenOrders: ");
         try {
@@ -375,7 +393,7 @@ public class BinanceClient implements APIClient {
                 String orderStartingAmount = json.getString("origQty");
                 String orderRemainingAmount = String.format("%.8f", Double.parseDouble(orderStartingAmount) - Double.parseDouble(json.getString("executedQty")));
                 String orderDate = Crypto.formatDate(Double.toString(Double.parseDouble(json.getString("time")) / 1000));
-                OpenOrder order = new OpenOrder(orderNumber, orderPair, orderType.toUpperCase(),
+                OpenOrder order = new OpenOrder((int)exchangeId, orderNumber, orderPair, orderType.toUpperCase(),
                         orderRate, orderStartingAmount, orderRemainingAmount, orderDate);
                 openOrdersList.add(order);
             }
@@ -548,6 +566,18 @@ public class BinanceClient implements APIClient {
         params.put("type", "LIMIT");
         params.put("timeInForce", "GTC");
         privateRequest(endpoint, params, method, c, "placeOrder");
+    }
+
+    public void CheckOpenOrder(Context c, String orderNumber, String symbol) {
+        Log.d(TAG, "CheckOpenOrder: " + orderNumber);
+        String endpoint = "/api/v3/order";
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("orderId", orderNumber);
+        params.put("symbol", symbol);
+
+        String method = "GET";
+        privateRequest(endpoint, params, method, c, "checkOpenOrder");
     }
 
     private static String createTradePair(String pair) {

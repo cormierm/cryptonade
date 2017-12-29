@@ -1,6 +1,7 @@
 package com.mattcormier.cryptonade.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,10 +12,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mattcormier.cryptonade.MainActivity;
+import com.mattcormier.cryptonade.OpenOrdersService;
 import com.mattcormier.cryptonade.R;
 import com.mattcormier.cryptonade.clients.APIClient;
+import com.mattcormier.cryptonade.databases.CryptoDB;
+import com.mattcormier.cryptonade.lib.Crypto;
+import com.mattcormier.cryptonade.models.AlertOrder;
 import com.mattcormier.cryptonade.models.OpenOrder;
 
 import java.util.List;
@@ -60,6 +66,20 @@ public class OpenOrdersAdapter extends ArrayAdapter {
 
         final OpenOrder currentOrder = openOrders.get(position);
 
+        viewHolder.ivLiOpenOrdersAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CryptoDB db = new CryptoDB(getContext());
+                AlertOrder alertOrder = new AlertOrder(currentOrder.getOrderNumber(), currentOrder.getExchangeId(), currentOrder.getTradePair());
+                db.deleteAlertOrder(alertOrder.getOrderId());
+                db.insertAlertOrder(alertOrder);
+                APIClient client = Crypto.getAPIClient(db.getExchange(alertOrder.getExchangeId()));
+                client.CheckOpenOrder(getContext(), alertOrder.getOrderId(), alertOrder.getSymbol());
+                Toast.makeText(getContext(), "Added alert for Order number: " + currentOrder.getOrderNumber(), Toast.LENGTH_SHORT).show();
+                getContext().startService(new Intent(getContext(), OpenOrdersService.class));
+            }
+        });
+
         viewHolder.tvliOpenOrdersId.setText(currentOrder.getOrderNumber());
         viewHolder.tvliOpenOrdersType.setText(currentOrder.getType());
         if (currentOrder.getType().equalsIgnoreCase("sell")) {
@@ -89,6 +109,7 @@ public class OpenOrdersAdapter extends ArrayAdapter {
         final TextView tvliOpenOrdersRate;
         final TextView tvliOpenOrdersTimestamp;
         final ImageView ivLiOpenOrdersCancel;
+        final ImageView ivLiOpenOrdersAlert;
 
         ViewHolder(View v) {
             this.tvliOpenOrdersId = (TextView) v.findViewById(R.id.tvliOpenOrdersId);
@@ -97,6 +118,7 @@ public class OpenOrdersAdapter extends ArrayAdapter {
             this.tvliOpenOrdersRate = (TextView) v.findViewById(R.id.tvLiOpenOrdersRate);
             this.tvliOpenOrdersTimestamp = (TextView) v.findViewById(R.id.tvliOpenOrdersTimestamp);
             this.ivLiOpenOrdersCancel = (ImageView) v.findViewById(R.id.ivLiOpenOrdersCancel);
+            this.ivLiOpenOrdersAlert = (ImageView) v.findViewById(R.id.ivLiOpenOrdersAlert);
         }
     }
 }

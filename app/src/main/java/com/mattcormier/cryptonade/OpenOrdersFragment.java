@@ -1,6 +1,7 @@
 package com.mattcormier.cryptonade;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
