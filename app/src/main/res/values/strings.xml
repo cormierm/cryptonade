@@ -80,4 +80,5 @@
     <string name="no_open_orders">No open orders.</string>
     <string name="no_transactions_to_display">No transactions to display</string>
     <string name="coin_market_cap">Coin Market Cap</string>
+    <string name="send_feedback">Send Feedback</string>
 </resources>

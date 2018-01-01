@@ -2,6 +2,7 @@ package com.mattcormier.cryptonade;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -275,6 +276,11 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.content_frame, getFragment("market_cap"), "market_cap")
                     .addToBackStack("market_cap")
                     .commit();
+        } else if (id == R.id.nav_send_feedback) {
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto: cormierm@gmail.com"));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Crptonade Feedback");
+            startActivity(Intent.createChooser(intent, "Send Feedback"));
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
